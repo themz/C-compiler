@@ -1,20 +1,9 @@
-row = -1, col = -1
-string value = 9
-type = Error
+string value = return
+type = ReservedWord
  ================================================ 
-row = -1, col = -1
-string value = 9
-type = Error
+string value = abc1_
+type = Identificator
  ================================================ 
-row = -1, col = -1
-string value = i
-type = Error
- ================================================ 
-row = -1, col = -1
-string value = nt
-type = Error
- ================================================ 
-row = -1, col = -1
-string value = 9
-type = Error
+string value = switch
+type = ReservedWord
  ================================================ 

@@ -16,16 +16,15 @@ string typeDef[] = {
 };
 
 	 
-int main()
+int main(int argc, char* argv[])
 {
-	Scanner textScanner;
+	Scanner scanner;
 	FILE *inp,*outp;
-    freopen_s(&inp,"0.in","r",stdin);
-    freopen_s(&outp,"0.out","w",stdout);
-	while (textScanner.next())
+    freopen_s(&inp, "0.in", "r", stdin);
+    freopen_s(&outp, "0.out", "w", stdout);
+	while (scanner.next())
 	{
-		Lexeme lex = textScanner.get();
-		lex.print();
+		scanner.get().print();
 	}
 	return 0;
 }

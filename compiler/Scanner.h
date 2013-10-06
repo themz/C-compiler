@@ -3,6 +3,7 @@
 #include "Lexeme.h"
 #include <string>
 #include <vector>
+#include <set>
 using namespace std;
 
 class Scanner 
@@ -11,17 +12,30 @@ private:
 	vector <string> reservedWords_;
 	vector <string> operations_;
 	vector <char> separators_;
+	vector <char> whitespace_;
+	set <char> operatSymbol_;
+
 	enum {
-		none,
-		inComment,
-		inString,
-		inRead,
-		inOperation
+		NONE,
+		IN_COMMENT,
+		IN_STRING,
+		IN_WORD,
+		IN_OPERATION,
+		IN_NUMBER,
+		IN_SEPARATOR,
+		IN_DECIMAL,
+		IN_HEX,
+		IN_INTEGER,
+		IN_EXP,
+
 	} typedef State;
 	int curRow_,
 		curCol_;
 	string curLex_;
-	State curState_, prevState_;
+	char s;
+	State curState_, prevState_ ,subCurState_;
+	bool readNext;
+
 	bool isIdentificator(string);
     bool isReservedWord(string);
     bool isOperation(string);
@@ -29,7 +43,13 @@ private:
 	bool isString(string);
 	bool isInteger(string);
 	bool isFloat(string);
+
 	bool isSeparator(char);
+	bool isWhitespace(char);
+	bool isLetter(char);
+	bool isDigit(char);
+	bool isOperatSymbol(char);
+
 	LexemType identity();
 public:
 	bool next();

@@ -24,8 +24,7 @@ void Lexeme::print()
 	"Char",
 	"String"
 };
-
-	printf("row = %d, col = %d\n",row_,col_);
+	//printf("row = %d, col = %d\n",row_,col_);
 	if (floatValue_ != 0)
 		printf("float value = %f\n",floatValue_);
 	else if (intValue_ != 0)
