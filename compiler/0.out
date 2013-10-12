@@ -1,9 +1,6 @@
-string value = return
-type = ReservedWord
+1#string value = 1
+type = Integer
  ================================================ 
-string value = abc1_
-type = Identificator
- ================================================ 
-string value = switch
-type = ReservedWord
+2#string value = 2.3
+type = Error
  ================================================ 

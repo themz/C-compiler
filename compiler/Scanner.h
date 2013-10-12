@@ -12,7 +12,7 @@ private:
 	vector <string> reservedWords_;
 	vector <string> operations_;
 	vector <char> separators_;
-	vector <char> whitespace_;
+	vector <char> skipSymbols_;
 	set <char> operatSymbol_;
 
 	enum {
@@ -22,6 +22,10 @@ private:
 		IN_WORD,
 		IN_OPERATION,
 		IN_NUMBER,
+		IN_NUMBER_DECIMAL,
+		IN_NUMBER_DECIMAL_E,
+		IN_NUMBER_DECIMAL_E_SIGN,
+		IN_NUMBER_DECIMAL_E_SIGN_NUM,
 		IN_SEPARATOR,
 		IN_DECIMAL,
 		IN_HEX,
@@ -45,7 +49,7 @@ private:
 	bool isFloat(string);
 
 	bool isSeparator(char);
-	bool isWhitespace(char);
+	bool isSkip(char);
 	bool isLetter(char);
 	bool isDigit(char);
 	bool isOperatSymbol(char);

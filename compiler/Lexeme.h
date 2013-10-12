@@ -11,11 +11,11 @@ enum LexemType
 	Identificator,
 	Integer,
 	Float,
-	Error,
 	Separator,
 	Operation,
 	Char,
-	String
+	String,
+	Error,
 };
 
 

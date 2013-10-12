@@ -11,28 +11,27 @@ Scanner::Scanner(void)
 	   "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", 
 	   "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
 	};
-	reservedWords_.assign(arrKeywords, arrKeywords + sizeof(arrKeywords)/sizeof(string));
-
-	string arrOperations[] = { "+","-","*","/","<",">","<=",">=","+=","-=","==","=","!="};
-	operations_.assign(arrOperations, arrOperations + sizeof(arrOperations)/sizeof(string));
+	string arrOperations[] = 
+	{
+		"++", "--", "~", "!", "-", "+", "&", "*", "/", "%", "<<", ">>", "<", ">", "<=", ">=",
+		"==", "!=", "^", "|", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="
+	};
 
 	char arrSeparators[] = 	{',', '(', ')', ';', '[', ']', ':','{','}'};
-	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
-
-	char arrWhitespace[] = {' ', '\t','\n'};
-	whitespace_.assign(arrWhitespace, arrWhitespace + sizeof(arrWhitespace)/sizeof(char));
-
+	char arrSkipSymbols[] = {' ', '\t','\n'};
 	char arrOperatSymbol[] = {'+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%'};
+	reservedWords_.assign(arrKeywords, arrKeywords + sizeof(arrKeywords)/sizeof(string));
+	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
+	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
+	operations_.assign(arrOperations, arrOperations + sizeof(arrOperations)/sizeof(string));
 	operatSymbol_.insert(arrOperatSymbol, arrOperatSymbol + sizeof(arrOperatSymbol)/sizeof(char));
-
-	curCol_ = -1;
-	curRow_ = -1;
+	
+	curCol_ = 1;
+	curRow_ = 1;
 	readNext = true;
 	curState_ = NONE;
 	subCurState_ = NONE;
-
 }
-
 
 Scanner::~Scanner(void)
 {
@@ -73,12 +72,38 @@ bool Scanner::isString(string str)
 
 bool Scanner::isInteger(string str)
 {
-	return false;
+	for (int i = 0; i < (int)str.length(); i++)
+	{
+		if (!isDigit(str[i])) 
+			return false;
+	}
+	return true;
 }
 
 bool Scanner::isFloat(string str)
 {
-	return false;
+	bool e = false,
+		 point = false;
+	if(!isDigit(str[0]))
+		return false;
+	for (int i = 0; i < (int)str.length(); i++)
+	{
+		if ((str[i] = '.' && point) || (str[i] == 'e' && e))
+			return false;
+		if (str[i] == 'e')
+		{
+			e = true;
+			continue;
+		}
+		if (str[i] == '.')
+		{
+			point = true;
+			continue;
+		}
+		if (!isDigit(str[i]))
+			return false;
+	}
+	return (e || point) ?  true : false;
 }
 
 bool Scanner::isSeparator(char s)
@@ -86,9 +111,9 @@ bool Scanner::isSeparator(char s)
 	return find(separators_.begin(), separators_.end(), s) != separators_.end();		
 }
 
-bool Scanner::isWhitespace(char s)
+bool Scanner::isSkip(char s)
 {
-	return find(whitespace_.begin(), whitespace_.end(), s) != whitespace_.end();	
+	return find(skipSymbols_.begin(), skipSymbols_.end(), s) != skipSymbols_.end();	
 }
 
 bool Scanner::isOperatSymbol(char s)
@@ -125,59 +150,92 @@ bool Scanner::next()
 	curState_ = NONE;
 	while (!cin.eof())
 	{
-		if (!readNext) // Для случая когда сепаратор уже считан
-		{
-			curLex_ = s;
-			readNext = true;
-			return true;
-		}
-		s = cin.get();
-		if (s == EOF && curState_ != NONE ) 
-			return true;
-		//if (isSeparator(s) && curState_ != NONE)
-		//{
-		//	readNext = false;
-		//}
+		s = (readNext) ?  cin.get() : s, readNext = true;
 		switch (curState_)
 		{
 		case(NONE):
-			if (isWhitespace(s))		 continue;
+			if (isSkip(s))		 continue;
 			else if (isSeparator(s))	 curState_ = IN_SEPARATOR;
 			else if (s > '0' && s < '9') curState_ = IN_NUMBER;
 			else if (isLetter(s))		 curState_ = IN_WORD;
 			else if (s == '"')			 curState_ = IN_STRING;
 			else if (isOperatSymbol(s))	 curState_ = IN_OPERATION;
-			break;
+			curLex_ += s;
+			continue;
 		case(IN_WORD):
 			while (isLetter(s) || isDigit(s))
 			{
 				curLex_ += s;
 				s = cin.get();
 			}
+			readNext = false;
 			return true;
 		case(IN_NUMBER):
-			/*while(s != EOF)
+			while (isDigit(s))
 			{
-				if (isDigit(s)) curLex_ += s;
-				if (s)
+				curLex_ += s; 
+				s = cin.get();
 			}
-			if (isSeparator(s))
+			if (s == '.')
 			{
-				curState_ = IN_SEPARATOR;
-				readNext = false;
-				return true;				
+				curLex_ += s;
+				curState_ = IN_NUMBER_DECIMAL;
+
+				s = cin.get();
+				while (isDigit(s))
+				{
+					curLex_ += s;
+					s = cin.get();
+				}
 			}
-			else if (s == '.')*/
+			if ( s == 'e')
+			{
+				curLex_ += s;
+				curState_ = IN_NUMBER_DECIMAL_E;
+				s = cin.get(); // безопасный приём
+				if (s == '+' || s == '-' )
+				{
+					curLex_ += s;
+					s = cin.get();
+				}
+				while (isDigit(s))
+				{
+					curLex_ += s;
+					s = cin.get();
+					curState_ = IN_NUMBER_DECIMAL_E_SIGN_NUM;
+				}
+				if (curState_ !=  IN_NUMBER_DECIMAL_E_SIGN_NUM)
+					return false; // 					
+			} 
+			else 
+			{
+				if(isSeparator(s) || isOperatSymbol(s) || isSkip(s) || s == EOF)
+				{	
+					readNext = false;
+					return true;
+				}
+				else 
+				{
+					return false; //вызвать исключение 
+				}						
+			}			
 			break;
 		case(IN_COMMENT):
 			break;
 		case(IN_SEPARATOR):
-			curLex_ += s;
+			readNext = false;
 			return true;
 		case(IN_OPERATION):
+			while (isOperation(curLex_ + s))
+			{
+				curLex_ += s;
+				s = cin.get();
+			}
+			readNext = false;
+			return true;
 			break;
 		case(IN_STRING):
-			char prevSymbol;
+			/*char prevSymbol;
 			while (s != EOF)
 			{
 				
@@ -188,17 +246,14 @@ bool Scanner::next()
 				curLex_ += s;
 				prevSymbol = s;
 				s = cin.get();
-			}
+			}*/
 			break;
 		default:
 			break;
 		}
-		curLex_ += s;
 	}
 	return false;
 }
-
-
 
 Lexeme Scanner::get()
 {

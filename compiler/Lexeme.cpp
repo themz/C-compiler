@@ -18,12 +18,14 @@ void Lexeme::print()
 	"Identificator",
 	"Integer",
 	"Float",
-	"Error",
 	"Separator",
 	"Operation",
 	"Char",
-	"String"
+	"String",
+	"Error"
+
 };
+	
 	//printf("row = %d, col = %d\n",row_,col_);
 	if (floatValue_ != 0)
 		printf("float value = %f\n",floatValue_);
