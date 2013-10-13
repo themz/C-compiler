@@ -1,6 +1,30 @@
-1#string value = 1
-type = Integer
+1#string value = in
+type = Identificator
  ================================================ 
-2#string value = 2.3
-type = Error
+2#string value = _n_t
+type = Identificator
+ ================================================ 
+3#string value = inint
+type = Identificator
+ ================================================ 
+4#string value = __
+type = Identificator
+ ================================================ 
+5#string value = __
+type = Identificator
+ ================================================ 
+6#string value = __
+type = Identificator
+ ================================================ 
+7#string value = it
+type = Identificator
+ ================================================ 
+8#string value = in
+type = Identificator
+ ================================================ 
+9#string value = _87r
+type = Identificator
+ ================================================ 
+10#string value = a44_e
+type = Identificator
  ================================================ 

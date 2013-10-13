@@ -18,7 +18,7 @@ Scanner::Scanner(void)
 	};
 
 	char arrSeparators[] = 	{',', '(', ')', ';', '[', ']', ':','{','}'};
-	char arrSkipSymbols[] = {' ', '\t','\n'};
+	char arrSkipSymbols[] = {' ', '\t','\n', EOF};
 	char arrOperatSymbol[] = {'+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%'};
 	reservedWords_.assign(arrKeywords, arrKeywords + sizeof(arrKeywords)/sizeof(string));
 	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
@@ -30,7 +30,8 @@ Scanner::Scanner(void)
 	curRow_ = 1;
 	readNext = true;
 	curState_ = NONE;
-	subCurState_ = NONE;
+	curLexemType = Error;
+	exceptionType_ = noError;
 }
 
 Scanner::~Scanner(void)
@@ -44,12 +45,12 @@ bool Scanner::isReservedWord(string str)
 
 bool Scanner::isIdentificator(string str)
 {
-	if (str[0] < 'A' || str[0] > 'z' || isReservedWord(str) || isOperation(str)){
+	if (!isLetter(str[0]) || isReservedWord(str) || isOperation(str)){
 		return false;
 	}
 	for (int i = 1; i < (int)str.length(); i++)
 	{
-		if (!((str[i] > 'A' && str[i] < 'z') || (str[i] > '0' && str[i] < '9')))
+		if (!(isLetter(str[i]) || isDigit(str[i])))
 			return false;
 	}
 	return true;
@@ -62,12 +63,12 @@ bool Scanner::isOperation(string str)
 
 bool Scanner::isChar(string str)
 {
-	return !(str.length() != 3 || isSeparator(str[1])  || str[0] != '\'' || str[2] != '\'' );
+	return 0;
 }
 
 bool Scanner::isString(string str)
 {
-	return false;	
+	return (str[0] == '\"' && str[(int)str.length()-1] == '\"' && str.length() > 2)? true : false;	
 }
 
 bool Scanner::isInteger(string str)
@@ -86,9 +87,9 @@ bool Scanner::isFloat(string str)
 		 point = false;
 	if(!isDigit(str[0]))
 		return false;
-	for (int i = 0; i < (int)str.length(); i++)
+	for (int i = 1; i < (int)str.length(); i++)
 	{
-		if ((str[i] = '.' && point) || (str[i] == 'e' && e))
+		if ((str[i] == '.' && point) || (str[i] == 'e' && e))
 			return false;
 		if (str[i] == 'e')
 		{
@@ -100,7 +101,7 @@ bool Scanner::isFloat(string str)
 			point = true;
 			continue;
 		}
-		if (!isDigit(str[i]))
+		if (!isDigit(str[i]) && str[i] != '+' && str[i] != '-')
 			return false;
 	}
 	return (e || point) ?  true : false;
@@ -123,17 +124,19 @@ bool Scanner::isOperatSymbol(char s)
 
 bool Scanner::isDigit(char s)
 {
-	return (s > '0' && s < '9');
+	return (s >= '0' && s <= '9');
 }
 
 bool Scanner::isLetter(char s)
 {
-	return  ((s > 'A' && s < 'z') || s == '-' || s == '_' || s == '$');
+	return  ((s >= 'A' && s <= 'z') || s == '-' || s == '_' || s == '$');
 
 }
 
 LexemType Scanner::identity()
 {
+	if (curLexemType != Error)
+		return curLexemType;
 	if (isReservedWord(curLex_)) return ReservedWord;
 	else if (isIdentificator(curLex_)) return Identificator;
 	else if (isOperation(curLex_)) return Operation;
@@ -145,111 +148,271 @@ LexemType Scanner::identity()
 	else return Error;
 }
 
+
 bool Scanner::next()
+
 {
 	curState_ = NONE;
-	while (!cin.eof())
-	{
-		s = (readNext) ?  cin.get() : s, readNext = true;
+	curLexemType = Error;
+	while (!cin.eof())	{
+		readNext ?  s = cin.get() : readNext = true;
+		if (curState_ != NONE && s == EOF)
+			return true;
+		prevState_ = curState_;
 		switch (curState_)
 		{
 		case(NONE):
-			if (isSkip(s))		 continue;
-			else if (isSeparator(s))	 curState_ = IN_SEPARATOR;
-			else if (s > '0' && s < '9') curState_ = IN_NUMBER;
-			else if (isLetter(s))		 curState_ = IN_WORD;
-			else if (s == '"')			 curState_ = IN_STRING;
-			else if (isOperatSymbol(s))	 curState_ = IN_OPERATION;
+			if (isSkip(s))				     continue;
+			else if (isSeparator(s))		 curState_ = IN_SEPARATOR;
+			else if (isDigit(s) || s == '.') curState_ = IN_NUMBER;
+			else if (s == '/')				 curState_ = SLASH;
+			else if (s == '\'')				 curState_ = IN_CHAR;
+			else if (isLetter(s))			 curState_ = IN_WORD;
+			else if (s == '"')				 curState_ = IN_STRING;
+			else if (isOperatSymbol(s))		 curState_ = IN_OPERATION;
 			curLex_ += s;
 			continue;
 		case(IN_WORD):
-			while (isLetter(s) || isDigit(s))
+			if (isLetter(s) || isDigit(s))
 			{
 				curLex_ += s;
-				s = cin.get();
 			}
-			readNext = false;
-			return true;
-		case(IN_NUMBER):
-			while (isDigit(s))
+			else
 			{
-				curLex_ += s; 
-				s = cin.get();
+				curState_ = AFTER_WORD;
+				readNext = false;
 			}
-			if (s == '.')
-			{
-				curLex_ += s;
-				curState_ = IN_NUMBER_DECIMAL;
-
-				s = cin.get();
-				while (isDigit(s))
-				{
-					curLex_ += s;
-					s = cin.get();
-				}
-			}
-			if ( s == 'e')
-			{
-				curLex_ += s;
-				curState_ = IN_NUMBER_DECIMAL_E;
-				s = cin.get(); // безопасный приём
-				if (s == '+' || s == '-' )
-				{
-					curLex_ += s;
-					s = cin.get();
-				}
-				while (isDigit(s))
-				{
-					curLex_ += s;
-					s = cin.get();
-					curState_ = IN_NUMBER_DECIMAL_E_SIGN_NUM;
-				}
-				if (curState_ !=  IN_NUMBER_DECIMAL_E_SIGN_NUM)
-					return false; // 					
-			} 
-			else 
-			{
-				if(isSeparator(s) || isOperatSymbol(s) || isSkip(s) || s == EOF)
-				{	
-					readNext = false;
-					return true;
-				}
-				else 
-				{
-					return false; //вызвать исключение 
-				}						
-			}			
-			break;
-		case(IN_COMMENT):
-			break;
+			continue;
 		case(IN_SEPARATOR):
 			readNext = false;
 			return true;
-		case(IN_OPERATION):
-			while (isOperation(curLex_ + s))
-			{
+			break;
+		case(IN_NUMBER):
+			if (isDigit(s))
 				curLex_ += s;
-				s = cin.get();
+			else if ( s == '.')
+			{
+				curState_ = IN_NUMBER_DECIMAL;
+				curLex_ += s;
 			}
-			readNext = false;
-			return true;
-			break;
-		case(IN_STRING):
-			/*char prevSymbol;
-			while (s != EOF)
+			else if ( s == 'E' || s == 'e')
 			{
-				
-				if(s == '"' && prevSymbol != '\\')
-				{
-					return true;
-				}
+				curState_ = IN_NUMBER_DECIMAL_NUM_E;
 				curLex_ += s;
-				prevSymbol = s;
-				s = cin.get();
-			}*/
-			break;
+			}
+			else 
+			{
+				curState_ = AFTER_INT;
+				readNext = false;
+			}
+			continue;
+		case(IN_NUMBER_DECIMAL):
+			if (isDigit(s))
+			{
+				curState_ = IN_NUMBER_DECIMAL_NUM;
+				curLex_ += s;
+			}
+			else
+			{
+				exceptionType_ = Exception1;
+				return false; // выкинуть исключение
+			}
+			continue;
+		case(IN_NUMBER_DECIMAL_NUM):
+			if(isDigit(s))
+			{
+				curLex_ += s;
+			}
+			else if ( s == 'E' || s == 'e')
+			{
+				curState_ = IN_NUMBER_DECIMAL_NUM_E;
+				curLex_ += s;
+			}
+			else 
+			{
+				curState_ = AFTER_FLOAT;
+				readNext = false;
+			}
+			continue;
+		case(IN_NUMBER_DECIMAL_NUM_E):
+			if(s == '-' || s == '+')
+			{
+				curLex_ += s;
+				curState_ = IN_NUMBER_DECIMAL_E_SIGN;
+			}
+			else if (isDigit(s))
+			{
+				curLex_ += s;
+				curState_ = IN_NUMBER_DECIMAL_E_SIGN_NUM; 
+			}
+			else
+			{
+				exceptionType_ = Exception1;
+				return false; //  выкинуть исключение
+			}
+			continue;
+		case(IN_NUMBER_DECIMAL_E_SIGN):
+			if (isDigit(s))
+			{
+				curLex_ += s;
+				curState_ = IN_NUMBER_DECIMAL_E_SIGN_NUM;
+			}
+			else
+			{
+				exceptionType_ = Exception1;
+				return false; // выкинуть исключение
+			}
+			continue;
+		case(IN_NUMBER_DECIMAL_E_SIGN_NUM):
+			if (isDigit(s))
+			{
+				curLex_ += s;
+			}
+			else
+			{
+				curState_ = AFTER_FLOAT_WITH_E;
+				readNext = false;
+			}
+			continue;
+		case(IN_CHAR):
+			curLex_ += s;
+			if(s == '\\')
+			{
+				curLex_ += s;				
+				curState_ = IN_CHAR_SLASH;
+			}
+			else
+			{
+				curState_ = IN_CHAR_ONE;
+			}
+			continue;
+		case(IN_CHAR_ONE):
+			if(s == '\'')
+			{
+				curLex_ += s;
+				curLexemType = Char;
+				return true;
+			}
+			else
+			{
+				exceptionType_ = Exception1;
+				return false; // обработать исключение
+			}
+		case(IN_CHAR_SLASH):
+			return false;
+			//curLex_ += s;
+			//if(isDigit(s) &&  s < '7')
+			//{
+			//	curState_ = IN_CHAR_SLASH_DIG; 
+			//}
+			//else
+			//{
+			//	curState_ = IN_CHAR_ONE;
+			//}
+			////if()
+		case(IN_STRING):
+			curLex_ += s;
+			if (s == '\\')
+			{
+				curState_ = IN_STRING_SLASH; 
+			}
+			else if ( s == '"')
+			{
+				curState_ = AFTER_STRING;
+			}
+			continue;
+		case(IN_STRING_SLASH):
+			curLex_ += s;
+			curState_ = IN_STRING;
+			continue;
+		case(IN_OPERATION):
+			if (isOperation(curLex_ + s))
+			{
+				curLex_ += s;
+			}
+			else
+			{
+				curState_ = AFTER_OPERATION;
+				readNext = false;
+			}
+			continue;
+		case(SLASH):
+			if (s == '*')
+			{
+				curState_ = IN_COMMENT_MULTI_LINE;
+				curLex_ = "";
+			}
+			else if (s == '/')
+			{
+				curState_ = IN_COMMENT_LINE;
+				curLex_ = "";
+			}
+			else
+			{
+				curState_ = IN_OPERATION;
+				readNext = false;
+			}
+			continue;
+		case(IN_COMMENT_LINE):
+			if (s == '\n' || s == EOF)
+			{
+				curLex_ = "";
+				curState_ = NONE;
+			}
+			continue;
+		case(IN_COMMENT_MULTI_LINE):
+			if (s == '*' )
+			{
+				curState_ = IN_COMMENT_MULTI_LINE_ASTERISK;
+			}
+			else
+			{
+				continue;
+			}
+			continue;
+		case(IN_COMMENT_MULTI_LINE_ASTERISK):
+			if ( s == '/')
+			{
+				curState_ = NONE;				
+			}
+			else if ( s != '*' )
+			{
+				curState_ = IN_COMMENT_MULTI_LINE;
+			}
+			continue;	
+		case(AFTER_OPERATION):
+			if(isDigit(s) || isLetter(s))
+			{
+				readNext = false;
+				return true;	
+			}
+		case(AFTER_INT):
+		case(AFTER_STRING):
+		case(AFTER_FLOAT):
+		case(AFTER_FLOAT_WITH_E):
+		case(AFTER_WORD):
+		if (isSeparator(s))
+			{
+				curState_ = IN_SEPARATOR;
+				readNext = false;
+				return true;
+			}
+			else if (isSkip(s))
+				return true;
+			else if (isOperatSymbol(s))
+			{
+				readNext = false;
+				return true;
+			}
+			else
+			{
+				exceptionType_ = Exception1;
+				return false; // выкинуть исключение
+			}
+			continue;
 		default:
-			break;
+			exceptionType_ = Exception1;
+			return false; // выкинуть исключение
 		}
 	}
 	return false;
@@ -259,7 +422,6 @@ Lexeme Scanner::get()
 {
 	Lexeme res(getRow(), getCol(), 0, 0,curLex_, identity());
 	curLex_.clear();
-	prevState_ = curState_;
 	return res;
 
 }

@@ -77,10 +77,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Lexeme.cpp" />
     <ClCompile Include="Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Exception.h" />
     <ClInclude Include="Lexeme.h" />
     <ClInclude Include="Scanner.h" />
   </ItemGroup>
