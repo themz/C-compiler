@@ -12,15 +12,8 @@ int main(int argc, char* argv[])
 	int i = 0;
 	while (scanner.next())
 	{
-		cout << ++i << '#';
-		scanner.get().print();
+		scanner.get()->print();
 	}
-
-	char * ex[] = {	"Exception1", "Exception2", "Exception3", "Exception4"};
-	if (scanner.getException())
-	{
-		cout << ex[scanner.getException()];
-	} 	
 	return 0;
 }
 

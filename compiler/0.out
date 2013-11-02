@@ -1,30 +1,93 @@
-1#string value = in
-type = Identificator
- ================================================ 
-2#string value = _n_t
-type = Identificator
- ================================================ 
-3#string value = inint
-type = Identificator
- ================================================ 
-4#string value = __
-type = Identificator
- ================================================ 
-5#string value = __
-type = Identificator
- ================================================ 
-6#string value = __
-type = Identificator
- ================================================ 
-7#string value = it
-type = Identificator
- ================================================ 
-8#string value = in
-type = Identificator
- ================================================ 
-9#string value = _87r
-type = Identificator
- ================================================ 
-10#string value = a44_e
-type = Identificator
- ================================================ 
+Identificator		2		1		ababaca		
+Integer		2		3		4		4
+Identificator		4		1		$__iden2t__		
+Integer		5		1		97		97
+ReservedWord		5		10		continue		
+ReservedWord		5		13		do		
+ReservedWord		5		20		double		
+ReservedWord		5		27		sizeof		
+ReservedWord		5		32		else		
+ReservedWord		5		36		for		
+ReservedWord		5		39		if		
+ReservedWord		5		43		int		
+ReservedWord		5		50		return		
+ReservedWord		5		57		struct		
+ReservedWord		5		63		break		
+ReservedWord		5		71		typedef		
+ReservedWord		5		76		void		
+ReservedWord		5		82		while		
+ReservedWord		6		1		char		
+Operation		6		3		&		&
+Operation		6		5		||		||
+Operation		6		7		&&		&&
+Operation		6		8		=		=
+Operation		6		10		&=		&=
+Operation		6		11		~		~
+Operation		6		13		||		||
+Operation		6		14		=		=
+Operation		6		16		^=		^=
+Operation		6		17		^		^
+Operation		6		18		*		*
+Operation		6		20		-		-
+Operation		6		21		/		/
+Operation		6		24		/=		/=
+Operation		6		26		==		==
+Operation		6		29		>>=		>>=
+Operation		6		31		++		++
+Operation		6		33		!=		!=
+Operation		6		35		<<		<<
+Operation		6		38		<<=		<<=
+Operation		6		39		<		<
+Operation		6		40		+		+
+Operation		6		42		<=		<=
+Operation		6		43		%		%
+Operation		6		45		%=		%=
+Operation		6		47		*=		*=
+Operation		6		48		!		!
+Operation		6		49		?		?
+Operation		6		51		>>		>>
+Operation		6		54		>>=		>>=
+Operation		6		56		>		>
+Operation		6		59		-=		-=
+Operation		7		1		+=		+=
+Separator		7		3		{		{
+Separator		7		5		)		)
+Separator		7		7		(		(
+Separator		7		9		,		,
+Separator		8		1		;		;
+String		9		1		"Banana charlie"		Banana charlie
+Identificator		13		34		ababaca		
+Operation		16		4		--		--
+Operation		16		7		+		+
+Operation		16		10		++		++
+Operation		16		12		-		-
+Operation		17		1		>>=		>>=
+String		18		1		""		
+Integer		19		1		010		10
+Integer		20		1		0xF		0
+Integer		21		1		97		97
+Integer		22		1		03		3
+Integer		23		1		0x3		0
+Double		24		1		3.		3.000000
+Double		25		1		.30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000		0.300000
+Double		26		1		0.3		0.300000
+Double		27		1		3.0		3.000000
+Integer		28		1		3		3
+Integer		29		1		33		33
+Double		30		1		3.e3		3000.000000
+Double		31		1		3e3		3000.000000
+Double		32		1		3e-3		0.003000
+Double		33		1		3e+3		3000.000000
+Double		34		1		3.3		3.300000
+Double		35		1		3.3333		3.333300
+Double		36		1		3.333e3		3333.000000
+Double		37		1		3.333e+3		3333.000000
+Double		38		1		3.333e-3		0.003333
+Double		39		1		1.e+1		10.000000
+Double		40		1		1.e-1		0.100000
+Double		41		1		1.1e-1		0.110000
+Double		42		1		.1e-1		0.010000
+Double		43		1		1e-1		0.100000
+Double		44		1		1e1		10.000000
+Double		45		1		1e+1		10.000000
+Double		46		1		1e-1		0.100000
