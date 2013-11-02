@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Lexeme.h"
-#include "scanner_exception.h"
+#include "exception.h"
 #include <string>
 #include <vector>
 #include <set>
