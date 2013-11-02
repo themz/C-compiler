@@ -1,4 +1,4 @@
-#include "scanner_exception.h"
+#include "exception.h"
 
 
 scanner_exception::scanner_exception(void)
