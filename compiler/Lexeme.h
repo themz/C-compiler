@@ -15,7 +15,7 @@ typedef enum
 	Operation,
 	Char,
 	String,
-	Error,
+	Start,
 } LexemType;
 
 class Lexeme
@@ -89,8 +89,10 @@ public:
 
 class StringLexeme : public Lexeme
 {
+private:
+	string val_;
 public:
 	string getInfo();
-	StringLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
+	StringLexeme(int line, int col, const string& strVal, LexemType type, const string& val) : Lexeme(line,col,strVal,type), val_(val){};
 };
 

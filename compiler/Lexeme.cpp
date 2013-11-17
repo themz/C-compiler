@@ -58,7 +58,7 @@ string CharLexeme::getInfo()
 
 string StringLexeme::getInfo()
 {
-	return Lexeme::getInfo() + stringValue.substr(1, stringValue.length()-2);	
+	return Lexeme::getInfo() + val_;	
 }
 
 

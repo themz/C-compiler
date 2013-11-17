@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 using namespace std;
 
 class Scanner 
@@ -15,6 +16,7 @@ private:
 	vector <char> separators_;
 	vector <char> skipSymbols_;
 	set <char> operatSymbol_;
+	map <char, char> specChar; 
 	enum {		
 		IN_WORD,
 
@@ -51,13 +53,13 @@ private:
 		NONE,
 		SLASH,
 	} typedef State;
-	int curLine_,
-		curCol_;
+	int curLine_,curCol_,prevLine_,prevCol_;
 	string buffer_;
 	char s;
 	State curState_, prevState_ ;
-	bool readNext,getNext;
-	LexemType curLexemType;
+	bool readNext, getNext,chLine;
+	Lexeme* curLexem;
+
 	bool isIdentificator(string);
     bool isReservedWord(string);
     bool isOperation(string);
@@ -65,16 +67,6 @@ private:
 	bool isString(string);
 	bool isInteger(string);
 	bool isDouble(string);
-	
-	Lexeme* getWordLexeme();
-	Lexeme* getIntegerLexeme();
-	Lexeme* getDoubleLexeme();
-	Lexeme* getSeparatorLexeme();
-	Lexeme* getOperationLexeme();
-	Lexeme* getCharLexeme();
-	Lexeme* getStringLexeme();
-
-
 	bool isSeparator(char);
 	bool isSkip(char);
 	bool isLetter(char);
@@ -84,11 +76,19 @@ private:
 	bool isOperatSymbol(char);
 	void setSymbol();
 	bool identityNext();
-	Lexeme* curLexem;
+	Lexeme* getWordLexeme();
+	Lexeme* getIntegerLexeme();
+	Lexeme* getDoubleLexeme();
+	Lexeme* getSeparatorLexeme();
+	Lexeme* getOperationLexeme();
+	Lexeme* getCharLexeme(State state = IN_CHAR_ONE);
+	Lexeme* getStringLexeme();
+	int getLine(){return (chLine)? prevLine_ : curLine_;};
+	int getCol(){return (chLine)? prevCol_ : curCol_;};
+	char getSpecChar(string);
+	char getSpecChar(char);
 public:
 	bool next();
-	int getLine(){return curLine_;};
-	int getCol(){return curCol_;};
 	Lexeme* get();
 	Scanner(void);
 	~Scanner(void);
