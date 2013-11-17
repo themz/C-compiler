@@ -63,7 +63,7 @@ build/
 *.ilk
 *.pdb
 *.lastbuildstate
-
+*.out
 
 *_i.c
 *_p.c
