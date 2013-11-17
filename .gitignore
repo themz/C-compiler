@@ -43,16 +43,27 @@ local.properties
 
 # Build results
 
-[Dd]ebug/
 [Rr]elease/
 x64/
 build/
 [Bb]in/
 [Oo]bj/
 
+
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+
+*.obj
+*.log
+*.tlog
+*.idb
+*.pdb
+*.exe
+*.ilk
+*.pdb
+*.lastbuildstate
+
 
 *_i.c
 *_p.c
