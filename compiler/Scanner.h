@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <fstream>
 #include "Lexeme.h"
 #include "exception.h"
 #include <string>
@@ -16,7 +17,7 @@ private:
 	vector <char> separators_;
 	vector <char> skipSymbols_;
 	set <char> operatSymbol_;
-	map <char, char> specChar; 
+	map <char, char> specChar_; 
 	enum {		
 		IN_WORD,
 
@@ -52,21 +53,16 @@ private:
 
 		NONE,
 		SLASH,
-	} typedef State;
+	} typedef State_;
 	int curLine_,curCol_,prevLine_,prevCol_;
-	string buffer_;
-	char s;
-	State curState_, prevState_ ;
-	bool readNext, getNext,chLine;
-	Lexeme* curLexem;
+	ifstream input_;	
+	string buffer_, filename_;
+	char s_;
+	State_ curState_;
+	bool readNext_, getNext_,chLine_;
+	Lexeme* curLexem_;
 
-	bool isIdentificator(string);
-    bool isReservedWord(string);
     bool isOperation(string);
-    bool isChar(string);
-	bool isString(string);
-	bool isInteger(string);
-	bool isDouble(string);
 	bool isSeparator(char);
 	bool isSkip(char);
 	bool isLetter(char);
@@ -81,15 +77,14 @@ private:
 	Lexeme* getDoubleLexeme();
 	Lexeme* getSeparatorLexeme();
 	Lexeme* getOperationLexeme();
-	Lexeme* getCharLexeme(State state = IN_CHAR_ONE);
+	Lexeme* getCharLexeme(State_ state = IN_CHAR_ONE);
 	Lexeme* getStringLexeme();
-	int getLine(){return (chLine)? prevLine_ : curLine_;};
-	int getCol(){return (chLine)? prevCol_ : curCol_;};
-	char getSpecChar(string);
+	int getLine(){return (chLine_)? prevLine_ : curLine_;};
+	int getCol(){return (chLine_)? prevCol_ : curCol_;};
 	char getSpecChar(char);
 public:
+	string getFileName(){return filename_;};
 	bool next();
 	Lexeme* get();
-	Scanner(void);
-	~Scanner(void);
+	Scanner(string filename);
 };

@@ -16,7 +16,6 @@ public:
 	compiler_exception(string msg, int col, int row):exceptionMsg_(msg), exCol_(col), exLine_(row){};
 };
 
-
 class scanner_exception : public compiler_exception
 {
 public:
@@ -25,7 +24,6 @@ public:
 
 class parser_exception : public compiler_exception
 {
-
 public:
 	parser_exception(string msg, int col, int line) : compiler_exception(msg, col, line){};
 };

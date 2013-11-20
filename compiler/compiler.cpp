@@ -6,18 +6,16 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	bool debug = false;
-	Scanner scanner;
-	FILE *inp,*outp;
+	FILE *outp;
 	if (!debug)
 	{		
 		if (argc > 1)
 		{
 			if ((string)argv[1] == (string)"/S")
 			{
-				string fname = string(argv[2]);
-				freopen_s(&inp, fname.c_str(), "r", stdin);
-				freopen_s(&outp, (fname.substr(0, fname.length() - 3) +(string) ".out").c_str() , "w", stdout);
+				Scanner scanner(argv[2]);
 				try{
+					freopen_s(&outp, (scanner.getFileName().substr(0, scanner.getFileName().length() - 3) +(string) ".out").c_str() , "w", stdout);
 					while (scanner.next())
 					{
 						scanner.get()->print();
@@ -33,19 +31,19 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				cout << argv[1] << 1;			
+				cout << "C-compilator v.0.2 developed by Zinov Mikhail 2013" << endl;				
 			}
 		}
 		else
 		{
-	 		cout << "C-compilator pf-pf-pf" << endl;
+	 		cout << "C-compilator v.0.2 developed by Zinov Mikhail 2013" << endl;
 		}
 	}
 	else
 	{
-		freopen_s(&inp, "1.in" , "r", stdin);
-		freopen_s(&outp, "1.sol" , "w", stdout);
 		try{
+			Scanner scanner("0.in");
+			freopen_s(&outp, "0.out", "w", stdout);					
 			while (scanner.next())
 			{
 				scanner.get()->print();
@@ -58,7 +56,9 @@ int main(int argc, char* argv[])
 		{
 			cout << "Exeption: " << exc.getExceptionMsg() << endl << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
 		}
-	}
+
+		system("pause");
+	}	
 	return 0;
 }
 

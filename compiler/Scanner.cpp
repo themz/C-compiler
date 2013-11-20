@@ -2,8 +2,12 @@
 #include "Scanner.h"
 #include <iostream>
 
-Scanner::Scanner(void)
+Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_(0), curLine_(1), 
+		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false)
 {
+	if (!input_)
+		throw exception("Invalid filename");
+
 	string arrKeywords[] = 
 	{
 	   "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", 
@@ -24,32 +28,20 @@ Scanner::Scanner(void)
 	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
 	operations_.assign(arrOperations, arrOperations + sizeof(arrOperations)/sizeof(string));
 	operatSymbol_.insert(arrOperatSymbol, arrOperatSymbol + sizeof(arrOperatSymbol)/sizeof(char));
-	specChar.insert (pair<char,char>('n','\n'));
-    specChar.insert (pair<char,char>('N','\n'));
-    specChar.insert (pair<char,char>('t','\t'));
-    specChar.insert (pair<char,char>('T','\t'));
-    specChar.insert (pair<char,char>('b','\b'));
-    specChar.insert (pair<char,char>('B','\b'));
-    specChar.insert (pair<char,char>('r','\r'));
-    specChar.insert (pair<char,char>('R','\r'));
-    specChar.insert (pair<char,char>('f','\f'));
-    specChar.insert (pair<char,char>('F','\f'));
-    specChar.insert (pair<char,char>('\\','\\'));
-    specChar.insert (pair<char,char>('\'','\''));
-	curCol_ = 0;
-	curLine_ = 1;
-	prevCol_ = 0;
-	prevLine_ = 1;
-	readNext = true;
-	getNext = true;
-	curState_ = NONE;
-	curLexem = NULL;
-	chLine = false;
+	specChar_.insert (pair<char,char>('n','\n'));
+    specChar_.insert (pair<char,char>('N','\n'));
+    specChar_.insert (pair<char,char>('t','\t'));
+    specChar_.insert (pair<char,char>('T','\t'));
+    specChar_.insert (pair<char,char>('b','\b'));
+    specChar_.insert (pair<char,char>('B','\b'));
+    specChar_.insert (pair<char,char>('r','\r'));
+    specChar_.insert (pair<char,char>('R','\r'));
+    specChar_.insert (pair<char,char>('f','\f'));
+    specChar_.insert (pair<char,char>('F','\f'));
+    specChar_.insert (pair<char,char>('\\','\\'));
+    specChar_.insert (pair<char,char>('\'','\''));
 }
 
-Scanner::~Scanner(void)
-{
-}
 
 Lexeme* Scanner::getWordLexeme()
 {
@@ -88,7 +80,7 @@ Lexeme* Scanner::getOperationLexeme()
 	return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, Operation);
 }
 
-Lexeme*  Scanner::getCharLexeme(State state)
+Lexeme*  Scanner::getCharLexeme(State_ state)
 {
 	int val = 0;
 	try {
@@ -102,7 +94,7 @@ Lexeme*  Scanner::getCharLexeme(State state)
 			val = stoi( "0" + buffer_.substr(2,buffer_.length() - 3),nullptr,0);
 			break;
 		case(IN_CHAR_SPEC):
-			val = (int) getSpecChar(buffer_);
+			val = (int)getSpecChar(buffer_[2]);
 			break;
 		}		
 	} catch (out_of_range&) {
@@ -135,12 +127,8 @@ Lexeme*  Scanner::getSeparatorLexeme()
 	return new SeparatorLexeme (getLine(), getCol() - 1, buffer_, Separator,buffer_.c_str()[0]);
 }
 
-char Scanner::getSpecChar(string str){
-	return specChar[str[2]];
-}
-
 char Scanner::getSpecChar(char c){
-	return specChar[c];
+	return specChar_[c];
 }
 
 bool Scanner::isSeparator(char s)
@@ -175,7 +163,7 @@ bool Scanner::isHexLetter(char s)
 
 bool Scanner::isSpecChar(char s)
 {
-	return (specChar.find(s) != specChar.end());  
+	return (specChar_.find(s) != specChar_.end());  
 }
 
 bool Scanner::isLetter(char s)
@@ -185,40 +173,40 @@ bool Scanner::isLetter(char s)
 
 void Scanner::setSymbol()
 {
-	chLine = false;
-	s = cin.get();
+	chLine_ = false;
+	s_ = input_.get();
 	curCol_++;
-	if (s == '\t')
+	if (s_ == '\t')
 	{
 		curCol_ += 3;
 	}
-	else if (s == '\n')
+	else if (s_ == '\n')
 	{
-		chLine = true;
+		chLine_ = true;
 		prevLine_ = curLine_;
 		curLine_++;
 		prevCol_ = curCol_;
 		curCol_ = 0;
 	}
-	else if (s == EOF)
+	else if (s_ == EOF)
 	{
-		getNext = false;
+		getNext_ = false;
 	}
 }
 
 bool Scanner::identityNext()
 {
-	if (isSeparator(s))
+	if (isSeparator(s_))
 	{
 		curState_ = IN_SEPARATOR;
-		readNext = false;
+		readNext_ = false;
 		return true;
 	}
-	else if (isSkip(s))
+	else if (isSkip(s_))
 		return true;
-	else if (isOperatSymbol(s))
+	else if (isOperatSymbol(s_))
 	{
-		readNext = false;
+		readNext_ = false;
 		return true;
 	}
 	else
@@ -268,86 +256,86 @@ bool Scanner::identityNext()
 bool Scanner::next()
 {
 	curState_ = NONE;
-	while (getNext){
-		readNext ?  setSymbol() : readNext = true;
+	while (getNext_){
+		readNext_ ?  setSymbol() : readNext_ = true;
 		switch (curState_)
 		{
 		case(NONE):
-			if (isSkip(s))				     continue;
-			else if (isSeparator(s))		 curState_ = IN_SEPARATOR;
-			else if (s == '0')				 curState_ = IN_NULL_NUMBER;
-			else if (isDigit(s))			 curState_ = IN_INTEGER;
-			else if (s == '.')				 curState_ = IN_DECIMAL_POINT;
-			else if (s == '/')				 curState_ = SLASH;
-			else if (s == '\'')				 curState_ = IN_CHAR;
-			else if (isOperatSymbol(s))		 curState_ = IN_OPERATION;
-			else if (isLetter(s))			 curState_ = IN_WORD;
-			else if (s == '"')				 curState_ = IN_STRING;
-			buffer_ += s;
+			if (isSkip(s_))				     continue;
+			else if (isSeparator(s_))		 curState_ = IN_SEPARATOR;
+			else if (s_ == '0')				 curState_ = IN_NULL_NUMBER;
+			else if (isDigit(s_))			 curState_ = IN_INTEGER;
+			else if (s_ == '.')				 curState_ = IN_DECIMAL_POINT;
+			else if (s_ == '/')				 curState_ = SLASH;
+			else if (s_ == '\'')			 curState_ = IN_CHAR;
+			else if (isOperatSymbol(s_))	 curState_ = IN_OPERATION;
+			else if (isLetter(s_))			 curState_ = IN_WORD;
+			else if (s_ == '"')				 curState_ = IN_STRING;
+			buffer_ += s_;
 			continue;
 		case(IN_WORD):
-			if (isLetter(s) || isDigit(s))
+			if (isLetter(s_) || isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
 			else
 			{					
 				if (identityNext())
 				{
-					curLexem = getWordLexeme();
+					curLexem_ = getWordLexeme();
 					return true;
 				}
 			}
 			continue;
 		case(IN_SEPARATOR):
-			readNext = false;
-			curLexem = getSeparatorLexeme();
+			readNext_ = false;
+			curLexem_ = getSeparatorLexeme();
 			return true;
 		case(IN_NULL_NUMBER):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_OCT_INTEGER;
 			}				
-			else if(s == 'x' || s == 'X')
+			else if(s_ == 'x' || s_ == 'X')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_HEX_INTEGER;
 			}
-			else if (s == '.')
+			else if (s_ == '.')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_POINT;
 			}
 			else
 			{	
 				if (identityNext())
 				{
-					curLexem = getIntegerLexeme();
+					curLexem_ = getIntegerLexeme();
 					return true;
 				}
 			}
 			continue;
 		case (IN_HEX_INTEGER):
-			if (isDigit(s) || isHexLetter(s))
+			if (isDigit(s_) || isHexLetter(s_))
 			{
-				buffer_ += s; 
+				buffer_ += s_; 
 			}
 			else
 			{
 				if (identityNext())
 				{
-					curLexem = getIntegerLexeme();
+					curLexem_ = getIntegerLexeme();
 					return true;
 				}
 			}
 			continue;
 		case (IN_OCT_INTEGER):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				if (s < '8')
+				if (s_ < '8')
 				{
-					buffer_ += s;
+					buffer_ += s_;
 				}
 				else
 				{
@@ -358,41 +346,41 @@ bool Scanner::next()
 			{
 				if (identityNext())
 				{
-					curLexem = getIntegerLexeme();
+					curLexem_ = getIntegerLexeme();
 					return true;
 				}
 			}
 			continue;
 		case(IN_INTEGER):
-			if (isDigit(s))
-				buffer_ += s;
-			else if ( s == 'E' || s == 'e')
+			if (isDigit(s_))
+				buffer_ += s_;
+			else if ( s_ == 'E' || s_ == 'e')
 			{
 				curState_ = IN_DECIMAL_E;
-				buffer_ += s;
+				buffer_ += s_;
 			}
-			else if (s == '.')
+			else if (s_ == '.')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_POINT;	
 			}
 			else 
 			{
 				if (identityNext())
 				{
-					curLexem = getIntegerLexeme();
+					curLexem_ = getIntegerLexeme();
 					return true;
 				}
 			}
 			continue;
 		case (IN_DECIMAL_POINT):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
-			else if (s == 'E' || s == 'e')
+			else if (s_ == 'E' || s_ == 'e')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_E;
 			}
 			else 
@@ -402,7 +390,7 @@ bool Scanner::next()
 				{
 					if (identityNext())
 					{
-						curLexem = getDoubleLexeme();
+						curLexem_ = getDoubleLexeme();
 						return true;
 					}
 				}
@@ -413,33 +401,33 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_DECIMAL):
-			if(isDigit(s))
+			if(isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
-			else if ( s == 'E' || s == 'e')
+			else if ( s_ == 'E' || s_ == 'e')
 			{
 				curState_ = IN_DECIMAL_E;
-				buffer_ += s;
+				buffer_ += s_;
 			}
 			else 
 			{
 				if (identityNext())
 				{
-					curLexem = getDoubleLexeme();
+					curLexem_ = getDoubleLexeme();
 					return true;
 				}
 			}
 			continue;
 		case(IN_DECIMAL_E):
-			if(s == '-' || s == '+')
+			if(s_ == '-' || s_ == '+')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_E_SIGN;
 			}
-			else if (isDigit(s))
+			else if (isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_E_SIGN_NUM; 
 			}
 			else
@@ -448,9 +436,9 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_DECIMAL_E_SIGN):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_DECIMAL_E_SIGN_NUM;
 			}
 			else
@@ -459,26 +447,26 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_DECIMAL_E_SIGN_NUM):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
 			else
 			{
 				if (identityNext())
 				{
-					curLexem = getDoubleLexeme();
+					curLexem_ = getDoubleLexeme();
 					return true;
 				}
 			}
 			continue;
 		case(IN_CHAR):
-			buffer_ += s;
-			if(s == '\\')
+			buffer_ += s_;
+			if(s_ == '\\')
 			{	
 				curState_ = IN_CHAR_SLASH;
 			}
-			else if (s == '\'' )
+			else if (s_ == '\'' )
 			{
 				throw scanner_exception ("Empty Char", getCol(), getLine());
 					 	
@@ -489,13 +477,13 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_CHAR_ONE):
-			if(s == '\'')
+			if(s_ == '\'')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				setSymbol();
 				if (identityNext())
 				{
-					curLexem = getCharLexeme( buffer_[1] == '\\' ?  IN_CHAR_SPEC : IN_CHAR_ONE);
+					curLexem_ = getCharLexeme( buffer_[1] == '\\' ?  IN_CHAR_SPEC : IN_CHAR_ONE);
 					return true;
 				}
 			}
@@ -505,16 +493,16 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_CHAR_SLASH):
-			if (s == 'x' || s == 'X')
+			if (s_ == 'x' || s_ == 'X')
 			{
-				buffer_ += s;	
+				buffer_ += s_;	
 				curState_ = IN_CHAR_SLASH_HEX;
 			}
-			else if (isDigit(s))
+			else if (isDigit(s_))
 			{
-				if (s < '8')
+				if (s_ < '8')
 				{
-					buffer_ += s;					
+					buffer_ += s_;					
 					curState_ = IN_CHAR_SLASH_OCTAL;
 				}
 				else
@@ -522,9 +510,9 @@ bool Scanner::next()
 					throw scanner_exception ("Invalid characters in octal char ", getCol(), getLine());
 				}
 			}
-			else if (isSpecChar(s))
+			else if (isSpecChar(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				curState_ = IN_CHAR_ONE;
 			}
 			else 
@@ -533,18 +521,18 @@ bool Scanner::next()
 			}
 			continue;			
 		case(IN_CHAR_SLASH_OCTAL):
-			if (isDigit(s))
+			if (isDigit(s_))
 			{
-				if (s < '8')
-					buffer_ += s;
+				if (s_ < '8')
+					buffer_ += s_;
 				else
 				{
 					throw scanner_exception ("Invalid characters in octal char ", getCol(), getLine());
 				}
 			}
-			else if (s == '\'')
+			else if (s_ == '\'')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				if (buffer_.length() > 6)
 				{
 					throw scanner_exception ("Exceed the dimension of the char ", getCol(), getLine() - buffer_.length());
@@ -552,23 +540,23 @@ bool Scanner::next()
 				setSymbol();
 				if (identityNext())
 				{
-					curLexem = getCharLexeme(IN_CHAR_SLASH_OCTAL);
+					curLexem_ = getCharLexeme(IN_CHAR_SLASH_OCTAL);
 					return true;
 				}
 			}
 			continue;
 		case(IN_CHAR_SLASH_HEX):
-			if (isDigit(s) || isHexLetter(s))
+			if (isDigit(s_) || isHexLetter(s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
-			else if(s == '\'')
+			else if(s_ == '\'')
 			{
-				buffer_ += s;
+				buffer_ += s_;
 				setSymbol();
 				if (identityNext())
 				{
-					curLexem = getCharLexeme(IN_CHAR_SLASH_HEX);
+					curLexem_ = getCharLexeme(IN_CHAR_SLASH_HEX);
 					return true;
 				}
 			}
@@ -578,55 +566,55 @@ bool Scanner::next()
 			}
 			continue;
 		case(IN_STRING):
-			buffer_ += s;
-			if (s == '\\')
+			buffer_ += s_;
+			if (s_ == '\\')
 			{
 				curState_ = IN_STRING_SLASH; 
 			}
-			else if ( s == EOF)
+			else if (s_ == EOF)
 			{
 				throw scanner_exception ("Not a closed string ", getCol(), getLine());
 			}
-			else if ( s == '"')
+			else if (s_ == '"')
 			{
 				setSymbol();
 				if (identityNext())
 				{
-					curLexem = getStringLexeme();
+					curLexem_ = getStringLexeme();
 					return true;
 				}
 			}
 			continue;
 		case(IN_STRING_SLASH):
-			if ( s == EOF)
+			if (s_ == EOF)
 			{
 				throw scanner_exception ("Not a closed string ", getCol(), getLine());
 			}
-			buffer_ += s;
+			buffer_ += s_;
 			curState_ = IN_STRING;
 			continue;
 		case(IN_OPERATION):
-			if (isOperation(buffer_ + s))
+			if (isOperation(buffer_ + s_))
 			{
-				buffer_ += s;
+				buffer_ += s_;
 			}
 			else
 			{
-				if (isDigit(s) || isLetter(s) || s == '.' || identityNext())
+				if (isDigit(s_) || isLetter(s_) || s_ == '.' || identityNext())
 				{
-					readNext = false;
-					curLexem = getOperationLexeme();
+					readNext_ = false;
+					curLexem_ = getOperationLexeme();
 					return true;
 				}
 			}
 			continue;
  		case(SLASH):
-			if (s == '*')
+			if (s_ == '*')
 			{
 				curState_ = IN_COMMENT_MULTI_LINE;
 				buffer_ = "";
 			}
-			else if (s == '/')
+			else if (s_ == '/')
 			{
 				curState_ = IN_COMMENT_LINE;
 				buffer_ = "";
@@ -634,36 +622,36 @@ bool Scanner::next()
 			else
 			{
 				curState_ = IN_OPERATION;
-				readNext = false;
+				readNext_ = false;
 			}
 			continue;
 		case(IN_COMMENT_LINE):
-			if (s == '\n' || s == EOF)
+			if (s_ == '\n' || s_ == EOF)
 			{
 				buffer_ = "";
 				curState_ = NONE;
 			}
 			continue;
 		case(IN_COMMENT_MULTI_LINE):
-			if (s == '*' )
+			if (s_ == '*' )
 			{
 				curState_ = IN_COMMENT_MULTI_LINE_ASTERISK;
 			}
-			else if(s == EOF )
+			else if(s_ == EOF )
 			{
 				throw scanner_exception ("Not a closed multi-line comment", getCol(), getLine());
 			}
 			continue;
 		case(IN_COMMENT_MULTI_LINE_ASTERISK):
-			if ( s == '/')
+			if ( s_ == '/')
 			{
 				curState_ = NONE;				
 			}
-			else if ( s != '*' )
+			else if (s_ != '*' )
 			{
 				curState_ = IN_COMMENT_MULTI_LINE;
 			}
-			else if(s == EOF )
+			else if(s_ == EOF )
 			{
 				throw scanner_exception ("Not a closed multi-line comment", getCol(), getLine());
 			}
@@ -679,5 +667,5 @@ bool Scanner::next()
 Lexeme* Scanner::get()
 {
 	buffer_.clear();
-	return curLexem;	
+	return curLexem_;	
 }

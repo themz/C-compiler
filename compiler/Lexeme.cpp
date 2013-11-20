@@ -2,7 +2,6 @@
 #include "Lexeme.h"
 #include <iostream>
 
-
 char* typeDef[] = {
 	"ReservedWord",
 	"Identificator",

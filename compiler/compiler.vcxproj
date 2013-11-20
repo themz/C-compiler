@@ -79,11 +79,15 @@
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="exception.cpp" />
     <ClCompile Include="Lexeme.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Scanner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="exception.h" />
     <ClInclude Include="Lexeme.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Scanner.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
