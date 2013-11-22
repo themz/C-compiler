@@ -1,17 +1,18 @@
 #include "Scanner.h"
+#include "Parser.h"
 #include <stdio.h>
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-	bool debug = false;
+	bool debug = 0;
 	FILE *outp;
 	if (!debug)
 	{		
 		if (argc > 1)
 		{
-			if ((string)argv[1] == (string)"/S")
+			if (argv[1] == "/S")
 			{
 				Scanner scanner(argv[2]);
 				try{
@@ -20,23 +21,24 @@ int main(int argc, char* argv[])
 					{
 						scanner.get()->print();
 					}
-					if(!scanner.get()){
-						throw compiler_exception ("Empty file ", 0, 0); 
-					}
 				}
 				catch(compiler_exception& exc)
 				{
 					cout << "Exeption: " << exc.getExceptionMsg() << endl << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
 				}
 			}
+			else if (argv[1] == "/PS")
+			{
+				Parser pars(Scanner(argv[2]));				
+			}
 			else
 			{
-				cout << "C-compilator v.0.2 developed by Zinov Mikhail 2013" << endl;				
+				cout << "C-compilator v.0.3 developed by Zinov Mikhail 2013" << endl;				
 			}
 		}
 		else
 		{
-	 		cout << "C-compilator v.0.2 developed by Zinov Mikhail 2013" << endl;
+	 		cout << "C-compilator v.0.3 developed by Zinov Mikhail 2013" << endl;
 		}
 	}
 	else
@@ -47,9 +49,6 @@ int main(int argc, char* argv[])
 			while (scanner.next())
 			{
 				scanner.get()->print();
-			}
-			if(!scanner.get()){
-				throw compiler_exception ("Empty file ", 0, 0); 
 			}
 		}
 		catch(compiler_exception& exc)

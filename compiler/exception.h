@@ -24,8 +24,10 @@ public:
 
 class parser_exception : public compiler_exception
 {
+	bool printPos;
 public:
 	parser_exception(string msg, int col, int line) : compiler_exception(msg, col, line){};
+	parser_exception(string msg):compiler_exception(msg, 0, 0){}
 };
 
 

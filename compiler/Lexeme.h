@@ -6,16 +6,69 @@ using namespace std;
 
 typedef enum
 {
-	ReservedWord,
-	Identificator,
-	Integer,
-	Double,
-	Separator,
-	Operation,
-	Char,
-	String,
-	Start,
+	RESERVEDWORD,
+	IDENTIFICATOR,
+	INTEGER,
+	DOUBLE,
+	SEPARATOR,
+	OPERATION,
+	CHAR,
+	STRING,
+	START,
+	ENDOF,
 } LexemType;
+
+typedef enum {
+	PLUS, 
+	MINUS,
+	MULT,
+	DIV,
+	MOD,
+	INC,
+	DEC,
+	PLUS_ASSING,
+	MINUS_ASSING,
+	MULT_ASSING,
+	DIV_ASSING,
+	MOD_ASSING,
+	QUESTION,
+	COLON,
+	BITWISE_AND,
+	BITWISE_OR,
+	LOGICAL_AND,
+	LOGICAL_OR,
+	LOGICAL_NOT,
+	XOR,
+	AND_ASSING,
+	OR_ASSING,
+	XOR_ASSIGN,
+	ASSIGN,
+	EQUAL,
+	NOT_EQUAL,
+	GREATER,
+	LESS,
+	GREATER_OR_EQUAL,
+	LESS_OR_EQUAL,
+	BITWISE_SHIFT_LEFT,
+	BITWISE_SHIFT_RIGHT,
+	DOT,
+	ARROW,
+	BITWISE_SHIFT_LEFT_ASSIGN,
+	BITWISE_SHIFT_RIGHT_ASSIGN,
+	PARENTHESIS_FRONT,
+	PARENTHESIS_BACK,
+	BRACKET_FRONT,
+	BRACKET_BACK,
+	COMMA,
+	BITWISE_NOT,
+	OPERATIONS_COUNT
+} OperationType;
+
+typedef enum {
+	T_AUTO, T_BREAK, T_CASE, T_CHAR, T_CONST , T_CONTINUE, T_DEFAULT, T_DO, T_DOUBLE, T_ELSE, T_ENUM, 
+	T_EXTERN, T_FLOAT, T_FOR, T_GOTO, T_IF, T_INT, T_LONG, T_REGISTER, T_RETURN, T_SHORT, T_SIGNED, 
+	T_SIZEOF, T_STATIC, T_STRUCT, T_SWITCH, T_TYPEDEF, T_UNION, T_UNSIGNED, T_VOID, T_VOLATILE, T_WHILE
+} ReservedWordType;
 
 class Lexeme
 {
@@ -32,8 +85,10 @@ public:
 
 class ReservedWordLexeme : public Lexeme
 {
+private:
+	ReservedWordType tVal_;
 public:
-	ReservedWordLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
+	ReservedWordLexeme(int line, int col, const string& strVal, LexemType type, ReservedWordType val) : Lexeme(line,col,strVal,type), tVal_(val){};
 };
 
 class IdentificatorLexeme : public Lexeme
@@ -71,9 +126,14 @@ public:
 
 class OperationLexeme : public Lexeme
 {
+private:
+	OperationType tVal_;
 public:
 	string getInfo();
-	OperationLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
+	OperationType getTVal() const {return tVal_;};
+	bool operator == (OperationType) const;
+	bool operator != (OperationType) const;
+	OperationLexeme(int line, int col, const string& strVal, LexemType type, OperationType val) : Lexeme(line,col,strVal,type), tVal_(val){};
 };
 
 
@@ -94,4 +154,13 @@ public:
 	string getInfo();
 	StringLexeme(int line, int col, const string& strVal, LexemType type, const string& val) : Lexeme(line,col,strVal,type), val_(val){};
 };
+
+class EofLexeme : public Lexeme
+{
+private:
+public:
+	string getInfo();
+	EofLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
+};
+
 

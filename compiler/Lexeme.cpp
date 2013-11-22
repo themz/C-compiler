@@ -45,6 +45,14 @@ string OperationLexeme::getInfo()
 	return Lexeme::getInfo() + stringValue;
 }
 
+bool OperationLexeme::operator==(OperationType t) const {
+	return tVal_ == t;
+}
+
+bool OperationLexeme::operator!=(OperationType t) const {
+	return tVal_ != t;
+}
+
 string SeparatorLexeme::getInfo()
 {
 	return Lexeme::getInfo() + charValue_;
@@ -58,6 +66,10 @@ string CharLexeme::getInfo()
 string StringLexeme::getInfo()
 {
 	return Lexeme::getInfo() + val_;	
+}
+
+string EofLexeme::getInfo(){
+	return getInfo() + "EOF";
 }
 
 

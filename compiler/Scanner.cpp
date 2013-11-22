@@ -8,49 +8,115 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	if (!input_)
 		throw exception("Invalid filename");
 
-	string arrKeywords[] = 
-	{
-	   "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", 
-	   "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", 
-	   "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
-	};
-	string arrOperations[] = 
-	{
-		"++", "--", "~", "!", "-", "+", "&", "*", "/", "%", "<<", ">>", "<", ">", "<=", ">=",
-		"==", "!=", "^", "|", "=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|=",
-		"&&", "||", "?","->"
-	};
-	char arrSeparators[] = 	{',', '(', ')', ';', '[', ']', ':','{','}'};
+	reservedWords_["auto"] =  T_AUTO;
+	reservedWords_["break"] =  T_BREAK;
+	reservedWords_["case"] =  T_CASE;
+	reservedWords_["char"] =  T_CHAR;
+	reservedWords_["const"] =  T_CONST;
+	reservedWords_["continue"] =  T_CONTINUE;
+	reservedWords_["default"] =  T_DEFAULT;
+	reservedWords_["do"] =  T_DO;
+	reservedWords_["double"] =  T_DOUBLE;
+	reservedWords_["else"] =  T_ELSE;
+	reservedWords_["enum"] =  T_ENUM;
+	reservedWords_["extern"] =  T_EXTERN;
+	reservedWords_["for"] =  T_FOR;
+	reservedWords_["float"] =  T_FLOAT;
+	reservedWords_["goto"] =  T_GOTO;
+	reservedWords_["if"] =  T_IF;
+	reservedWords_["int"] =  T_INT;
+	reservedWords_["long"] =  T_LONG;
+	reservedWords_["register"] =  T_REGISTER;
+	reservedWords_["return"] =  T_RETURN;
+	reservedWords_["short"] =  T_SHORT;
+	reservedWords_["signed"] =  T_SIGNED;
+	reservedWords_["sizeof"] =  T_SIZEOF;
+	reservedWords_["static"] =  T_STATIC;
+	reservedWords_["struct"] =  T_STRUCT;
+	reservedWords_["switch"] =  T_SWITCH;
+	reservedWords_["typedef"] =  T_TYPEDEF;
+	reservedWords_["union"] =  T_UNION;
+	reservedWords_["unsigned"] =  T_UNSIGNED;
+	reservedWords_["void"] =  T_VOID;
+	reservedWords_["volatile"] =  T_VOLATILE;
+	reservedWords_["while"] =  T_WHILE;
+	
+	operations_["+"] = PLUS;
+	operations_["-"] = MINUS;
+	operations_["*"] = MULT;
+	operations_["/"] = DIV;
+	operations_["%"] = MOD;
+	operations_["++"] = INC;
+	operations_["--"] = DEC;
+	operations_["+="] = PLUS_ASSING;
+	operations_["-="] = MINUS_ASSING;
+	operations_["*="] = MULT_ASSING;
+	operations_["/="] = DIV_ASSING;
+	operations_["%="] = MOD_ASSING;
+	operations_["&="] = AND_ASSING;
+	operations_["|="] = OR_ASSING;
+	operations_[">>="] = BITWISE_SHIFT_RIGHT_ASSIGN;
+	operations_["<<="] = BITWISE_SHIFT_LEFT_ASSIGN;
+	operations_["^="] = XOR_ASSIGN;
+	operations_["?"] = QUESTION;
+	operations_[":"] = COLON;
+	operations_["&"] = BITWISE_AND;
+	operations_["|"] = BITWISE_OR;
+	operations_["&&"] = LOGICAL_AND;
+	operations_["||"] = LOGICAL_OR;
+	operations_["!"] = LOGICAL_NOT;
+	operations_["^"] = XOR;
+	operations_["="] = ASSIGN;
+	operations_["=="] = EQUAL;
+	operations_["!="] = NOT_EQUAL;
+	operations_[">"] = GREATER;
+	operations_["<"] = LESS;
+	operations_[">="] = GREATER_OR_EQUAL;
+	operations_["<="] = LESS_OR_EQUAL;
+	operations_["<<"] = BITWISE_SHIFT_LEFT;
+	operations_[">>"] = BITWISE_SHIFT_RIGHT;
+	operations_["~"] = BITWISE_NOT;
+	operations_["."] = DOT;
+	operations_["->"] = ARROW;
+	operations_["("] = PARENTHESIS_FRONT;
+	operations_[")"] = PARENTHESIS_BACK;
+	operations_["["] = BRACKET_FRONT;
+	operations_["]"] = BRACKET_BACK;
+	operations_[","] = COMMA;
+
+
+	char arrSeparators[] = 	{',', ';', ':','{','}'};
 	char arrSkipSymbols[] = {' ', '\t','\n', EOF};
-	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%'};
-	reservedWords_.assign(arrKeywords, arrKeywords + sizeof(arrKeywords)/sizeof(string));
+	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')'};
+
 	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
 	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
-	operations_.assign(arrOperations, arrOperations + sizeof(arrOperations)/sizeof(string));
 	operatSymbol_.insert(arrOperatSymbol, arrOperatSymbol + sizeof(arrOperatSymbol)/sizeof(char));
-	specChar_.insert (pair<char,char>('n','\n'));
-    specChar_.insert (pair<char,char>('N','\n'));
-    specChar_.insert (pair<char,char>('t','\t'));
-    specChar_.insert (pair<char,char>('T','\t'));
-    specChar_.insert (pair<char,char>('b','\b'));
-    specChar_.insert (pair<char,char>('B','\b'));
-    specChar_.insert (pair<char,char>('r','\r'));
-    specChar_.insert (pair<char,char>('R','\r'));
-    specChar_.insert (pair<char,char>('f','\f'));
-    specChar_.insert (pair<char,char>('F','\f'));
-    specChar_.insert (pair<char,char>('\\','\\'));
-    specChar_.insert (pair<char,char>('\'','\''));
+
+	specChar_['n'] = '\n';
+    specChar_['N'] = '\n';
+    specChar_['t'] = '\t';
+    specChar_['T'] = '\t';
+    specChar_['b'] = '\b';
+    specChar_['B'] = '\b';
+    specChar_['r'] = '\r';
+    specChar_['R'] = '\r';
+    specChar_['f'] = '\f';
+    specChar_['F'] = '\f';
+    specChar_['\\'] = '\\';
+    specChar_['\''] = '\'';
 }
 
 
 Lexeme* Scanner::getWordLexeme()
 {
-	if (find(reservedWords_.begin(), reservedWords_.end(), buffer_) != reservedWords_.end())
+	auto it =  reservedWords_.find(buffer_); 
+	if ( it != reservedWords_.end())
 	{
-		return new ReservedWordLexeme (getLine(), getCol() - buffer_.length(), buffer_, ReservedWord);
+		return new ReservedWordLexeme (getLine(), getCol() - buffer_.length(), buffer_, RESERVEDWORD, it->second);
 	}
 	else 
-		return new IdentificatorLexeme (getLine(), getCol() - buffer_.length(), buffer_, Identificator);
+		return new IdentificatorLexeme (getLine(), getCol() - buffer_.length(), buffer_, IDENTIFICATOR);
 }
 
 Lexeme* Scanner::getIntegerLexeme()
@@ -61,7 +127,7 @@ Lexeme* Scanner::getIntegerLexeme()
 	} catch (out_of_range&) {
 		throw scanner_exception ("Integer is out of range ", getCol(), getLine());
 	}
-	return new IntegerLexeme (getLine(), getCol() - buffer_.length(), buffer_, Integer, val);	
+	return new IntegerLexeme (getLine(), getCol() - buffer_.length(), buffer_, INTEGER, val);	
 }
 
 Lexeme* Scanner::getDoubleLexeme()
@@ -72,12 +138,13 @@ Lexeme* Scanner::getDoubleLexeme()
 	} catch (out_of_range&) {
 		throw scanner_exception ("Double is out of range ", curCol_, getLine());
 	}
-	return new DoubleLexeme  (getLine(), curCol_ - buffer_.length() ,buffer_, Double, val);
+	return new DoubleLexeme  (getLine(), getCol() - buffer_.length() ,buffer_, DOUBLE, val);
 }
 
 Lexeme* Scanner::getOperationLexeme()
 {
-	return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, Operation);
+	//return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, OPERATION, operations_[buffer_]);
+	return NULL;
 }
 
 Lexeme*  Scanner::getCharLexeme(State_ state)
@@ -102,7 +169,7 @@ Lexeme*  Scanner::getCharLexeme(State_ state)
 	}
 	if (val > 255)
 		throw scanner_exception ("Char is out of range ", curCol_, curLine_);
-	return new CharLexeme (getLine(), getCol() - buffer_.length() ,buffer_, Char, (char)val);
+	return new CharLexeme (getLine(), getCol() - buffer_.length() ,buffer_, CHAR, (char)val);
 }
 
 Lexeme* Scanner::getStringLexeme()
@@ -119,12 +186,17 @@ Lexeme* Scanner::getStringLexeme()
 			str += buffer_[i];
 		}
 	}	
-	return new StringLexeme (getLine(), getCol() - buffer_.length(), buffer_, String, str);
+	return new StringLexeme (getLine(), getCol() - buffer_.length(), buffer_, STRING, str);
 }
 
 Lexeme*  Scanner::getSeparatorLexeme()
 {
-	return new SeparatorLexeme (getLine(), getCol() - 1, buffer_, Separator,buffer_.c_str()[0]);
+	return new SeparatorLexeme (getLine(), getCol() - 1, buffer_, SEPARATOR,buffer_.c_str()[0]);
+}
+
+Lexeme* Scanner::getEofLexeme()
+{
+	return new EofLexeme (getLine(), getCol(), "EOF", ENDOF);
 }
 
 char Scanner::getSpecChar(char c){
@@ -133,12 +205,13 @@ char Scanner::getSpecChar(char c){
 
 bool Scanner::isSeparator(char s)
 {	
-	return find(separators_.begin(), separators_.end(), s) != separators_.end();		
+	return find(separators_.begin(), separators_.end(), s) != separators_.end();	
+	return NULL;
 }
 
 bool Scanner::isOperation(string str)
 {
-	return find(operations_.begin(), operations_.end(), str) != operations_.end();
+	return operations_.find(str) != operations_.end();
 }
 
 bool Scanner::isSkip(char s)
@@ -256,6 +329,9 @@ bool Scanner::identityNext()
 bool Scanner::next()
 {
 	curState_ = NONE;
+	//if (getNext_)
+	//	curLexem_ = getEofLexeme();
+	//	return true;
 	while (getNext_){
 		readNext_ ?  setSymbol() : readNext_ = true;
 		switch (curState_)
