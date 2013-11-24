@@ -80,7 +80,9 @@ public:
 	string getFileName(){return filename_;};
 	bool next();
 	Lexeme* get();
+	Lexeme* getNextLex();
 	Scanner(string filename);
-	Scanner(const Scanner& c): input_(c.filename_), filename_(c.filename_), curCol_(0), curLine_(1), 
-		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false) {}
+	Scanner(Scanner& c): input_(c.filename_), filename_(c.filename_), curCol_(0), curLine_(1), 
+		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false), specChar_(c.specChar_),
+		operations_(c.operations_), reservedWords_(c.reservedWords_), separators_(c.separators_), skipSymbols_(c.skipSymbols_), operatSymbol_(c.operatSymbol_){}
 };

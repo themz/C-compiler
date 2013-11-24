@@ -6,13 +6,13 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	bool debug = 0;
+	bool debug = true;
 	FILE *outp;
 	if (!debug)
 	{		
 		if (argc > 1)
 		{
-			if (argv[1] == "/S")
+			if (string(argv[1]) == string("/S"))
 			{
 				Scanner scanner(argv[2]);
 				try{
@@ -27,9 +27,10 @@ int main(int argc, char* argv[])
 					cout << "Exeption: " << exc.getExceptionMsg() << endl << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
 				}
 			}
-			else if (argv[1] == "/PS")
+			else if (string(argv[1]) == string("/PS"))
 			{
-				Parser pars(Scanner(argv[2]));				
+				Parser pars = Parser (Scanner(argv[2]));
+				pars.parseExp();				
 			}
 			else
 			{
@@ -43,20 +44,39 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		try{
-			Scanner scanner("0.in");
-			freopen_s(&outp, "0.out", "w", stdout);					
-			while (scanner.next())
+		try
+		{
+			bool tpars = true;
+			if (tpars)
 			{
-				scanner.get()->print();
+				Parser pars(Scanner("0.in"));
+				Node* r = pars.parseExp();
+				if (r)
+				{
+					r->print();
+				}
+				else
+				{
+					throw parser_exception ("woooooooow!");
+				}
 			}
+			else
+			{			
+				Scanner scanner("0.in");
+				//freopen_s(&outp, "0.out", "w", stdout);					
+				while (scanner.next())
+				{
+					scanner.get()->print();
+				}			
+			}
+			system("pause");
 		}
 		catch(compiler_exception& exc)
 		{
 			cout << "Exeption: " << exc.getExceptionMsg() << endl << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
+			system("pause");
 		}
 
-		system("pause");
 	}	
 	return 0;
 }

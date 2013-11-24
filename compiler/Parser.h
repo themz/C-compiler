@@ -6,9 +6,9 @@ class Parser
 {
 private:
 	Scanner scanner_;
-	Node* parsTerm(int priority = 0);
-	Node* parsFactor(int priority = 0);
-
+	Node* parseTerm(int priority = 0);
+	Node* parseFactor(int priority = 0);
+	bool needNext;
 public:
 	Node* parseExp(int priority = 0);
 	void parse();

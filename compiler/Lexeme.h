@@ -79,7 +79,15 @@ protected:
 public:
 	virtual string getStringValue(){return stringValue;};
 	virtual void print();
+	const LexemType getLexType(){ return type;} 
 	virtual string getInfo();
+	virtual string getValue(){return stringValue;}
+	virtual bool operator == (OperationType) const{return false;}
+	bool operator == (LexemType t) const { return type == t;}
+	bool operator != (LexemType t) const { return type != t;}
+	virtual bool operator == (ReservedWordType t) const{return false;}
+	virtual bool operator != (ReservedWordType t) const{return false;}
+	Lexeme(Lexeme &l) : line(l.line), col(l.col), stringValue(l.stringValue), type(l.type){};
 	Lexeme(int line, int col, const string& strVal, LexemType type) : line(line), col(col), stringValue(strVal),type(type){};
 };
 
@@ -88,12 +96,17 @@ class ReservedWordLexeme : public Lexeme
 private:
 	ReservedWordType tVal_;
 public:
+	bool operator == (ReservedWordType t) const {return tVal_ == t;}
+	bool operator != (ReservedWordType t) const {return tVal_ != t;}
+	string getValue(){ return stringValue;}
 	ReservedWordLexeme(int line, int col, const string& strVal, LexemType type, ReservedWordType val) : Lexeme(line,col,strVal,type), tVal_(val){};
 };
 
 class IdentificatorLexeme : public Lexeme
 {
 public:
+	string getValue(){ return stringValue;}
+	IdentificatorLexeme(IdentificatorLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type){};
 	IdentificatorLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
 };
 
@@ -103,6 +116,8 @@ private:
 	int intValue_;
 public:
 	string getInfo();
+	string getValue();
+	IntegerLexeme(IntegerLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), intValue_(l.intValue_){};
 	IntegerLexeme(int line, int col, const string& strVal, LexemType type, int intValue) : Lexeme(line,col,strVal,type), intValue_(intValue){};
 };
 
@@ -112,6 +127,8 @@ private:
 	double doubleValue_;
 public:
 	string getInfo();
+	string getValue();
+	DoubleLexeme(DoubleLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), doubleValue_(l.doubleValue_){};
 	DoubleLexeme(int line, int col, const string& strVal, LexemType type, double doubleValue) : Lexeme(line,col,strVal,type), doubleValue_(doubleValue){};
 };
 
@@ -121,6 +138,8 @@ private:
 	char charValue_; 
 public:
 	string getInfo();
+	string getValue();
+	SeparatorLexeme(SeparatorLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), charValue_(l.charValue_){};
 	SeparatorLexeme(int line, int col, const string& strVal, LexemType type, char charValue) : Lexeme(line,col,strVal,type), charValue_(charValue){};
 };
 
@@ -130,9 +149,10 @@ private:
 	OperationType tVal_;
 public:
 	string getInfo();
-	OperationType getTVal() const {return tVal_;};
-	bool operator == (OperationType) const;
-	bool operator != (OperationType) const;
+	string getValue();
+	bool operator == (OperationType t) const{return tVal_ == t;};
+	bool operator != (OperationType t) const{return tVal_ != t;};
+	OperationLexeme(OperationLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), tVal_(l.tVal_){};
 	OperationLexeme(int line, int col, const string& strVal, LexemType type, OperationType val) : Lexeme(line,col,strVal,type), tVal_(val){};
 };
 
@@ -143,6 +163,8 @@ private:
 	char charValue_;
 public:
 	string getInfo();
+	string getValue();
+	CharLexeme(CharLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), charValue_(l.charValue_){};
 	CharLexeme(int line, int col, const string& strVal, LexemType type, char charValue) : Lexeme(line,col,strVal,type), charValue_(charValue){};
 };
 
@@ -152,6 +174,8 @@ private:
 	string val_;
 public:
 	string getInfo();
+	string getValue();
+	StringLexeme(StringLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), val_(l.val_){};
 	StringLexeme(int line, int col, const string& strVal, LexemType type, const string& val) : Lexeme(line,col,strVal,type), val_(val){};
 };
 
@@ -160,6 +184,8 @@ class EofLexeme : public Lexeme
 private:
 public:
 	string getInfo();
+	string getValue(){ return "EOF\n";}
+	EofLexeme(EofLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type){};
 	EofLexeme(int line, int col, const string& strVal, LexemType type) : Lexeme(line,col,strVal,type){};
 };
 

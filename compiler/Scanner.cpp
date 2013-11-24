@@ -107,7 +107,6 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
     specChar_['\''] = '\'';
 }
 
-
 Lexeme* Scanner::getWordLexeme()
 {
 	auto it =  reservedWords_.find(buffer_); 
@@ -143,8 +142,7 @@ Lexeme* Scanner::getDoubleLexeme()
 
 Lexeme* Scanner::getOperationLexeme()
 {
-	//return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, OPERATION, operations_[buffer_]);
-	return NULL;
+	return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, OPERATION, operations_[buffer_]);
 }
 
 Lexeme*  Scanner::getCharLexeme(State_ state)
@@ -744,4 +742,10 @@ Lexeme* Scanner::get()
 {
 	buffer_.clear();
 	return curLexem_;	
+}
+
+Lexeme* Scanner::getNextLex()
+{
+	buffer_.clear();
+	return next() ? curLexem_ : new EofLexeme(getLine(), getCol(),"EOF", ENDOF);
 }

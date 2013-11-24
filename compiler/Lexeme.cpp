@@ -28,29 +28,37 @@ void Lexeme::print()
 
 string IntegerLexeme::getInfo()
 {
+	return Lexeme::getInfo() + string(getValue());
+}
+
+string IntegerLexeme::getValue()
+{
 	char * info = (char*) malloc(sizeof(char) * 100);
 	sprintf_s(info, sizeof(char) * 100, "%d", intValue_);
-	return Lexeme::getInfo() + string(info);
-}
+	return string(info);
+} 
+
 
 string DoubleLexeme::getInfo()
 {
+
+	return Lexeme::getInfo() + string(getValue());
+}
+
+string DoubleLexeme::getValue()
+{
 	char * info = (char*) malloc(sizeof(char) * 100);
 	sprintf_s(info, sizeof(char) * 100, "%f", doubleValue_);
-	return Lexeme::getInfo() + string(info);
+	return string(info);
 }
 
 string OperationLexeme::getInfo()
 {
 	return Lexeme::getInfo() + stringValue;
 }
-
-bool OperationLexeme::operator==(OperationType t) const {
-	return tVal_ == t;
-}
-
-bool OperationLexeme::operator!=(OperationType t) const {
-	return tVal_ != t;
+string OperationLexeme::getValue()
+{
+	return stringValue;
 }
 
 string SeparatorLexeme::getInfo()
@@ -58,9 +66,22 @@ string SeparatorLexeme::getInfo()
 	return Lexeme::getInfo() + charValue_;
 }
 
+string SeparatorLexeme::getValue()
+{
+	return string(charValue_ + " ");
+	//return "Ebanblu` separator";
+}
+
+
 string CharLexeme::getInfo()
 {
 	return Lexeme::getInfo() + charValue_;
+}
+
+string CharLexeme::getValue()
+{
+	return string(charValue_ + " ");
+	//return "Ebanblu` char";
 }
 
 string StringLexeme::getInfo()
@@ -68,9 +89,15 @@ string StringLexeme::getInfo()
 	return Lexeme::getInfo() + val_;	
 }
 
+string StringLexeme::getValue()
+{
+	return val_;
+}
+
 string EofLexeme::getInfo(){
 	return getInfo() + "EOF";
 }
+
 
 
 
