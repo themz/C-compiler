@@ -36,23 +36,6 @@ public:
 	void print(int) const;
 };
 
-//class UnaryOpNode : public OpNode
-//{
-//protected:
-//	Node* operand;
-//public:
-//	UnaryOpNode(Lexeme* op, Node* oper);
-//	void print(int) const{ cout << "unary";};
-//};
-//
-//class PostfixUnaryOpNode : public UnaryOpNode
-//{
-//public:
-//	PostfixUnaryOpNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper) {}
-//	void print(int) const;
-//};
-
-
 class TernaryOpNode : public BinaryOpNode
 {
 private:
