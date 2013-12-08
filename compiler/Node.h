@@ -41,8 +41,8 @@ class TernaryOpNode : public BinaryOpNode
 private:
 	Node* condition;
 public:
-	TernaryOpNode(Lexeme* op, Node* c, Node* l, Node* r): BinaryOpNode(op, l, r), condition(c) {}
-	void print(int deep) const;
+	TernaryOpNode(Lexeme* op, Node* c, Node* l, Node* r): BinaryOpNode(op, l, r), condition(c){};
+	void print(int) const;
 };
 
 class IntNode : public Node
@@ -59,9 +59,41 @@ public:
 	void print(int) const;
 };
 
+class CharNode : public Node
+{
+public:	
+	CharNode(Lexeme* t): Node(t) {}
+	void print(int) const;
+};
+
 class IdentifierNode : public Node
 {
 public:	
 	IdentifierNode(Lexeme* t): Node(t) {}
 	void print(int) const;
+};
+
+class UnaryOpNode : public OpNode
+{
+protected:
+	Node* operand;
+public:
+	UnaryOpNode(Lexeme* op, Node* oper);
+	void print(int deep) const;
+};
+
+class PostfixUnaryOpNode : public UnaryOpNode
+{
+public:
+	PostfixUnaryOpNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper) {}
+	void print(int deep) const;
+};
+
+class TypecastNode : public UnaryOpNode
+{
+private:
+	
+public:
+	TypecastNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper){}
+	void print(int deep) const;
 };

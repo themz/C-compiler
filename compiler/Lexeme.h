@@ -26,11 +26,11 @@ typedef enum {
 	MOD,
 	INC,
 	DEC,
-	PLUS_ASSING,
-	MINUS_ASSING,
-	MULT_ASSING,
-	DIV_ASSING,
-	MOD_ASSING,
+	PLUS_ASSIGN,
+	MINUS_ASSIGN,
+	MULT_ASSIGN,
+	DIV_ASSIGN,
+	MOD_ASSIGN,
 	QUESTION,
 	COLON,
 	BITWISE_AND,
@@ -38,10 +38,10 @@ typedef enum {
 	LOGICAL_AND,
 	LOGICAL_OR,
 	LOGICAL_NOT,
-	XOR,
-	AND_ASSING,
-	OR_ASSING,
-	XOR_ASSIGN,
+	BITWISE_XOR,
+	AND_ASSIGN,
+	OR_ASSIGN,
+	BITWISE_XOR_ASSIGN,
 	ASSIGN,
 	EQUAL,
 	NOT_EQUAL,
@@ -99,6 +99,7 @@ public:
 	bool operator == (ReservedWordType t) const {return tVal_ == t;}
 	bool operator != (ReservedWordType t) const {return tVal_ != t;}
 	string getValue(){ return stringValue;}
+	ReservedWordType getRwType(){return tVal_;};
 	ReservedWordLexeme(int line, int col, const string& strVal, LexemType type, ReservedWordType val) : Lexeme(line,col,strVal,type), tVal_(val){};
 };
 
@@ -150,6 +151,7 @@ private:
 public:
 	string getInfo();
 	string getValue();
+	OperationType getOpType(){return tVal_;};
 	bool operator == (OperationType t) const{return tVal_ == t;};
 	bool operator != (OperationType t) const{return tVal_ != t;};
 	OperationLexeme(OperationLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), tVal_(l.tVal_){};

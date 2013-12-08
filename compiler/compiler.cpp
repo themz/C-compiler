@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	bool debug = false;
+	bool debug = true;	
 	FILE *outp;
 	try{
 		if (!debug)
@@ -15,9 +15,8 @@ int main(int argc, char* argv[])
 			{
 				if (string(argv[1]) == string("/S"))
 				{
-					Scanner scanner(argv[2]);
-				
-						freopen_s(&outp, (scanner.getFileName().substr(0, scanner.getFileName().length() - 3) +(string)".out").c_str() , "w", stdout);
+					Scanner scanner(argv[2]);				
+						freopen_s(&outp, (scanner.getFileName().substr(0, scanner.getFileName().length() - 3)+(string)".out").c_str() , "w", stdout);
 						while (scanner.next())
 						{
 							scanner.get()->print();
@@ -27,7 +26,8 @@ int main(int argc, char* argv[])
 				{
 					string filename = argv[2];
 					freopen_s(&outp, (filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
-					Node* r = Parser(Scanner(filename)).parseExp();
+					Parser p = Parser(Scanner(filename));					
+					Node* r = p.parseExp();
 					if (r)
 					{
 						r->print();
@@ -47,12 +47,13 @@ int main(int argc, char* argv[])
 		{
 		bool tpars = true;
 			if (tpars)
-			{
-					Node* r = Parser(Scanner("0.in")).parseExp();
-					if (r)
-					{
-						r->print();
-					}
+			{					
+				string filename = "0.in";
+				Node* r =  Parser(Scanner(filename)).parseExp();					
+				if (r)
+				{
+					r->print();
+				}
 			}
 			else
 			{			
@@ -62,8 +63,7 @@ int main(int argc, char* argv[])
 				{
 					scanner.get()->print();
 				}			
-			}
-			system("pause");			
+			}		
 		}
 	}
 	catch(compiler_exception& exc)
@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
 			cout << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
 		}
 	}
+	if (debug) system("pause");	
 	return 0;
 }
 

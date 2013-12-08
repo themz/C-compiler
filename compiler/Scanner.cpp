@@ -48,16 +48,16 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	operations_["%"] = MOD;
 	operations_["++"] = INC;
 	operations_["--"] = DEC;
-	operations_["+="] = PLUS_ASSING;
-	operations_["-="] = MINUS_ASSING;
-	operations_["*="] = MULT_ASSING;
-	operations_["/="] = DIV_ASSING;
-	operations_["%="] = MOD_ASSING;
-	operations_["&="] = AND_ASSING;
-	operations_["|="] = OR_ASSING;
+	operations_["+="] = PLUS_ASSIGN;
+	operations_["-="] = MINUS_ASSIGN;
+	operations_["*="] = MULT_ASSIGN;
+	operations_["/="] = DIV_ASSIGN;
+	operations_["%="] = MOD_ASSIGN;
+	operations_["&="] = AND_ASSIGN;
+	operations_["|="] = OR_ASSIGN;
 	operations_[">>="] = BITWISE_SHIFT_RIGHT_ASSIGN;
 	operations_["<<="] = BITWISE_SHIFT_LEFT_ASSIGN;
-	operations_["^="] = XOR_ASSIGN;
+	operations_["^="] = BITWISE_XOR_ASSIGN;
 	operations_["?"] = QUESTION;
 	operations_[":"] = COLON;
 	operations_["&"] = BITWISE_AND;
@@ -65,7 +65,7 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	operations_["&&"] = LOGICAL_AND;
 	operations_["||"] = LOGICAL_OR;
 	operations_["!"] = LOGICAL_NOT;
-	operations_["^"] = XOR;
+	operations_["^"] = BITWISE_XOR;
 	operations_["="] = ASSIGN;
 	operations_["=="] = EQUAL;
 	operations_["!="] = NOT_EQUAL;
@@ -85,9 +85,9 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	operations_[","] = COMMA;
 
 
-	char arrSeparators[] = 	{',', ';', ':','{','}'};
+	char arrSeparators[] = 	{',', ';','{','}'};
 	char arrSkipSymbols[] = {' ', '\t','\n', EOF};
-	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')'};
+	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')', ':'};
 
 	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
 	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
@@ -109,7 +109,7 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 
 Lexeme* Scanner::getWordLexeme()
 {
-	auto it =  reservedWords_.find(buffer_); 
+	auto it = reservedWords_.find(buffer_); 
 	if ( it != reservedWords_.end())
 	{
 		return new ReservedWordLexeme (getLine(), getCol() - buffer_.length(), buffer_, RESERVEDWORD, it->second);
@@ -348,7 +348,7 @@ bool Scanner::next()
 			buffer_ += s_;
 			continue;
 		case(IN_WORD):
-			if (isLetter(s_) || isDigit(s_))
+			if ((isLetter(s_) || isDigit(s_)) && s_ != '-')
 			{
 				buffer_ += s_;
 			}
@@ -744,8 +744,8 @@ Lexeme* Scanner::get()
 	return curLexem_;	
 }
 
-Lexeme* Scanner::getNextLex()
+Lexeme* Scanner::getNextLex(bool need)
 {
 	buffer_.clear();
-	return next() ? curLexem_ : new EofLexeme(getLine(), getCol(),"EOF", ENDOF);
+	return need ?  next() ? curLexem_ : new EofLexeme(getLine(), getCol(),"EOF", ENDOF) : curLexem_;
 }

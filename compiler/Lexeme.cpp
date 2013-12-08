@@ -69,7 +69,6 @@ string SeparatorLexeme::getInfo()
 string SeparatorLexeme::getValue()
 {
 	return string(charValue_ + " ");
-	//return "Ebanblu` separator";
 }
 
 
@@ -81,7 +80,6 @@ string CharLexeme::getInfo()
 string CharLexeme::getValue()
 {
 	return string(charValue_ + " ");
-	//return "Ebanblu` char";
 }
 
 string StringLexeme::getInfo()

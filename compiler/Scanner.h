@@ -73,14 +73,14 @@ private:
 	Lexeme* getCharLexeme(State_ state = IN_CHAR_ONE);
 	Lexeme* getStringLexeme();
 	Lexeme* getEofLexeme();
-	int getLine(){return (chLine_)? prevLine_ : curLine_;};
-	int getCol(){return (chLine_)? prevCol_ : curCol_;};
 	char getSpecChar(char);
 public:
 	string getFileName(){return filename_;};
 	bool next();
+	int getLine(){return (chLine_)? prevLine_ : curLine_;};
+	int getCol(){return (chLine_)? prevCol_ : curCol_;};
 	Lexeme* get();
-	Lexeme* getNextLex();
+	Lexeme* getNextLex(bool need = true);
 	Scanner(string filename);
 	Scanner(Scanner& c): input_(c.filename_), filename_(c.filename_), curCol_(0), curLine_(1), 
 		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false), specChar_(c.specChar_),
