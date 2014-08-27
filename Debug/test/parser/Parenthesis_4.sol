@@ -1,2 +1,17 @@
-Exeption: Invalid integer
-row:1 col:3
+            3
+         +
+            d
+      /
+         x
+   +
+            r
+         +
+            r
+      /
+         4
++
+      7
+   *
+         r
+      +
+         r

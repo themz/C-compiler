@@ -26,6 +26,15 @@ public:
 	virtual void print(int deep) {}
 };
 
+class UnaryOpNode : public OpNode
+{
+protected:
+	Node* operand;
+public:
+	UnaryOpNode(Lexeme* op, Node* oper);
+	void print(int deep) const;
+};
+
 class BinaryOpNode : public OpNode
 {
 protected:
@@ -73,13 +82,33 @@ public:
 	void print(int) const;
 };
 
-class UnaryOpNode : public OpNode
+class FunctionalNode : public Node
 {
 protected:
-	Node* operand;
+	Node* name;
+	mutable vector<Node*> args;
+	void printArgs(int deep) const;
 public:
-	UnaryOpNode(Lexeme* op, Node* oper);
+	FunctionalNode(Lexeme* lex, Node* n): Node(lex), name(n), args(0){}
+	void addArg(Node* arg) { args.push_back(arg); }
+};
+
+class FuncCallNode : public FunctionalNode
+{
+private:
+
+public:
+	FuncCallNode(Lexeme* t, Node* f): FunctionalNode(t, f){}
 	void print(int deep) const;
+};
+
+class ArrNode : public FunctionalNode
+{
+public:
+	ArrNode(Lexeme* t, Node* arr): FunctionalNode(t, arr) {}
+	void print(int deep) const;
+	bool isModifiableLvalue() const;
+	bool isLvalue() const { return true; }
 };
 
 class PostfixUnaryOpNode : public UnaryOpNode

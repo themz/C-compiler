@@ -73,16 +73,16 @@ Parser::Parser(Scanner &scanner):scanner_(scanner)
 	rightAssocOps[QUESTION] = true;
 }
 
-Node* Parser::parseExp(int priority){
-        needNext = true;	
-		if (priority > 15)
-			return parseFactor();
-		Node* l = parseExp(priority + 1);
+Node* Parser::parseExp(int priority, bool next){
+        needNext = next;        
+                if (priority > 15)
+                        return parseFactor();
+        Node* l = parseExp(priority + 1);
         Node* root = l;
-        Lexeme* lex = needNext ? scanner_.getNextLex() : scanner_.get();
-		needNext = false;	
-		if (!lex || *lex == ENDOF || *lex == PARENTHESIS_BACK || *lex == BRACKET_BACK || *lex == COLON || *lex == SEPARATOR){
-			return root;
+        Lexeme* lex = scanner_.getNextLex(needNext);
+        needNext = false;        
+        if (!lex || *lex == ENDOF || *lex == PARENTHESIS_BACK || *lex == BRACKET_BACK || *lex == COLON || *lex == SEPARATOR){
+                return root;
         }
         OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
 		while(opLex && priorityTable[opLex->getOpType()] >= priority)
@@ -90,10 +90,16 @@ Node* Parser::parseExp(int priority){
 			OperationType op = opLex->getOpType();
 			switch (op)
 			{
-			case(INC):
+			case(INC): 
 			case(DEC):
 				needNext = true;
 				root = new PostfixUnaryOpNode(opLex, root);
+				break;
+			case(PARENTHESIS_FRONT):
+				root = parseFuncCall(root);
+				break;
+			case(BRACKET_FRONT):
+				root = parseArrIndex(root);
 				break;
 			case(QUESTION):
 				{
@@ -110,10 +116,10 @@ Node* Parser::parseExp(int priority){
 			//case(ARROW):
 			default:
 				needNext = true;
-				root = new BinaryOpNode(opLex, root, parseExp(priority + (rightAssocOps[op] ? 0 : 1)));		
+				root = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));		
 				break;
 			}
-		opLex = dynamic_cast<OperationLexeme*>(needNext ? scanner_.getNextLex() : scanner_.get());
+		opLex = dynamic_cast<OperationLexeme*>(scanner_.getNextLex(needNext));
 		}     
         return root;
 }
@@ -157,7 +163,7 @@ Node* Parser::parseFactor(int priority)
 			} 
 			else if (rwType == T_SIZEOF)
 			{
-			
+				
 			}
 			else 
 				throw parser_exception("Expected typecast word: int(), double(), char() or sizeof()", scanner_.getLine(), scanner_.getCol());
@@ -171,7 +177,7 @@ Node* Parser::parseFactor(int priority)
 			needNext = true;
 			Lexeme* lex = scanner_.get();
 			OperationLexeme* clLex = dynamic_cast<OperationLexeme*>(lex);
-			if(!clLex || *clLex != PARENTHESIS_BACK)
+			if(clLex && *clLex != PARENTHESIS_BACK)
 			{
 				throw parser_exception ("Expected parenthesis close", false);
 			}
@@ -185,6 +191,50 @@ Node* Parser::parseFactor(int priority)
 		{
 			throw parser_exception ("Empty expression is not allowed", false);
 		}
+
 	}
 	return root;
+}
+
+
+Node* Parser::parseFuncCall(Node* root)
+{
+	Lexeme* lex = scanner_.get();
+	Node* r = NULL;
+	if (*lex == PARENTHESIS_FRONT)
+		{
+			Lexeme* l = NULL;
+			r = new FuncCallNode(root->lexeme_, root);
+			while (true)
+			{
+				dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
+				if (*l == ENDOF)
+					throw parser_exception("Expected parenthesis close after function argument list", scanner_.getCol(), scanner_.getLine());
+				if (*l == COMMA){
+					l = scanner_.getNextLex();
+					if (dynamic_cast<OperationLexeme*>(l) && *l == PARENTHESIS_BACK)
+						break;
+				}
+			}
+		}
+	return r;
+}
+
+Node* Parser::parseArrIndex(Node* root)
+{
+	Node* r = NULL;
+	if (*scanner_.get() == BRACKET_FRONT)
+		{
+			r = new ArrNode(root->lexeme_, root);
+			Lexeme* l = scanner_.get();
+			while (*l == BRACKET_FRONT)
+			{
+				Node* k = parseExp();
+				dynamic_cast<ArrNode*>(r)->addArg(k);
+				l = scanner_.get();
+				if (*l == ENDOF)
+					throw parser_exception("Expected bracket close after array index", scanner_.getCol(), scanner_.getLine());
+			}
+		}
+	return r;
 }

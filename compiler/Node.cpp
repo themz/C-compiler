@@ -65,6 +65,32 @@ void PostfixUnaryOpNode::print(int offset) const
 	cout << string(offset * N, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< endl;
 }
 
+void FunctionalNode::printArgs(int offset) const
+{
+	for (int i = 0; i < (int)args.size(); i++)
+	{
+		args[i]->print(offset + 1);
+		if (i < (int)args.size() - 1)
+			cout << string(offset * N, ' ') << ',' << endl;
+	}
+}
+
+void FuncCallNode::print(int offset) const
+{
+	name->print(offset);
+	cout << string(offset * N, ' ') << "(" << endl;
+	printArgs(offset);
+	cout << string(offset * N, ' ') << ")" << endl;
+}
+
+void ArrNode::print(int offset) const 
+{
+	name->print(offset);
+	cout << string(offset * N, ' ') << "[" << endl;
+	printArgs(offset);
+	cout << string(offset * N, ' ') << "]" << endl;
+}
+
 void TypecastNode::print(int offset) const
 {
 	string typeName = "";

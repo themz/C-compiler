@@ -6,7 +6,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	bool debug = true;	
+	string copyRight = "C-compilator v.0.4 developed by Zinov Mikhail 2014";
+	
+	bool debug = 0;	
 	FILE *outp;
 	try{
 		if (!debug)
@@ -35,12 +37,12 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					cout << "C-compilator v.0.3 developed by Zinov Mikhail 2013" << endl;				
+					cout << copyRight << endl;				
 				}
 			}
 			else
 			{
-	 			cout << "C-compilator v.0.3 developed by Zinov Mikhail 2013" << endl;
+	 			cout << copyRight << endl;
 			}
 		}
 		else
@@ -58,7 +60,7 @@ int main(int argc, char* argv[])
 			else
 			{			
 				Scanner scanner("0.in");
-				//freopen_s(&outp, "0.out", "w", stdout);					
+				freopen_s(&outp, "0.out", "w", stdout);					
 				while (scanner.next())
 				{
 					scanner.get()->print();

@@ -83,6 +83,7 @@ public:
 	virtual string getInfo();
 	virtual string getValue(){return stringValue;}
 	virtual bool operator == (OperationType) const{return false;}
+	virtual bool operator != (OperationType) const{return false;}
 	bool operator == (LexemType t) const { return type == t;}
 	bool operator != (LexemType t) const { return type != t;}
 	virtual bool operator == (ReservedWordType t) const{return false;}

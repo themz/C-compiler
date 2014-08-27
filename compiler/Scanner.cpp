@@ -85,9 +85,9 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	operations_[","] = COMMA;
 
 
-	char arrSeparators[] = 	{',', ';','{','}'};
+	char arrSeparators[] = 	{';','{','}'};
 	char arrSkipSymbols[] = {' ', '\t','\n', EOF};
-	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')', ':'};
+	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')', ':', ','};
 
 	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
 	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
@@ -327,9 +327,6 @@ bool Scanner::identityNext()
 bool Scanner::next()
 {
 	curState_ = NONE;
-	//if (getNext_)
-	//	curLexem_ = getEofLexeme();
-	//	return true;
 	while (getNext_){
 		readNext_ ?  setSymbol() : readNext_ = true;
 		switch (curState_)
@@ -543,7 +540,7 @@ bool Scanner::next()
 			else if (s_ == '\'' )
 			{
 				throw scanner_exception ("Empty Char", getCol(), getLine());
-					 	
+ 	
 			}
 			else				
 			{
