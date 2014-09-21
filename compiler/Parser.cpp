@@ -75,8 +75,8 @@ Parser::Parser(Scanner &scanner):scanner_(scanner)
 
 Node* Parser::parseExp(int priority, bool next){
         needNext = next;        
-                if (priority > 15)
-                        return parseFactor();
+		if (priority > 15)
+				return parseFactor();
         Node* l = parseExp(priority + 1);
         Node* root = l;
         Lexeme* lex = scanner_.getNextLex(needNext);
@@ -187,6 +187,10 @@ Node* Parser::parseFactor(int priority)
 				needNext = true;
 				root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
 		}
+		else if (*opLex == PARENTHESIS_BACK) 
+		{
+				break;
+		}
 		else 
 		{
 			throw parser_exception ("Empty expression is not allowed", false);
@@ -203,20 +207,21 @@ Node* Parser::parseFuncCall(Node* root)
 	Node* r = NULL;
 	if (*lex == PARENTHESIS_FRONT)
 		{
-			Lexeme* l = NULL;
+			Lexeme* l = scanner_.get();
 			r = new FuncCallNode(root->lexeme_, root);
-			while (true)
+			while (dynamic_cast<OperationLexeme*>(l) != NULL && *l!= PARENTHESIS_BACK)
 			{
 				dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
+				l = scanner_.get();
 				if (*l == ENDOF)
 					throw parser_exception("Expected parenthesis close after function argument list", scanner_.getCol(), scanner_.getLine());
 				if (*l == COMMA){
-					l = scanner_.getNextLex();
-					if (dynamic_cast<OperationLexeme*>(l) && *l == PARENTHESIS_BACK)
-						break;
+					continue;
 				}
 			}
 		}
+	else
+		throw parser_exception("Expected PARENTHESIS_FRONT", scanner_.getCol(), scanner_.getLine());
 	return r;
 }
 

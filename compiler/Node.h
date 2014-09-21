@@ -90,7 +90,7 @@ protected:
 	void printArgs(int deep) const;
 public:
 	FunctionalNode(Lexeme* lex, Node* n): Node(lex), name(n), args(0){}
-	void addArg(Node* arg) { args.push_back(arg); }
+	void addArg(Node* arg);
 };
 
 class FuncCallNode : public FunctionalNode

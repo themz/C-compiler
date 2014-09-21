@@ -75,6 +75,12 @@ void FunctionalNode::printArgs(int offset) const
 	}
 }
 
+void FunctionalNode::addArg(Node* arg)
+{
+	if(arg != NULL)
+		args.push_back(arg); 
+}
+
 void FuncCallNode::print(int offset) const
 {
 	name->print(offset);
