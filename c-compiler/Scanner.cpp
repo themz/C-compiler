@@ -1,4 +1,3 @@
-#pragma once
 #include "Scanner.h"
 #include <iostream>
 
@@ -6,7 +5,7 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false)
 {
 	if (!input_)
-		throw exception("Invalid filename");
+        throw exception();
 
 	reservedWords_["auto"] =  T_AUTO;
 	reservedWords_["break"] =  T_BREAK;
@@ -328,7 +327,11 @@ bool Scanner::next()
 {
 	curState_ = NONE;
 	while (getNext_){
-		readNext_ ?  setSymbol() : readNext_ = true;
+        if (readNext_) {
+            setSymbol();
+        } else {
+            readNext_ = true;
+        }
 		switch (curState_)
 		{
 		case(NONE):

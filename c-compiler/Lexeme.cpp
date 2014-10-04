@@ -15,9 +15,9 @@ char* typeDef[] = {
 };
 
 string Lexeme::getInfo()
-{	
-	char * info = (char*) malloc(sizeof(char) * 300);
-	sprintf_s(info, 300, "%s\t\t%d\t\t%d\t\t%s\t\t", typeDef[type], line, col, stringValue.c_str());
+{
+    char * info = (char*) calloc(sizeof(char), 300);
+	sprintf(info, "%s\t\t%d\t\t%d\t\t%s\t\t", typeDef[type], line, col, stringValue.c_str());
 	return string(info);
 }
 
@@ -34,7 +34,7 @@ string IntegerLexeme::getInfo()
 string IntegerLexeme::getValue()
 {
 	char * info = (char*) malloc(sizeof(char) * 100);
-	sprintf_s(info, sizeof(char) * 100, "%d", intValue_);
+	sprintf(info, "%d", intValue_);
 	return string(info);
 } 
 
@@ -48,7 +48,7 @@ string DoubleLexeme::getInfo()
 string DoubleLexeme::getValue()
 {
 	char * info = (char*) malloc(sizeof(char) * 100);
-	sprintf_s(info, sizeof(char) * 100, "%f", doubleValue_);
+	sprintf(info, "%f", doubleValue_);
 	return string(info);
 }
 

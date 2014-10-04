@@ -8,8 +8,7 @@ int main(int argc, char* argv[])
 {
 	string copyRight = "C-compilator v.0.4 developed by Zinov Mikhail 2014";
 	
-	bool debug = true;	
-	FILE *outp;
+	bool debug = true;
 	try{
 		if (!debug)
 		{		
@@ -17,8 +16,8 @@ int main(int argc, char* argv[])
 			{
 				if (string(argv[1]) == string("/S"))
 				{
-					Scanner scanner(argv[2]);				
-						freopen_s(&outp, (scanner.getFileName().substr(0, scanner.getFileName().length() - 3)+(string)".out").c_str() , "w", stdout);
+					Scanner scanner(argv[2]);
+                    freopen((scanner.getFileName().substr(0, scanner.getFileName().length() - 3)+(string)".out").c_str(), "w", stdout);
 						while (scanner.next())
 						{
 							scanner.get()->print();
@@ -26,10 +25,11 @@ int main(int argc, char* argv[])
 				}
 				else if (string(argv[1]) == string("/PS"))
 				{
-					string filename = argv[2];
-					freopen_s(&outp, (filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
-					Parser p = Parser(Scanner(filename));					
-					Node* r = p.parseExp();
+                    string filename = argv[2];
+					freopen((filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
+                    Scanner scanner(filename);
+                    Parser p(scanner);
+                    Node* r = p.parseExp();
 					if (r)
 					{
 						r->print();
@@ -47,11 +47,13 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-		bool tpars = true;
+            bool tpars = true;
 			if (tpars)
 			{					
 				string filename = "0.in";
-				Node* r =  Parser(Scanner(filename)).parseExp();					
+                //freopen("0.out", "w", stdout);
+                Scanner scanner(filename);
+				Node* r =  Parser(scanner).parseExp();
 				if (r)
 				{
 					r->print();
@@ -60,7 +62,7 @@ int main(int argc, char* argv[])
 			else
 			{			
 				Scanner scanner("0.in");
-				freopen_s(&outp, "0.out", "w", stdout);					
+				//sfreopen("0.out", "w", stdout);
 				while (scanner.next())
 				{
 					scanner.get()->print();
@@ -76,7 +78,6 @@ int main(int argc, char* argv[])
 			cout << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();
 		}
 	}
-	if (debug) system("pause");	
 	return 0;
 }
 
