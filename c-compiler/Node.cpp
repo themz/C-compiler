@@ -111,6 +111,8 @@ void TypecastNode::print(int offset) const
 	case(T_DOUBLE):
 		typeName = "double";
 		break;
+    default:
+        break;
 	}	
 	cout << string(offset * N, ' ') << typeName << endl;
 	cout << string(offset * N, ' ') << "(" << endl;

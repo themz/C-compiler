@@ -1,17 +1,16 @@
-#pragma once
 #include "Lexeme.h"
 #include <iostream>
 
 char* typeDef[] = {
-	"ReservedWord",
-	"Identificator",
-	"Integer",
-	"Double",
-	"Separator",
-	"Operation",
-	"Char",
-	"String",
-	"Error"
+	(char*)"ReservedWord",
+	(char*)"Identificator",
+	(char*)"Integer",
+	(char*)"Double",
+	(char*)"Separator",
+	(char*)"Operation",
+	(char*)"Char",
+	(char*)"String",
+	(char*)"Error"
 };
 
 string Lexeme::getInfo()
@@ -68,7 +67,7 @@ string SeparatorLexeme::getInfo()
 
 string SeparatorLexeme::getValue()
 {
-	return string(charValue_ + " ");
+	return string(charValue_ + string(" "));
 }
 
 
@@ -79,7 +78,7 @@ string CharLexeme::getInfo()
 
 string CharLexeme::getValue()
 {
-	return string(charValue_ + " ");
+	return string(charValue_ + string(" "));
 }
 
 string StringLexeme::getInfo()

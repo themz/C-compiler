@@ -170,33 +170,37 @@ Node* Parser::parseFactor(int priority)
 			break;
 		}
 	case(OPERATION):
-		OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
-		if (*opLex == PARENTHESIS_FRONT)
-		{
-			root = parseExp();
-			needNext = true;
-			Lexeme* lex = scanner_.get();
-			OperationLexeme* clLex = dynamic_cast<OperationLexeme*>(lex);
-			if(clLex && *clLex != PARENTHESIS_BACK)
-			{
-				throw parser_exception ("Expected parenthesis close", false);
-			}
-		}
-		else if (unaryOps[opLex->getOpType()]) 
-		{
-				needNext = true;
-				root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
-		}
-		else if (*opLex == PARENTHESIS_BACK) 
-		{
-				break;
-		}
-		else 
-		{
-			throw parser_exception ("Empty expression is not allowed", false);
-		}
-
-	}
+        {
+            OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
+            if (*opLex == PARENTHESIS_FRONT)
+            {
+                root = parseExp();
+                needNext = true;
+                Lexeme* lex = scanner_.get();
+                OperationLexeme* clLex = dynamic_cast<OperationLexeme*>(lex);
+                if(clLex && *clLex != PARENTHESIS_BACK)
+                {
+                    throw parser_exception ("Expected parenthesis close", false);
+                }
+            }
+            else if (unaryOps[opLex->getOpType()]) 
+            {
+                    needNext = true;
+                    root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
+            }
+            else if (*opLex == PARENTHESIS_BACK) 
+            {
+                    break;
+            }
+            else 
+            {
+                throw parser_exception ("Empty expression is not allowed", false);
+            }
+        }
+	default:
+            break;
+    }
+    
 	return root;
 }
 

@@ -111,10 +111,10 @@ Lexeme* Scanner::getWordLexeme()
 	auto it = reservedWords_.find(buffer_); 
 	if ( it != reservedWords_.end())
 	{
-		return new ReservedWordLexeme (getLine(), getCol() - buffer_.length(), buffer_, RESERVEDWORD, it->second);
+		return new ReservedWordLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, RESERVEDWORD, it->second);
 	}
 	else 
-		return new IdentificatorLexeme (getLine(), getCol() - buffer_.length(), buffer_, IDENTIFICATOR);
+		return new IdentificatorLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, IDENTIFICATOR);
 }
 
 Lexeme* Scanner::getIntegerLexeme()
@@ -125,7 +125,7 @@ Lexeme* Scanner::getIntegerLexeme()
 	} catch (out_of_range&) {
 		throw scanner_exception ("Integer is out of range ", getCol(), getLine());
 	}
-	return new IntegerLexeme (getLine(), getCol() - buffer_.length(), buffer_, INTEGER, val);	
+	return new IntegerLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, INTEGER, val);
 }
 
 Lexeme* Scanner::getDoubleLexeme()
@@ -136,12 +136,12 @@ Lexeme* Scanner::getDoubleLexeme()
 	} catch (out_of_range&) {
 		throw scanner_exception ("Double is out of range ", curCol_, getLine());
 	}
-	return new DoubleLexeme  (getLine(), getCol() - buffer_.length() ,buffer_, DOUBLE, val);
+	return new DoubleLexeme  (getLine(), getCol() - (int)buffer_.length() ,buffer_, DOUBLE, val);
 }
 
 Lexeme* Scanner::getOperationLexeme()
 {
-	return new OperationLexeme (getLine(), getCol() - buffer_.length(), buffer_, OPERATION, operations_[buffer_]);
+	return new OperationLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, OPERATION, operations_[buffer_]);
 }
 
 Lexeme*  Scanner::getCharLexeme(State_ state)
@@ -160,13 +160,15 @@ Lexeme*  Scanner::getCharLexeme(State_ state)
 		case(IN_CHAR_SPEC):
 			val = (int)getSpecChar(buffer_[2]);
 			break;
+        default:
+                break;
 		}		
 	} catch (out_of_range&) {
 		throw scanner_exception ("Char is out of range ", curCol_, curLine_);
 	}
 	if (val > 255)
 		throw scanner_exception ("Char is out of range ", curCol_, curLine_);
-	return new CharLexeme (getLine(), getCol() - buffer_.length() ,buffer_, CHAR, (char)val);
+	return new CharLexeme (getLine(), getCol() - (int)buffer_.length() ,buffer_, CHAR, (char)val);
 }
 
 Lexeme* Scanner::getStringLexeme()
@@ -183,7 +185,7 @@ Lexeme* Scanner::getStringLexeme()
 			str += buffer_[i];
 		}
 	}	
-	return new StringLexeme (getLine(), getCol() - buffer_.length(), buffer_, STRING, str);
+	return new StringLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, STRING, str);
 }
 
 Lexeme*  Scanner::getSeparatorLexeme()
@@ -609,7 +611,7 @@ bool Scanner::next()
 				buffer_ += s_;
 				if (buffer_.length() > 6)
 				{
-					throw scanner_exception ("Exceed the dimension of the char ", getCol(), getLine() - buffer_.length());
+					throw scanner_exception ("Exceed the dimension of the char ", getCol(), getLine() - (int)buffer_.length());
 				}
 				setSymbol();
 				if (identityNext())
