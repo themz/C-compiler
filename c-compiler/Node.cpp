@@ -22,6 +22,11 @@ void BinaryOpNode::print(int offset) const
 	right->print(offset + 1);
 }
 
+bool BinaryOpNode::haveBranch()
+{
+    return left != NULL && right != NULL;
+}
+
 void TernaryOpNode::print(int offset) const 
 {
 	string tab = string(offset * N, ' ');

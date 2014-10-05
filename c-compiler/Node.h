@@ -42,6 +42,7 @@ protected:
 	Node* right;
 public:	
 	BinaryOpNode(Lexeme* lex, Node* l, Node* r): OpNode(lex), left(l), right(r){};
+    bool haveBranch();
 	void print(int) const;
 };
 
