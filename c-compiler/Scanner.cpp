@@ -739,6 +739,12 @@ bool Scanner::next()
 	return false;
 }
 
+void Scanner::nextLex()
+{
+    if (!next()) {
+        curLexem_ = new EofLexeme(getLine(), getCol(),"EOF", ENDOF);
+    }
+}
 
 Lexeme* Scanner::get()
 {
@@ -746,8 +752,9 @@ Lexeme* Scanner::get()
 	return curLexem_;	
 }
 
-Lexeme* Scanner::getNextLex(bool need)
-{
-	buffer_.clear();
-	return need ?  next() ? curLexem_ : new EofLexeme(getLine(), getCol(),"EOF", ENDOF) : curLexem_;
-}
+//
+//Lexeme* Scanner::getNextLex(bool need)
+//{
+//	buffer_.clear();
+//	return need ?  next() ? curLexem_ : new EofLexeme(getLine(), getCol(),"EOF", ENDOF) : curLexem_;
+//}

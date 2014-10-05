@@ -13,9 +13,8 @@ private:
 	Node* parseFactor(int priority = 0);
 	Node* parseArrIndex(Node*);
 	Node* parseFuncCall(Node*);
-	bool needNext;
 public:
-	Node* parseExp(int priority = 0, bool next = true);
+	Node* parseExp(int priority = 0);
 	void parse();
 	Parser(Scanner &scanner);
 };
