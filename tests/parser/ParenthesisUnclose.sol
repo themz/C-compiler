@@ -1,9 +1,1 @@
-         a
-      +
-         3
-   *
-      s
--
-      4
-   +
-      4
+Exeption: Expected parenthesis close

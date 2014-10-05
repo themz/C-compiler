@@ -81,7 +81,6 @@ public:
 	int getCol(){return (chLine_)? prevCol_ : curCol_;};
 	Lexeme* get();
     void nextLex();
-	//Lexeme* getNextLex(bool need = true);
 	Scanner(string filename);
 	Scanner(Scanner& c): input_(c.filename_), filename_(c.filename_), curCol_(0), curLine_(1), 
 		prevCol_(0), prevLine_(1),readNext_(true), getNext_(true), curState_(NONE), curLexem_(NULL), chLine_(false), specChar_(c.specChar_),

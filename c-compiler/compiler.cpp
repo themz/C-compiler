@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
 	string copyRight = "C-compilator v.0.4 developed by Zinov Mikhail 2014";
 	
-	bool debug = 0;
+	bool debug = true;
 	try{
 		if (!debug)
 		{		

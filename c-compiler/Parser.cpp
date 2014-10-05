@@ -180,8 +180,7 @@ Node* Parser::parseFactor(int priority)
                 scanner_.nextLex();
                 root = parseExp();
                 Lexeme* lex = scanner_.get();
-                OperationLexeme* clLex = dynamic_cast<OperationLexeme*>(lex);
-                if(clLex && *clLex != PARENTHESIS_BACK)
+                if(!lex || *lex != PARENTHESIS_BACK)
                 {
                     throw parser_exception ("Expected parenthesis close", false);
                 }
