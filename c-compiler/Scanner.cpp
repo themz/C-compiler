@@ -86,7 +86,7 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 
 	char arrSeparators[] = 	{';','{','}'};
 	char arrSkipSymbols[] = {' ', '\t','\n', EOF};
-	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')', ':', ','};
+	char arrOperatSymbol[] = {'~','|','^','&','+', '-', '*', '/', '<', '>', '=', '=', '!', '?', '%', '[', ']', '(', ')', ':', ',', '.'};
 
 	separators_.assign(arrSeparators, arrSeparators + sizeof(arrSeparators)/sizeof(char));
 	skipSymbols_.assign(arrSkipSymbols, arrSkipSymbols + sizeof(arrSkipSymbols)/sizeof(char));
@@ -341,8 +341,8 @@ bool Scanner::next()
 			else if (isSeparator(s_))		 curState_ = IN_SEPARATOR;
 			else if (s_ == '0')				 curState_ = IN_NULL_NUMBER;
 			else if (isDigit(s_))			 curState_ = IN_INTEGER;
-			else if (s_ == '.')				 curState_ = IN_DECIMAL_POINT;
 			else if (s_ == '/')				 curState_ = SLASH;
+            else if (s_ == '.')              curState_ = IN_POINT;
 			else if (s_ == '\'')			 curState_ = IN_CHAR;
 			else if (isOperatSymbol(s_))	 curState_ = IN_OPERATION;
 			else if (isLetter(s_))			 curState_ = IN_WORD;
@@ -449,6 +449,15 @@ bool Scanner::next()
 				}
 			}
 			continue;
+        case (IN_POINT):
+                if (curLexem_ == NULL) {
+                    curState_ = IN_DECIMAL_POINT;
+                }
+                else if(curLexem_->getLexType() == IDENTIFICATOR || dynamic_cast<OperationLexeme*>(curLexem_)->getOpType() == BRACKET_BACK || dynamic_cast<OperationLexeme*>(curLexem_)->getOpType() == PARENTHESIS_BACK){
+                    readNext_ = false;
+                    curState_ = IN_OPERATION;
+                    continue;
+                }
 		case (IN_DECIMAL_POINT):
 			if (isDigit(s_))
 			{
@@ -676,7 +685,7 @@ bool Scanner::next()
 			}
 			else
 			{
-				if (isDigit(s_) || isLetter(s_) || s_ == '.' || identityNext())
+				if (isDigit(s_) || isLetter(s_) || identityNext())
 				{
 					readNext_ = false;
 					curLexem_ = getOperationLexeme();

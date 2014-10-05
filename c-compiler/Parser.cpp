@@ -113,12 +113,28 @@ Node* Parser::parseExp(int priority){
                 root = new TernaryOpNode(sepLex, root, l, r);
                 break;
             }
-        //case(DOT):
+            case(DOT):
+            {
+                scanner_.nextLex();
+                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
+                if (r == NULL) {
+                    throw parser_exception("Missed branch of binary operator", scanner_.getLine(), scanner_.getCol());
+                }
+                else if(r->lexeme_->getLexType() != IDENTIFICATOR){
+                    throw parser_exception("Expected identificator", scanner_.getLine(), scanner_.getCol());
+                }
+                root = new BinaryOpNode(opLex, root, r);
+                break;
+            }
         //case(ARROW):
         default:
-            scanner_.nextLex();
-            root = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));		
-            break;
+                scanner_.nextLex();
+                BinaryOpNode *bn = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));
+                if (!bn->haveBranch()) {
+                    throw parser_exception("Missed branch of binary operator", scanner_.getLine(), scanner_.getCol());
+                }
+                root = bn;
+                break;
         }
     opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
     }     
@@ -147,6 +163,7 @@ Node* Parser::parseFactor(int priority)
 		break;
 	case(CHAR):
 		root = new CharNode(lex);
+        break;
 	case RESERVEDWORD:
 		{
 			ReservedWordType rwType = dynamic_cast<ReservedWordLexeme*>(lex)->getRwType();
@@ -193,12 +210,14 @@ Node* Parser::parseFactor(int priority)
             }
             else if (*opLex == PARENTHESIS_BACK) 
             {
+                throw parser_exception ("Expected parenthesis open", false);
                 break;
             }
             else 
             {
                 throw parser_exception ("Empty expression is not allowed", false);
             }
+            break;
         }
 	default:
             break;
@@ -219,7 +238,6 @@ Node* Parser::parseFuncCall(Node* root)
             scanner_.nextLex();
             Lexeme* l = scanner_.get();
 			r = new FuncCallNode(root->lexeme_, root);
-            //dynamic_cast<OperationLexeme*>(l) != NULL && 
 			while (*l != PARENTHESIS_BACK)
 			{
                 dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
@@ -230,6 +248,7 @@ Node* Parser::parseFuncCall(Node* root)
                     scanner_.nextLex();
 				}
 			}
+            scanner_.nextLex();
 		}
 	else
 		throw parser_exception("Expected PARENTHESIS_FRONT", scanner_.getCol(), scanner_.getLine());
@@ -242,15 +261,11 @@ Node* Parser::parseArrIndex(Node* root)
 	if (*scanner_.get() == BRACKET_FRONT)
 		{
 			r = new ArrNode(root->lexeme_, root);
-			Lexeme* l = scanner_.get();
-			while (*l == BRACKET_FRONT)
-			{
-				Node* k = parseExp();
-				dynamic_cast<ArrNode*>(r)->addArg(k);
-				l = scanner_.get();
-				if (*l == ENDOF)
-					throw parser_exception("Expected bracket close after array index", scanner_.getCol(), scanner_.getLine());
-			}
-		}
+            scanner_.next();
+            dynamic_cast<ArrNode*>(r)->addArg(parseExp());
+            if (*scanner_.get() != BRACKET_BACK)
+                throw parser_exception("Expected bracket close after array index", scanner_.getCol(), scanner_.getLine());
+            scanner_.next();
+        }
 	return r;
 }
