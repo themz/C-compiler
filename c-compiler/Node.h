@@ -62,10 +62,10 @@ public:
 	void print(int) const;
 };
 
-class DoubleNode : public Node
+class FloatNode : public Node
 {
 public:	
-	DoubleNode(Lexeme* t): Node(t) {}
+	FloatNode(Lexeme* t): Node(t) {}
 	void print(int) const;
 };
 

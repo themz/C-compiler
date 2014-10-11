@@ -15,7 +15,6 @@ Scanner::Scanner(string filename):input_(filename), filename_(filename), curCol_
 	reservedWords_["continue"] =  T_CONTINUE;
 	reservedWords_["default"] =  T_DEFAULT;
 	reservedWords_["do"] =  T_DO;
-	reservedWords_["double"] =  T_DOUBLE;
 	reservedWords_["else"] =  T_ELSE;
 	reservedWords_["enum"] =  T_ENUM;
 	reservedWords_["extern"] =  T_EXTERN;
@@ -128,15 +127,15 @@ Lexeme* Scanner::getIntegerLexeme()
 	return new IntegerLexeme (getLine(), getCol() - (int)buffer_.length(), buffer_, INTEGER, val);
 }
 
-Lexeme* Scanner::getDoubleLexeme()
+Lexeme* Scanner::getFloatLexeme()
 {
-	double val;
+	float val = 0;
 	try {
-		val = stod(buffer_);
+		val = stof(buffer_);
 	} catch (out_of_range&) {
-		throw scanner_exception ("Double is out of range ", curCol_, getLine());
+		throw scanner_exception ("Float is out of range ", curCol_, getLine());
 	}
-	return new DoubleLexeme  (getLine(), getCol() - (int)buffer_.length() ,buffer_, DOUBLE, val);
+	return new FloatLexeme  (getLine(), getCol() - (int)buffer_.length() ,buffer_, FLOAT, val);
 }
 
 Lexeme* Scanner::getOperationLexeme()
@@ -309,7 +308,7 @@ bool Scanner::identityNext()
 			case(IN_DECIMAL_POINT):
 			case(IN_DECIMAL_E_SIGN): 
 			case(IN_DECIMAL_E_SIGN_NUM):
-				msg = "Invalid double";
+				msg = "Invalid float";
 				break;
 			case(IN_STRING):
 			case(IN_STRING_SLASH):
@@ -475,7 +474,7 @@ bool Scanner::next()
 				{
 					if (identityNext())
 					{
-						curLexem_ = getDoubleLexeme();
+						curLexem_ = getFloatLexeme();
 						return true;
 					}
 				}
@@ -499,7 +498,7 @@ bool Scanner::next()
 			{
 				if (identityNext())
 				{
-					curLexem_ = getDoubleLexeme();
+					curLexem_ = getFloatLexeme();
 					return true;
 				}
 			}
@@ -540,7 +539,7 @@ bool Scanner::next()
 			{
 				if (identityNext())
 				{
-					curLexem_ = getDoubleLexeme();
+					curLexem_ = getFloatLexeme();
 					return true;
 				}
 			}

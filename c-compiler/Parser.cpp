@@ -158,8 +158,8 @@ Node* Parser::parseFactor(int priority)
 	case(INTEGER):
 		root = new IntNode(lex);
 		break;
-	case(DOUBLE):
-		root = new DoubleNode(lex);
+	case(FLOAT):
+		root = new FloatNode(lex);
 		break;
 	case(CHAR):
 		root = new CharNode(lex);
@@ -167,7 +167,7 @@ Node* Parser::parseFactor(int priority)
 	case RESERVEDWORD:
 		{
 			ReservedWordType rwType = dynamic_cast<ReservedWordLexeme*>(lex)->getRwType();
-			if (rwType == T_CHAR || rwType == T_INT || rwType == T_DOUBLE)
+			if (rwType == T_CHAR || rwType == T_INT || rwType == T_FLOAT)
 			{
                 scanner_.nextLex();
                 OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
@@ -185,7 +185,7 @@ Node* Parser::parseFactor(int priority)
 				
 			}
 			else 
-				throw parser_exception("Expected typecast word: int(), double(), char() or sizeof()", scanner_.getLine(), scanner_.getCol());
+				throw parser_exception("Expected typecast word: int(), float(), char() or sizeof()", scanner_.getLine(), scanner_.getCol());
             needNext = false;
 			break;
 		}

@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
 	string copyRight = "C-compilator v.0.4 developed by Zinov Mikhail 2014";
 	
-	bool debug = true;
+	bool debug = false;
 	try{
 		if (!debug)
 		{		
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-            bool tpars = true;
+            bool tpars = false;
 			if (tpars)
 			{					
 				string filename = "0.in";

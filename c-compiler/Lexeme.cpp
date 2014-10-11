@@ -5,7 +5,7 @@ char* typeDef[] = {
 	(char*)"ReservedWord",
 	(char*)"Identificator",
 	(char*)"Integer",
-	(char*)"Double",
+	(char*)"Float",
 	(char*)"Separator",
 	(char*)"Operation",
 	(char*)"Char",
@@ -38,16 +38,16 @@ string IntegerLexeme::getValue()
 } 
 
 
-string DoubleLexeme::getInfo()
+string FloatLexeme::getInfo()
 {
 
 	return Lexeme::getInfo() + string(getValue());
 }
 
-string DoubleLexeme::getValue()
+string FloatLexeme::getValue()
 {
 	char * info = (char*) malloc(sizeof(char) * 100);
-	sprintf(info, "%f", doubleValue_);
+	sprintf(info, "%f", floatValue_);
 	return string(info);
 }
 

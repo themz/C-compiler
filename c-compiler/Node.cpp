@@ -43,9 +43,9 @@ void IntNode::print(int offset) const
 	cout << string(offset * N, ' ') << dynamic_cast<IntegerLexeme*>(lexeme_)->getValue()<< endl;
 }
 
-void DoubleNode::print(int offset) const
+void FloatNode::print(int offset) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<DoubleLexeme*>(lexeme_)->getValue() << endl;
+	cout << string(offset * N, ' ') << dynamic_cast<FloatLexeme*>(lexeme_)->getValue() << endl;
 }
 
 void CharNode::print(int offset) const
@@ -113,8 +113,8 @@ void TypecastNode::print(int offset) const
 	case(T_INT):
 		typeName = "int";
 		break;
-	case(T_DOUBLE):
-		typeName = "double";
+	case(T_FLOAT):
+		typeName = "float";
 		break;
     default:
         break;

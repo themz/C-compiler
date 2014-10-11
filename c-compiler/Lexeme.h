@@ -9,7 +9,7 @@ typedef enum
 	RESERVEDWORD,
 	IDENTIFICATOR,
 	INTEGER,
-	DOUBLE,
+	FLOAT,
 	SEPARATOR,
 	OPERATION,
 	CHAR,
@@ -65,7 +65,7 @@ typedef enum {
 } OperationType;
 
 typedef enum {
-	T_AUTO, T_BREAK, T_CASE, T_CHAR, T_CONST , T_CONTINUE, T_DEFAULT, T_DO, T_DOUBLE, T_ELSE, T_ENUM, 
+	T_AUTO, T_BREAK, T_CASE, T_CHAR, T_CONST , T_CONTINUE, T_DEFAULT, T_DO, T_ELSE, T_ENUM,
 	T_EXTERN, T_FLOAT, T_FOR, T_GOTO, T_IF, T_INT, T_LONG, T_REGISTER, T_RETURN, T_SHORT, T_SIGNED, 
 	T_SIZEOF, T_STATIC, T_STRUCT, T_SWITCH, T_TYPEDEF, T_UNION, T_UNSIGNED, T_VOID, T_VOLATILE, T_WHILE
 } ReservedWordType;
@@ -123,15 +123,15 @@ public:
 	IntegerLexeme(int line, int col, const string& strVal, LexemType type, int intValue) : Lexeme(line,col,strVal,type), intValue_(intValue){};
 };
 
-class DoubleLexeme : public Lexeme
+class FloatLexeme : public Lexeme
 {
 private:
-	double doubleValue_;
+	float floatValue_;
 public:
 	string getInfo();
 	string getValue();
-	DoubleLexeme(DoubleLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), doubleValue_(l.doubleValue_){};
-	DoubleLexeme(int line, int col, const string& strVal, LexemType type, double doubleValue) : Lexeme(line,col,strVal,type), doubleValue_(doubleValue){};
+	FloatLexeme(FloatLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), floatValue_(l.floatValue_){};
+	FloatLexeme(int line, int col, const string& strVal, LexemType type, float floatValue) : Lexeme(line,col,strVal,type), floatValue_(floatValue){};
 };
 
 class SeparatorLexeme : public Lexeme

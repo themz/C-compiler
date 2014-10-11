@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CE3CC1FD19E7FCD100379EA6 /* Symbols.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE3CC1FB19E7FCD100379EA6 /* Symbols.cpp */; };
 		CE8664CF19DA638700797989 /* compiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE8664C419DA638700797989 /* compiler.cpp */; };
 		CE8664D019DA638700797989 /* exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE8664C519DA638700797989 /* exception.cpp */; };
 		CE8664D119DA638700797989 /* Lexeme.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE8664C719DA638700797989 /* Lexeme.cpp */; };
@@ -28,6 +29,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CE3CC1FB19E7FCD100379EA6 /* Symbols.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Symbols.cpp; sourceTree = "<group>"; };
+		CE3CC1FC19E7FCD100379EA6 /* Symbols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Symbols.h; sourceTree = "<group>"; };
 		CE8664B719DA60A200797989 /* c-compiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "c-compiler"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE8664C419DA638700797989 /* compiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = compiler.cpp; sourceTree = "<group>"; };
 		CE8664C519DA638700797989 /* exception.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = exception.cpp; sourceTree = "<group>"; };
@@ -77,6 +80,8 @@
 				CE8664C619DA638700797989 /* exception.h */,
 				CE8664C719DA638700797989 /* Lexeme.cpp */,
 				CE8664C819DA638700797989 /* Lexeme.h */,
+				CE3CC1FB19E7FCD100379EA6 /* Symbols.cpp */,
+				CE3CC1FC19E7FCD100379EA6 /* Symbols.h */,
 				CE8664C919DA638700797989 /* Node.cpp */,
 				CE8664CA19DA638700797989 /* Node.h */,
 				CE8664CB19DA638700797989 /* Parser.cpp */,
@@ -145,6 +150,7 @@
 			files = (
 				CE8664D419DA638700797989 /* Scanner.cpp in Sources */,
 				CE8664CF19DA638700797989 /* compiler.cpp in Sources */,
+				CE3CC1FD19E7FCD100379EA6 /* Symbols.cpp in Sources */,
 				CE8664D019DA638700797989 /* exception.cpp in Sources */,
 				CE8664D119DA638700797989 /* Lexeme.cpp in Sources */,
 				CE8664D319DA638700797989 /* Parser.cpp in Sources */,
@@ -264,6 +270,7 @@
 				CE8664C019DA60A200797989 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

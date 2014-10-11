@@ -68,7 +68,7 @@ private:
 	bool identityNext();
 	Lexeme* getWordLexeme();
 	Lexeme* getIntegerLexeme();
-	Lexeme* getDoubleLexeme();
+	Lexeme* getFloatLexeme();
 	Lexeme* getSeparatorLexeme();
 	Lexeme* getOperationLexeme();
 	Lexeme* getCharLexeme(State_ state = IN_CHAR_ONE);
