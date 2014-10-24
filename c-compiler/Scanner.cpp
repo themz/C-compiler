@@ -189,7 +189,23 @@ Lexeme* Scanner::getStringLexeme()
 
 Lexeme*  Scanner::getSeparatorLexeme()
 {
-	return new SeparatorLexeme (getLine(), getCol() - 1, buffer_, SEPARATOR,buffer_.c_str()[0]);
+    SeparatorType t = SEMICOLON;
+    try {
+        switch (buffer_[0])
+        {
+            case('}'):
+                t = BRACES_BACK;
+                break;
+            case('{'):
+                t = BRACES_BACK;
+                break;
+            default:
+                break;
+        }		
+    } catch(int) {
+        throw scanner_exception ("Char is out of range ", curCol_, curLine_);
+    }
+    return new SeparatorLexeme (getLine(), getCol() - 1, buffer_, SEPARATOR,buffer_.c_str()[0],t);
 }
 
 Lexeme* Scanner::getEofLexeme()

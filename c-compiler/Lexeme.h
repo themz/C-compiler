@@ -66,6 +66,12 @@ typedef enum {
 } OperationType;
 
 typedef enum {
+    BRACES_FRONT,
+    BRACES_BACK,
+    SEMICOLON,
+} SeparatorType;
+
+typedef enum {
 	T_AUTO, T_BREAK, T_CASE, T_CHAR, T_CONST , T_CONTINUE, T_DEFAULT, T_DO, T_ELSE, T_ENUM,
 	T_EXTERN, T_FLOAT, T_FOR, T_GOTO, T_IF, T_INT, T_LONG, T_REGISTER, T_RETURN, T_SHORT, T_SIGNED, 
 	T_SIZEOF, T_STATIC, T_STRUCT, T_SWITCH, T_TYPEDEF, T_UNION, T_UNSIGNED, T_VOID, T_VOLATILE, T_WHILE
@@ -85,6 +91,8 @@ public:
 	virtual string getValue(){return stringValue;}
 	virtual bool operator == (OperationType) const{return false;}
 	virtual bool operator != (OperationType) const{return true;}
+    virtual bool operator == (SeparatorType) const{return false;}
+    virtual bool operator != (SeparatorType) const{return true;}
 	bool operator == (LexemType t) const { return type == t;}
 	bool operator != (LexemType t) const { return type != t;}
 	virtual bool operator == (ReservedWordType t) const{return false;}
@@ -139,12 +147,15 @@ public:
 class SeparatorLexeme : public Lexeme
 {
 private:
+    SeparatorType tVal_;
 	char charValue_; 
 public:
 	string getInfo();
 	string getValue();
-	SeparatorLexeme(SeparatorLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), charValue_(l.charValue_){};
-	SeparatorLexeme(int line, int col, const string& strVal, LexemType type, char charValue) : Lexeme(line,col,strVal,type), charValue_(charValue){};
+    bool operator == (SeparatorType t) const{return tVal_ == t;};
+    bool operator != (SeparatorType t) const{return tVal_ != t;};
+	SeparatorLexeme(SeparatorLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), charValue_(l.charValue_), tVal_(l.tVal_){};
+	SeparatorLexeme(int line, int col, const string& strVal, LexemType type, char charValue, SeparatorType t) : Lexeme(line,col,strVal,type), charValue_(charValue), tVal_(t){};
 };
 
 class OperationLexeme : public Lexeme
