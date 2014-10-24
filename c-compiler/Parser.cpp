@@ -1,5 +1,8 @@
 #include "Parser.h"
 
+#define NL scanner_.nextLex
+#define GL scanner_.get
+
 Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 {
 	priorityTable[PARENTHESIS_FRONT] = 15;
@@ -70,8 +73,7 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 	rightAssocOps[MULT] = true;
 	rightAssocOps[BITWISE_AND] = true;
 	rightAssocOps[QUESTION] = true;
-    
-    scanner_.nextLex();
+    NL();
     SymTable *st = new SymTable();
     st->add(new SymTypeInt());
     st->add(new SymTypeChar());
@@ -84,7 +86,7 @@ Node* Parser::parseExp(int priority){
             return parseFactor();
     Node* l = parseExp(priority + 1);
     Node* root = l;
-    Lexeme* lex = scanner_.get();
+    Lexeme* lex = GL();
     if (!lex || *lex == ENDOF || *lex == PARENTHESIS_BACK || *lex == BRACKET_BACK || *lex == COLON || *lex == SEPARATOR){
             return root;
     }
@@ -97,31 +99,31 @@ Node* Parser::parseExp(int priority){
             case(INC):
             case(DEC):
                 root = new PostfixUnaryOpNode(opLex, root);
-                scanner_.nextLex();
+                NL();
                 break;
             case(PARENTHESIS_FRONT):
                 root = parseFuncCall(root);
                 break;
             case(BRACKET_FRONT):
                 root = parseArrIndex(root);
-                scanner_.next();
+                NL();
                 break;
             case(QUESTION):
             {
-                scanner_.nextLex();
+                NL();
                 Node* l = parseExp();
-                Lexeme* le = scanner_.get(); 
+                Lexeme* le = GL();
                 OperationLexeme* sepLex = dynamic_cast<OperationLexeme*>(le);
                 if (*sepLex != COLON)
                     throw parser_exception("Missed branch of ternary operator", scanner_.getLine(), scanner_.getCol());
-                scanner_.nextLex();
+                NL();
                 Node* r = parseExp();
                 root = new TernaryOpNode(sepLex, root, l, r);
                 break;
             }
             case(DOT):
             {
-                scanner_.nextLex();
+                NL();
                 Node* r = parseExp(priority + (int)!rightAssocOps[op]);
                 if (r == NULL) {
                     throw parser_exception("Missed branch of binary operator", scanner_.getLine(), scanner_.getCol());
@@ -137,7 +139,7 @@ Node* Parser::parseExp(int priority){
             //break;
         //case(ARROW):
         default:
-                scanner_.nextLex();
+                NL();
                 BinaryOpNode *bn = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));
                 if (!bn->haveBranch()) {
                     throw parser_exception("Missed branch of binary operator", scanner_.getLine(), scanner_.getCol());
@@ -163,18 +165,18 @@ SymTable *Parser::parseFuncArg(const bool dec)
 
 SymType* Parser::parseType()
 {
-    Lexeme* l = scanner_.get();
-    if (*l != RESERVEDWORD && *l != IDENTIFICATOR) {
+
+    if (*GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR) {
         throw parser_exception("Expected type", scanner_.getLine(), scanner_.getCol());
     }
-    if (*l == T_STRUCT) {
+    if (*GL() == T_STRUCT) {
         //parseStruct()
     }
-    SymType* type = (SymType*)symStack.find(l->getValue());
+    SymType* type = (SymType*)symStack.find(GL()->getValue());
     if (type == NULL) {
         throw parser_exception("Undefine type", scanner_.getLine(), scanner_.getCol());
     }
-    scanner_.nextLex();
+    NL();
     return type;
 }
 
@@ -182,44 +184,42 @@ void Parser::parseDeclaration()
 {
     Node* exp = NULL;
     bool isConst = false;
-    Lexeme* l = scanner_.get();
+    Lexeme* l = GL();
     if (*l == T_CONST) {
         isConst = true;
-        scanner_.nextLex();
+        NL();
     }
     SymType* type = parseType();
-    l = scanner_.get();
-    while (*scanner_.get() != SEPARATOR && *scanner_.get() != ENDOF) {
+    l = GL();
+    while (*GL() != SEPARATOR && *GL() != ENDOF) {
         exp = NULL;
         if (*l == COMMA) {
-            scanner_.nextLex();
-            l = scanner_.get();
+            NL();
         }
-        if (*l == MULT) {
+        if (*GL() == MULT) {
             parseComplexDeclaration();
-            l = scanner_.get();
             continue;
             //complex statment
         }
-        if (*l != IDENTIFICATOR) {
+        if (*GL() != IDENTIFICATOR) {
             throw parser_exception("Expected identificator", scanner_.getLine(), scanner_.getCol());
         }
         string name = l->getValue();
-        scanner_.nextLex();
-        if(*scanner_.get() == BRACKET_FRONT) {
+        NL();
+        if(*GL() == BRACKET_FRONT) {
             parseArrayDeclaration(type, name, isConst);
-            if (scanner_.get()->getValue() != string("; "))
+            if (GL()->getValue() != string("; "))
                 break;
             //l = scanner_.get();
             //scanner_.nextLex();
             //exp = parseExp(priorityTable[COMMA] + 1);
             continue;
         }
-        if (*scanner_.get() != ASSIGN && isConst) {
+        if (*GL() != ASSIGN && isConst) {
             throw parser_exception("Default initialization of an object of const type", scanner_.getLine(), scanner_.getCol());
         }
-        if (*scanner_.get() == ASSIGN) {
-            scanner_.nextLex();
+        if (*GL() == ASSIGN) {
+            NL();
             exp = parseExp(priorityTable[COMMA] + 1);
             if (exp == NULL) {
                 throw parser_exception("Expected var assign expression", scanner_.getLine(), scanner_.getCol());
@@ -231,12 +231,12 @@ void Parser::parseDeclaration()
         if (!symStack.top()->add(new SymVar(l->getValue(), type, exp, isConst))) {
             throw parser_exception("Redefinition variable \"" + l->getValue() + "\"", scanner_.getLine(), scanner_.getCol());
         }
-        l = scanner_.get();
-        if (*l != COMMA && *l != SEPARATOR && *l != ENDOF) {
+
+        if (*GL()!= COMMA && *GL() != SEPARATOR && *GL() != ENDOF) {
             throw parser_exception("Expected comma", scanner_.getLine(), scanner_.getCol());
         }
     }
-    if (scanner_.get()->getValue() != string("; ")) {
+    if (*GL() != SEMICOLON) {
         throw parser_exception("Expected ';' after end of declaration", scanner_.getLine(), scanner_.getCol());
     }
 }
@@ -260,9 +260,9 @@ void Parser::parseFunction(const bool withBlock)
 
 void Parser::parse()
 {
-    while (*scanner_.get() != ENDOF) {
+    while (*GL() != ENDOF) {
         parseDeclaration();
-        scanner_.nextLex();
+        NL();
     }
 
 }
@@ -272,7 +272,7 @@ Node* Parser::parseFactor(int priority)
 {
 	Node* root = NULL;
     bool needNext = true;
-	Lexeme* lex = scanner_.get();
+	Lexeme* lex = GL();
 	if (*lex == ENDOF)
 	{
 		return root;
@@ -305,7 +305,7 @@ Node* Parser::parseFactor(int priority)
 				opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
 				if (!opLex || opLex->getOpType() != PARENTHESIS_BACK)
 					throw parser_exception("Expected close parenthesis", scanner_.getLine(), scanner_.getCol());
-                scanner_.nextLex();
+                NL();
 			} 
 			else if (rwType == T_SIZEOF)
 			{
@@ -321,9 +321,9 @@ Node* Parser::parseFactor(int priority)
             OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
             if (*opLex == PARENTHESIS_FRONT)
             {
-                scanner_.nextLex();
+                NL();
                 root = parseExp();
-                Lexeme* lex = scanner_.get();
+                Lexeme* lex = GL();
                 if(!lex || *lex != PARENTHESIS_BACK)
                 {
                     throw parser_exception ("Expected parenthesis close", false);
@@ -331,7 +331,7 @@ Node* Parser::parseFactor(int priority)
             }
             else if (unaryOps[opLex->getOpType()]) 
             {
-                scanner_.nextLex();
+                NL();
                 root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
                 needNext = false;
             }
@@ -342,7 +342,7 @@ Node* Parser::parseFactor(int priority)
             }
             else if (*opLex == BRACKET_FRONT)
             {
-                scanner_.nextLex();
+                NL();
                 root = parseExp();
                 needNext = false;
             }
@@ -356,29 +356,29 @@ Node* Parser::parseFactor(int priority)
             break;
     }
     if (needNext) {
-        scanner_.nextLex();
+        NL();
     }
 	return root;
 }
 
 void Parser::parseArrayDeclaration(SymType *type, string name, bool isConst)
 {
-    scanner_.nextLex();
+    NL();
     Node *size = NULL, *value = NULL;
-    if (*scanner_.get() != BRACKET_BACK) {
+    if (*GL() != BRACKET_BACK) {
          size = parseExp();
     } else {
         size = NULL;
     }
-    if (*scanner_.get() != BRACKET_BACK) {
+    if (*GL() != BRACKET_BACK) {
         throw parser_exception ("Expected bracket back after array count", scanner_.getLine(), scanner_.getCol());
     }
-    scanner_.next();
-    if (*scanner_.get() == ASSIGN) {
-        scanner_.nextLex();
-        scanner_.nextLex();
+    NL();
+    if (*GL() == ASSIGN) {
+        NL();
+        NL();
         value = parseExp();
-    } else if (*scanner_.get() == SEPARATOR) {
+    } else if (*GL() == SEPARATOR) {
         if (isConst) {
             throw parser_exception ("Default initialization of an object of const type ", scanner_.getLine(), scanner_.getCol());
         };
@@ -432,12 +432,12 @@ Node* Parser::parseFuncCall(Node* root)
 Node* Parser::parseArrIndex(Node* root)
 {
 	Node* r = NULL;
-	if (*scanner_.get() == BRACKET_FRONT)
+	if (*GL() == BRACKET_FRONT)
 		{
             r = (root == NULL) ? new ArrNode(NULL, root) : new ArrNode(root->lexeme_, root);
-            scanner_.next();
+            NL();
             dynamic_cast<ArrNode*>(r)->addArg(parseExp());
-            if (*scanner_.get() != BRACKET_BACK)
+            if (*GL() != BRACKET_BACK)
                 throw parser_exception("Expected bracket close after array index", scanner_.getCol(), scanner_.getLine());
         }
 	return r;
