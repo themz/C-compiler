@@ -35,7 +35,12 @@ string IntegerLexeme::getValue()
 	char * info = (char*) malloc(sizeof(char) * 100);
 	sprintf(info, "%d", intValue_);
 	return string(info);
-} 
+}
+
+int IntegerLexeme::getIntValue()
+{
+    return intValue_;
+}
 
 
 string FloatLexeme::getInfo()

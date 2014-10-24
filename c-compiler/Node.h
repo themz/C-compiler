@@ -1,7 +1,13 @@
 #pragma once
 #include "Lexeme.h"
 
-class Node
+class SynNode
+{
+protected:
+public:
+};
+
+class Node : public SynNode
 {
 protected:
 	Lexeme* lexeme_;
@@ -103,10 +109,15 @@ public:
 	void print(int deep) const;
 };
 
-class ArrNode : public FunctionalNode
+class ArrNode : public Node
 {
+private:
+    Node* name;
+    mutable vector<Node*> args;
 public:
-	ArrNode(Lexeme* t, Node* arr): FunctionalNode(t, arr) {}
+    void printArgs(int deep) const;
+    ArrNode(Lexeme* t, Node* arr): Node(t),name(arr), args(0){};
+    void addArg(Node* arg);
 	void print(int deep) const;
 	bool isModifiableLvalue() const;
 	bool isLvalue() const { return true; }

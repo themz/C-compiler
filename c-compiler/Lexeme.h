@@ -16,6 +16,7 @@ typedef enum
 	STRING,
 	START,
 	ENDOF,
+    EMPTY
 } LexemType;
 
 typedef enum {
@@ -119,6 +120,7 @@ private:
 public:
 	string getInfo();
 	string getValue();
+    int getIntValue();
 	IntegerLexeme(IntegerLexeme &l): Lexeme(l.line,l.col,l.stringValue,l.type), intValue_(l.intValue_){};
 	IntegerLexeme(int line, int col, const string& strVal, LexemType type, int intValue) : Lexeme(line,col,strVal,type), intValue_(intValue){};
 };

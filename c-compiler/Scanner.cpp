@@ -117,8 +117,8 @@ Lexeme* Scanner::getWordLexeme()
 }
 
 Lexeme* Scanner::getIntegerLexeme()
-{	
-	int val = 0;
+{
+    int val = 0;
 	try {
 		val = stoi(buffer_,nullptr,0);			
 	} catch (out_of_range&) {
@@ -749,6 +749,7 @@ bool Scanner::next()
 
 void Scanner::nextLex()
 {
+    buffer_.clear();
     if (!next()) {
         curLexem_ = new EofLexeme(getLine(), getCol(),"EOF", ENDOF);
     }

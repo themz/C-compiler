@@ -96,10 +96,25 @@ void FuncCallNode::print(int offset) const
 
 void ArrNode::print(int offset) const 
 {
-	name->print(offset);
+    name->print(offset);
 	cout << string(offset * N, ' ') << "[" << endl;
 	printArgs(offset);
 	cout << string(offset * N, ' ') << "]" << endl;
+}
+
+void ArrNode::printArgs(int deep) const
+{
+    for (int i = 0; i < (int)args.size(); i++)
+    {
+        args[i]->print(deep + 1);
+        if (i < (int)args.size() - 1)
+            cout << string(deep * N, ' ') << ',' << endl;
+    }
+}
+void ArrNode::addArg(Node *arg)
+{
+    if(arg != NULL)
+        args.push_back(arg);
 }
 
 void TypecastNode::print(int offset) const

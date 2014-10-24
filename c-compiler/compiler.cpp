@@ -2,32 +2,36 @@
 #include "Parser.h"
 #include <stdio.h>
 
+
+
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-	string copyRight = "C-compilator v.0.4 developed by Zinov Mikhail 2014";
-	
-	bool debug = false;
+    string readme = "c-compiler {/s | /ex | /p | /go} file.in \n"
+                    "\t/s\tLexical analysis & print lexems\n"
+                    "\t/ex\tExpression parser & print expression tree \n"
+                    "\t/p\tParse file and print symbols table\n"
+                    "\tfile.in\tSource filename witn .in\n";
+    string copyRight = "C-compiler v.0.61 developed by Zinov Mikhail 2014";
+	bool debug = true;
 	try{
 		if (!debug)
 		{		
 			if (argc > 1)
 			{
-				if (string(argv[1]) == string("/S"))
+                string filename = argv[2];
+                freopen((filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
+                Scanner scanner(filename);
+                if (string(argv[1]) == string("/s"))
 				{
-					Scanner scanner(argv[2]);
-                    freopen((scanner.getFileName().substr(0, scanner.getFileName().length() - 3)+(string)".out").c_str(), "w", stdout);
-						while (scanner.next())
-						{
-							scanner.get()->print();
-						}				
+                    while (scanner.next())
+                    {
+                        scanner.get()->print();
+                    }				
 				}
-				else if (string(argv[1]) == string("/PS"))
+				else if (string(argv[1]) == string("/px"))
 				{
-                    string filename = argv[2];
-					freopen((filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
-                    Scanner scanner(filename);
                     Parser p(scanner);
                     Node* r = p.parseExp();
 					if (r)
@@ -35,39 +39,55 @@ int main(int argc, char* argv[])
 						r->print();
 					}
 				}
+                else if (string(argv[1]) == string("/p"))
+                {
+                    Parser papser(scanner);
+                    papser.parse();
+                    papser.printTable();
+                }
 				else
 				{
-					cout << copyRight << endl;				
+					cout << "Expected /s or /px or /p" << endl;
 				}
 			}
 			else
 			{
-	 			cout << copyRight << endl;
+	 			cout << readme << endl << copyRight << endl;
 			}
 		}
 		else
 		{
-            bool tpars = false;
-			if (tpars)
-			{					
-				string filename = "0.in";
-                //freopen("0.out", "w", stdout);
-                Scanner scanner(filename);
-				Node* r =  Parser(scanner).parseExp();
-				if (r)
-				{
-					r->print();
-				}
-			}
-			else
-			{			
-				Scanner scanner("0.in");
-				//sfreopen("0.out", "w", stdout);
-				while (scanner.next())
-				{
-					scanner.get()->print();
-				}			
-			}		
+            string filename = "0.in";
+            Scanner scanner(filename);
+            //freopen("0.out", "w", stdout);
+            switch (3) {
+                case 1:
+                {
+                    Node* r =  Parser(scanner).parseExp();
+                    if (r)
+                    {
+                        r->print();
+                    }
+                    break;
+                }
+                case 2:
+                {
+                    while (scanner.next())
+                    {
+                        scanner.get()->print();
+                    }
+                    break;
+                }
+                case 3:
+                {
+                    Parser papser(scanner);
+                    papser.parse();
+                    papser.printTable();
+                    break;
+                }
+                default:
+                    break;
+            }
 		}
 	}
 	catch(compiler_exception& exc)
