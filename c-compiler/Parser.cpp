@@ -365,7 +365,11 @@ void Parser::parseFunctions(SymType *type, string name)
         if (varType == NULL) {
             exception("Expected var type");
         }
-        if (*GL() != IDENTIFICATOR) {
+        if (*GL() == COMMA || *GL() == PARENTHESIS_BACK) {
+            args->add(new SymVar("", varType, exp, isConstVar));
+            NL();
+            continue;
+        } else if (*GL() != IDENTIFICATOR) {
             exception("Expected identificator");
         }
         string name = GL()->getValue();

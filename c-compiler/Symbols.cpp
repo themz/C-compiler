@@ -5,7 +5,7 @@
 
 bool SymTable::add(Symbol *symbol)
 {
-    if (find(symbol->getName()) != NULL) {
+    if (find(symbol->getName()) != NULL && symbol->getName() != "") {
         return false;
     }
     table.push_back(symbol);

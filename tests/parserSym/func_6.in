@@ -1,0 +1,5 @@
+int func1(int, float);
+int func2(int a, float b);
+int func3(const int a, float b);
+int func4(const float a = 8);
+int func5(const float a = 8, const float b = ((1 + 2 + 3)));
