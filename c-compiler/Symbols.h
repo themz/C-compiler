@@ -5,6 +5,7 @@
 #include "Statement.h"
 
 class Node;
+class SymTable;
 
 enum{
     Variable,
@@ -23,10 +24,52 @@ private:
 public:
     Symbol(const string &name = ""): name(name){};
     string getName(){return name;};
-    virtual void print(){};
+    virtual void print(int deep = 0){};
     virtual bool isType(){return false;};
     virtual bool isVar(){return false;};
+    virtual bool isStruct(){return false;};
     virtual bool isFunc(){return false;};
+};
+
+//-------------SymTable--------------//
+
+class SymTable
+{
+private:
+    vector<Symbol *> table;
+    int size;
+    int shift;
+    bool hType = false, hVar = false, hFunc = false;
+public:
+    SymTable(): table(), size(0), shift(0){};
+    friend class Parser;
+    bool add(Symbol *symbol);
+    bool hasType(){return hType;};
+    bool hasVar(){return hVar;};
+    bool hasFunc(){return hFunc;};
+    void print(int deep = 0);
+    void printTypes(int deep = 0);
+    void printVariables(int deep = 0);
+    void printFunctions(int deep = 0);
+    int getSize(){return size;};
+    Symbol *find(const string &name);
+};
+
+class SymTableStack
+{
+private:
+    vector<SymTable *> tables;
+public:
+    Symbol *find(const string &name);
+    SymTable* top();
+    bool existsInLastNamespace(const string& name);
+    void add(Symbol* s);
+    void print(int deep = 0);
+    void printTypes(int deep = 0);
+    void printVariables(int deep = 0);
+    void printFunctions(int deep = 0);
+    void push(SymTable* table);
+    void pop();
 };
 
 class EmptySymbol : public Symbol
@@ -42,7 +85,7 @@ private:
 public:
     SymType(const string &name = ""): Symbol(name){};
     virtual bool isType(){return true;};
-    void print();
+    void print(int deep = 0);
 };
 
 class SymTypeInt : public SymType
@@ -86,7 +129,12 @@ public:
 class SymTypeStruct : public SymType
 {
 private:
+    SymTable *table;
 public:
+    SymTypeStruct(SymTable *table, const string &name): SymType(name), table(table){};
+    virtual bool isStruct(){return true;};
+    virtual bool isType(){return true;};
+    void print(int deep = 0);
 };
 
 class SymTypeDef : public SymType
@@ -114,10 +162,10 @@ public:
     bool isConst(){return constVar;};
     bool isLocal(){return localVar;};
     virtual bool isVar(){return true;};
-    void print();
+    void print(int deep = 0);
 };
 
-class SymTable;
+
 
 class SymFunc : public Symbol
 {
@@ -126,45 +174,9 @@ private:
     SymTable *args;
     StmtBlock *body;
 public:
+    SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):Symbol(name), retType(retType), args(args), body(body){};
     virtual bool isFunc(){return true;};
-    void print();
+    void print(int deep = 0);
+    int getArgCount(){return args->getSize();};
 };
-
-//-------------SymTable--------------//
-
-class SymTable
-{
-private:
-    vector<Symbol *> table;
-    int size;
-    int shift;
-public:
-    friend class Parser;
-    bool add(Symbol *symbol);
-    void print();
-    void printTypes();
-    void printVariables();
-    void printFunctions();
-    Symbol *find(const string &name);
-};
-
-class SymTableStack
-{
-private:
-        vector<SymTable *> tables;
-public:
-    Symbol *find(const string &name);
-    SymTable* top();
-    bool existsInLastNamespace(const string& name);
-    void add(Symbol* s);
-    void print();
-    void printTypes();
-    void printVariables();
-    void printFunctions();
-    void push(SymTable* table);
-    void pop();
-};
-
-
-
 

@@ -10,7 +10,6 @@ private:
 	map<OperationType, bool> unaryOps;
 	map<OperationType, bool> rightAssocOps;
 	Scanner scanner_;
-	Node *parseTerm(int priority = 0);
 	Node *parseFactor(int priority = 0);
 	Node *parseArrIndex(Node*);
 	Node *parseFuncCall(Node*);
@@ -20,11 +19,13 @@ public:
     void parseDeclaration();
     void parseFunction(const bool withBlock);
     void parseArrayDeclaration(SymType *type, string name,bool isConst);
+    void parseFunctions(SymType *type, string name);
+    void exception(string msg);
     void parseComplexDeclaration();
+    void parseStruct();
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType();
-    
 	void parse();
 	Parser(Scanner &scanner);
-    void printTable();
+    void printTable(int deep = 0);
 };
