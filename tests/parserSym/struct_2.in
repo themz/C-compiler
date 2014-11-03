@@ -1,0 +1,6 @@
+struct str_name
+{
+    int num1;
+    int num2;
+    float num3 = 2 + 1;
+};

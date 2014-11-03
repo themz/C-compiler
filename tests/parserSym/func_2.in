@@ -1,0 +1,1 @@
+int foo(int a, float b = 1, const int s = 6);
