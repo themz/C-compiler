@@ -84,6 +84,7 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     st->add(new SymTypeInt());
     st->add(new SymTypeChar());
     st->add(new SymTypeFloat());
+    //st->add(new SymTypeVoid());
     symStack.push(st);
 }
 
@@ -167,9 +168,9 @@ SymType* Parser::parseType()
         //parseStruct()
     }
     SymType* type = (SymType*)symStack.find(GL()->getValue());
-    if (*GL() == T_VOID) {
-        type = new SymTypeVoid();
-    }
+//    if (*GL() == T_VOID) {
+//        type = new SymTypeVoid();
+//    }
     if (type == NULL) {
         exception("Undefine type");
     }
@@ -177,9 +178,7 @@ SymType* Parser::parseType()
     return type;
 }
 
-
-
-void Parser::parseDeclaration()
+void Parser::parseDeclaration(bool inFuncDef)
 {
     Node* exp = NULL;
     bool isConst = false;
@@ -192,31 +191,41 @@ void Parser::parseDeclaration()
         parseStruct();
         return;
     }
-    SymType* type = parseType();
+    if (*GL() == T_TYPEDEF) {
+        parseTypedef();
+        return;
+    }
+    SymType *fistType = parseType(), *type = NULL;
     while (*GL() != SEPARATOR && *GL() != ENDOF) {
         exp = NULL;
-        if (*GL() == COMMA) {
+        if (*GL() == COMMA && !inFuncDef) {
             NL();
         }
-        if (*GL() == MULT) {
-            parseComplexDeclaration();
-            continue;
-            //complex statment
-        }
-        if (*GL() != IDENTIFICATOR) {
+        type = parseComplexDeclaration(fistType);
+        if(inFuncDef && (*GL() == COMMA || *GL() == PARENTHESIS_BACK)) {
+            name = "";
+        }else if(inFuncDef && *GL() == BRACKET_FRONT){
+            symStack.top()->add(parseArrayDeclaration(type, name, isConst));
+            return;
+        }else if (*GL() == IDENTIFICATOR) {
+            name = GL()->getValue();
+            NL();
+        } else{
             exception("Expected identificator");
         }
-        name = GL()->getValue();
-        NL();
+        if (type->isPointer() && *GL() == COMMA && inFuncDef){
+            addSym(new SymVar(name, type, exp, isConst));
+            return;
+        }
         if(*GL() == BRACKET_FRONT) {
-            parseArrayDeclaration(type, name, isConst);
+            addSym(parseArrayDeclaration(type, name, isConst));
             NL();
             continue;
         } else if(*GL() == PARENTHESIS_FRONT) {
             parseFunctions(type, name);
             return;
         }
-        if (*GL() != ASSIGN && isConst) {
+        if (*GL() != ASSIGN && isConst && !inFuncDef) {
             exception("Default initialization of an object of const type");
         }
         if (*GL() == ASSIGN) {
@@ -226,11 +235,13 @@ void Parser::parseDeclaration()
                 exception("Expected var assign expression");
             }
         }
-        else if(isConst){
-            exception("Default initialization of an object of const type 'const" + type->getName() +"'");
+        else if(isConst && !inFuncDef){
+            exception("Default initialization of an object of const type 'const " + type->getName() +"'");
         }
-        if (!symStack.top()->add(new SymVar(name, type, exp, isConst))) {
-            exception("Redefinition variable \"" + name + "\"");
+        addSym(new SymVar(name, type, exp, isConst));
+        if (inFuncDef) {
+            NL();
+            return;
         }
         if (*GL()!= COMMA && *GL() != SEPARATOR && *GL() != ENDOF) {
             exception("Expected comma");
@@ -238,6 +249,12 @@ void Parser::parseDeclaration()
     }
     if (*GL() != SEMICOLON && *GL() != ENDOF) {
         exception("Expected ';' after end of declaration");
+    }
+}
+
+void Parser::addSym(Symbol *symbol){
+    if (!symStack.top()->add(symbol)) {
+        exception("Redefinition variable \"" + symbol->getName() + "\"");
     }
 }
 
@@ -348,88 +365,82 @@ Node* Parser::parseFactor(int priority)
 void Parser::parseFunctions(SymType *type, string name)
 {
     NL();
-    SymType *varType;
-    Node *exp;
-    bool defArg = false;
-    bool isConstVar = false;
-    SymTable *args = new SymTable();
-    while(*GL() != SEPARATOR && *GL() != ENDOF && *GL() != PARENTHESIS_BACK)
+    symStack.push(new SymTable());
+    while(*GL() != SEMICOLON && *GL() != PARENTHESIS_BACK && *GL() != ENDOF)
     {
-        isConstVar = false;
-        if (*GL() == T_CONST) {
-            isConstVar = true;
-            NL();
-        }
-        exp = NULL;
-        varType = parseType();
-        if (varType == NULL) {
-            exception("Expected var type");
-        }
-        if (*GL() == COMMA || *GL() == PARENTHESIS_BACK) {
-            args->add(new SymVar("", varType, exp, isConstVar));
-            NL();
-            continue;
-        } else if (*GL() != IDENTIFICATOR) {
-            exception("Expected identificator");
-        }
-        string name = GL()->getValue();
+        parseDeclaration(true);
         NL();
-        if (*GL() == ASSIGN) {
-            defArg = true;
-            NL();
-            exp = parseExp(priorityTable[COMMA] + 1);
-            NL();
-        } else if(defArg){
-            exception("Missing default argument on parameter \"" + name + "\"");
-        } else if(*GL() == COMMA){
-            NL();
-        }
-        args->add(new SymVar(name, varType, exp, isConstVar));
     }
     if(*GL() == BRACES_BACK){
         NL();
         NL();
         //parser block
     }
-    if (!symStack.top()->add(new SymFunc(name, type, args, NULL))) {
+    SymTable *tt = symStack.top();
+    symStack.pop();
+    if (!symStack.top()->add(new SymFunc(name, type, tt, NULL))) {
         exception("Redefinition function  \"" + name + "\"");
     }
 }
 
-void Parser::parseArrayDeclaration(SymType *type, string name, bool isConst)
+SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, bool inFuncDef)
 {
-    NL();
-    Node *size = NULL, *value = NULL;
-    if (*GL() != BRACKET_BACK) {
-         size = parseExp();
-    } else {
-        size = NULL;
+    vector<Node *> sizes;
+    SymType *arrType = new SymTypeArray(NULL, type);
+    Node *value = NULL;
+    while (*GL() == BRACKET_FRONT) {
+        NL();
+        if (*GL() == BRACKET_BACK) {
+            NL();
+            break;
+        }
+        sizes.push_back(parseExp());
+        if (*GL() != BRACKET_BACK) {
+            exception("Expected bracket back after array count");
+        }
+        NL();
     }
-    if (*GL() != BRACKET_BACK) {
-        exception("Expected bracket back after array count");
-    }
-    NL();
+    for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
+        if (i == (int)sizes.size() - 1) {
+            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
+        } else
+            arrType = new SymTypeArray(sizes[i], arrType);
+    };
     if (*GL() == ASSIGN) {
         NL();
         NL();
         value = parseExp();
+        NL();
     } else if (*GL() == SEPARATOR) {
         if (isConst) {
             exception("Default initialization of an object of const type ");
-        };
+        } else if(sizes.size() == 0) {
+            exception("Definition of variable with array type needs an explicit size or an initializer");
+        }
+        
     } else if(*GL() == COMMA){
         //
+    } else if(*GL() == PARENTHESIS_BACK){
+        //NL();
     } else {
         exception("Expected assign or separator");
     }
-    symStack.top()->add(new SymVar(name, new SymTypeArray(size, type),value, isConst));
+    return new SymVar(name, arrType ,value, isConst);
 }
 
 void Parser::parseStruct()
 {
     NL();
-    string name = GL()->getValue();
-    NL();
+    string name;
+    if (*GL() == IDENTIFICATOR) {
+        name = GL()->getValue();
+        NL();
+    } else if (*GL() == BRACES_FRONT)
+    {
+        name = "";
+    } else {
+        exception("Expected identificator or unname struct");
+    }
     NL();
     symStack.push(new SymTable());
     while (*GL() != BRACES_BACK) {
@@ -442,20 +453,34 @@ void Parser::parseStruct()
         exception("Redefinition Struct \"" + name + "\"");
     }
 
+    
 }
 
-void Parser::parseComplexDeclaration()
+void Parser::parseTypedef()
 {
-    Lexeme *l = scanner_.get();
-    while (*l != SEPARATOR && *l != COMMA) {
-        scanner_.nextLex();
-        l = scanner_.get();
-        if (*l == ENDOF) {
-            exception("Expected bracket back after array count");
-        }
-        
+    SymType* type = NULL;
+    NL();
+    if (*GL() == T_STRUCT) {
+        parseStruct();
+        type = (SymType*)symStack.top()->top();
+        NL();
+    } else {
+        type = parseType();
     }
+    string name = GL()->getValue();
+    symStack.add(new SymTypeDef(type, name));
 }
+
+SymType *Parser::parseComplexDeclaration(SymType *type)
+{
+    while (*GL() == MULT) {
+        type = new SymTypePointer(type);
+        NL();
+    };
+    return type;
+}
+
+
 
 Node* Parser::parseFuncCall(Node* root)
 {

@@ -16,16 +16,18 @@ private:
     SymTableStack symStack;
 public:
 	Node *parseExp(int priority = 0);
-    void parseDeclaration();
+    void parseDeclaration(bool inFuncDef = false);
     void parseFunction(const bool withBlock);
-    void parseArrayDeclaration(SymType *type, string name,bool isConst);
+    SymVar *parseArrayDeclaration(SymType *type, string name,bool isConst, bool inFuncDef = false);
     void parseFunctions(SymType *type, string name);
-    void exception(string msg);
-    void parseComplexDeclaration();
+    SymType *parseComplexDeclaration(SymType *type);
     void parseStruct();
+    void parseTypedef();
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType();
 	void parse();
+    void addSym(Symbol *symbol);
 	Parser(Scanner &scanner);
     void printTable(int deep = 0);
+    void exception(string msg);
 };

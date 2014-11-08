@@ -1,11 +1,14 @@
 #include "Symbols.h"
+#include "exception.h"
 
 #define N 2
 //--------------------------------SymTable--------------------------------//
 
 bool SymTable::add(Symbol *symbol)
 {
-    if (find(symbol->getName()) != NULL && symbol->getName() != "") {
+    Symbol *s = find(symbol->getName());
+    if ( s != NULL && symbol->getName() != "" && ((s->isStruct() && symbol->isVar())
+                                                  || (s->isVar() && symbol->isStruct()))) {
         return false;
     }
     table.push_back(symbol);
@@ -16,7 +19,7 @@ bool SymTable::add(Symbol *symbol)
     return true;
 }
 
-Symbol* SymTable::find(const string &name)
+Symbol *SymTable::find(const string &name)
 {
     for (Symbol* s : table) {
         if (s->getName() == name) {
@@ -26,6 +29,11 @@ Symbol* SymTable::find(const string &name)
     }
     return NULL;
 };
+
+Symbol *SymTable::top()
+{
+    return table.size() > 0 ? table.back() : NULL;
+}
 
 void SymTable::printTypes(int deep)
 {
@@ -58,15 +66,15 @@ void SymTable::print(int deep)
 {
     string tab = string(deep, '-');
     if (hasType()) {
-        cout << std::endl << tab << "TYPES:\n";
+        cout << endl << tab << "TYPES:\n";
         printTypes(deep + N);
     }
     if (hasVar()) {
-        cout << std::endl << tab << "VARIABLES:\n";
+        cout << endl << tab << "VARIABLES:\n";
         printVariables(deep + N);
     }
     if (hasFunc()) {
-        cout << std::endl << tab << "FUNCTIONS:";
+        cout << endl << tab << "FUNCTIONS:";
         printFunctions(deep + N);
     }
 }
@@ -92,7 +100,9 @@ SymTable* SymTableStack::top()
 
 void SymTableStack::add(Symbol* s)
 {
-    top()->add(s);
+    if (!top()->add(s)) {
+        throw parser_exception("Redefinition type " + s->getName(), false);
+    }
 }
 
 Symbol* SymTableStack::find(const string &name)
@@ -114,11 +124,11 @@ void SymTableStack::print(int deep)
         printTypes(deep + N);
     }
     if (top()->hasVar()) {
-        cout << std::endl << tab << "VARIABLES:\n";
+        cout << endl << tab << "VARIABLES:\n";
         printVariables(deep + N);
     }
     if (top()->hasFunc()) {
-        cout << std::endl << tab << "FUNCTIONS:";
+        cout << endl << tab << "FUNCTIONS:";
         printFunctions(deep + N);
     }
 }
@@ -150,24 +160,45 @@ void SymTableStack::printFunctions(int deep)
 
 void SymType::print(int deep)
 {
-    std::cout << string(deep, ' ') << "type with name " << getName() << std::endl;
+    cout << string(deep, ' ') << getName() ;
 }
 
 
 void SymVar::print(int deep)
 {
-    std::cout << string(deep, ' ');
+    cout << string(deep, ' ');
     if (isConst()) {
-        std::cout << "const ";
+        cout << "const ";
     }
-    std::cout << "variable \"" << getName() <<"\" with type \"" << type->getName() << "\"";
+    cout << "variable \"" << getName() <<"\" with type ";
+    type->print(deep);
     if (exp != NULL) {
-        std::cout << " and values: "<< std::endl;
+        cout << " and values: "<< endl;
         exp->print();
     } else {
-        std::cout << " not initialized" << std::endl;
+        cout << " not initialized" << endl;
     }
     
+}
+
+void SymTypeArray::print(int deep)
+{
+    cout << "array [\n" ;
+    if(size != NULL) {
+        size->print();
+    } else {
+        cout << 0 << endl;
+    }
+    cout << "] of ";
+    if (type != NULL) {
+        type->print();
+    }
+}
+
+void SymTypePointer::print(int deep)
+{
+    cout << "pointer to ";
+    type->print(deep);
 }
 
 void SymTypeStruct::print(int deep)
@@ -178,13 +209,20 @@ void SymTypeStruct::print(int deep)
 
 void SymFunc::print(int deep)
 {
-    std::cout << "\nfunction return type \"" << retType->getName() << "\" with name "
-    << getName();
+    cout << "\nfunction return type \"" << retType->getName() << "\" with name "
+              << getName();
     if (args->getSize() > 0) {
-        std::cout << " and args: "<< std::endl;
+        cout << " and args: "<< endl;
     args->printVariables(deep + N);
-    //std::cout << endl;
+    //cout << endl;
     };
+}
+
+void SymTypeDef::print(int deep)
+{
+    cout << string(deep, ' ') << "typedef for ";
+    type->print();
+    cout << string(deep, ' ') <<  " defname \"" << getName() << "\"" << endl;
 }
 
 

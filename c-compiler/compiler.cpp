@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
                     "\t/ex\tExpression parser & print expression tree \n"
                     "\t/p\tParse file and print symbols table\n"
                     "\tfile.in\tSource filename witn .in\n";
-    string copyRight = "C-compiler v.0.61 developed by Zinov Mikhail 2014";
-	bool debug = true;
+    string copyRight = "C-compiler v.0.62 developed by Zinov Mikhail 2014";
+	bool debug = false;
 	try{
 		if (!debug)
 		{		

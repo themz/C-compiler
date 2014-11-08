@@ -29,6 +29,7 @@ public:
     virtual bool isVar(){return false;};
     virtual bool isStruct(){return false;};
     virtual bool isFunc(){return false;};
+    virtual bool isPointer(){return false;};
 };
 
 //-------------SymTable--------------//
@@ -52,6 +53,7 @@ public:
     void printVariables(int deep = 0);
     void printFunctions(int deep = 0);
     int getSize(){return size;};
+    Symbol *top();
     Symbol *find(const string &name);
 };
 
@@ -123,6 +125,8 @@ private:
     SymType *type;
 public:
     SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
+    void print(int deep = 0);
+    void setSize(Node *newSize){size = newSize;};
     //size_t getSize(){return size;};
 };
 
@@ -140,13 +144,20 @@ public:
 class SymTypeDef : public SymType
 {
 private:
+    SymType *type;
 public:
+    SymTypeDef(SymType *type, const string &name): SymType (name), type(type){};
+    void print(int deep = 0);
 };
 
 class SymTypePointer : public SymType
 {
 private:
+    SymType *type;
 public:
+    SymTypePointer(SymType *type, const string &name = ""): SymType(name), type(type){};
+    void print(int deep = 0);
+    virtual bool isPointer(){return true;};
 };
 
 class SymVar : public Symbol
@@ -164,8 +175,6 @@ public:
     virtual bool isVar(){return true;};
     void print(int deep = 0);
 };
-
-
 
 class SymFunc : public Symbol
 {
