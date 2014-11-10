@@ -7,7 +7,7 @@
 bool SymTable::add(Symbol *symbol)
 {
     Symbol *s = find(symbol->getName());
-    if ( s != NULL && symbol->getName() != "") {
+    if (s != NULL) {
         return false;
     }
     table.push_back(symbol);
@@ -170,7 +170,10 @@ void SymVar::print(int deep)
     if (isConst()) {
         cout << " const ";
     }
-    cout << " " << getName() << " ";
+    if (getName()[0] != '#') {
+        cout << " " << getName();
+    }
+    cout << " ";
     type->print();
     if (exp != NULL) {
         cout << " = ";
