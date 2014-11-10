@@ -21,6 +21,8 @@ private:
 	Node *parseArrIndex(Node*);
 	Node *parseFuncCall(Node*);
     SymTableStack symStack;
+    int unnameCount = 0;
+    bool defStruct = false;
 public:
 	Node *parseExp(int priority = 0);
     void parseDeclaration(const parserState state = PARSE_DEFENITION);
@@ -30,11 +32,11 @@ public:
     void parseFunctionDeclaration(SymType *type, string name);
     SymTable *parseFunctionsParams();
     SymType *parseComplexDeclaration(SymType *type);
-    void parseStruct();
+    string parseStruct();
     void parseTypedef();
     string parseName(const parserState state = PARSE_DEFENITION);
     SymTable *parseFuncArg(const bool dec = true);
-    SymType *parseType();
+    SymType *parseType(bool isConst = false);
 	void parse();
     void addSym(Symbol *symbol);
 	Parser(Scanner &scanner);

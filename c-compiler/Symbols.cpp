@@ -66,15 +66,15 @@ void SymTable::print(int deep)
 {
     string tab = string(deep, ' ');
     if (hasType()) {
-        cout << endl << tab << "+----Types--+" << endl << endl;
+        cout << endl << tab << "+----Types--+" << endl;
         printTypes(deep + N);
     }
     if (hasVar()) {
-        cout << endl << tab << "+----Variables----+" << endl << endl;
+        cout << endl << tab << "+----Variables----+" << endl;
         printVariables(deep + N);
     }
     if (hasFunc()) {
-        cout << endl << tab << "+----Functions----+" << endl << endl;
+        cout << endl << tab << "+----Functions----+" << endl;
         printFunctions(deep + N);
     }
 }
@@ -120,11 +120,11 @@ void SymTableStack::print(int deep)
 {
     string tab = string(deep, ' ');
     if (top()->hasType()) {
-        cout << tab << "+----Types----+" << endl << endl;
+        cout << tab << "+----Types----+" << endl;
         printTypes(deep + N);
     }
     if (top()->hasVar()) {
-        cout << tab << endl << "+----Variables----+" << endl << endl;
+        cout << tab << endl << "+----Variables----+" << endl;
         printVariables(deep + N);
     }
     if (top()->hasFunc()) {
@@ -176,9 +176,9 @@ void SymVar::print(int deep)
     cout << " ";
     type->print();
     if (exp != NULL) {
-        cout << " = ";
-        exp->print(0, false);
-        cout << endl;
+        cout << string(deep, ' ') <<  " = { ";
+        exp->print(deep, false);
+        cout << " }" << endl;
     } else {
         cout << " " << endl;
     }
@@ -206,18 +206,18 @@ void SymTypeStruct::print(int deep)
 {
     cout << string(deep, ' ') <<"struct " << getName() << " :";
     table->print(deep + N);
-    cout << string(deep + N, ' ') << "+-----------------+";
+    //cout << string(deep + N, ' ') << "+-----------------+";
 }
 
 void SymFunc::print(int deep)
 {
-    cout <<  endl << string(deep + 1, ' ')  << retType->getName() << " " << getName()<< "(";
+    cout <<  string(deep + 1, ' ')  << retType->getName() << " " << getName()<< "(";
     if (args->getSize() > 0) {
         cout << endl;
         args->printVariables(deep + N);
         cout << string(deep + 1, ' ') <<  ")" << endl;
     } else {
-        cout << ")";
+        cout << ")" << endl;
     }
 
 }

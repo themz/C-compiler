@@ -8,7 +8,7 @@
 +----Functions----+
 
    int foo(
-      int 
-      float 
-      int 
+     int 
+     float 
+     int 
    )

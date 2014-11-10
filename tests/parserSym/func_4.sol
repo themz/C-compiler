@@ -8,6 +8,6 @@
 +----Functions----+
 
    int main(
-      int 
-      float 
+     int 
+     float 
    )

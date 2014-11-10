@@ -24,6 +24,7 @@ private:
 public:
     Symbol(const string &name = ""): name(name){};
     string getName(){return name;};
+    bool isAnonymousSym(){return name[0] == '#';};
     virtual void print(int deep = 0){};
     virtual bool isType(){return false;};
     virtual bool isVar(){return false;};

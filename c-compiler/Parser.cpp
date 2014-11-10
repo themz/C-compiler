@@ -153,22 +153,21 @@ Node* Parser::parseExp(int priority){
     return root;
 }
 
-SymType* Parser::parseType()
+SymType* Parser::parseType(bool isConst)
 {
+    string typeName = GL()->getValue();
     if (*GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR) {
         exception("Expected type");
     }
     if (*GL() == T_STRUCT) {
-        //parseStruct()
+        typeName = parseStruct();
     }
-    SymType* type = (SymType*)symStack.find(GL()->getValue());
-//    if (*GL() == T_VOID) {
-//        type = new SymTypeVoid();
-//    }
+    SymType* type = (SymType*)symStack.find(typeName);
     if (type == NULL) {
         exception("Undefine type");
     }
-    NL();
+    if(*GL() != IDENTIFICATOR)
+        NL();
     return type;
 }
 
@@ -186,9 +185,15 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
         addSym(new SymVar(name, type, exp, isConst));
     }else if (*GL() == ASSIGN){
         NL();
-        exp = parseExp(priorityTable[COMMA] + 1);
+        if (*GL() == BRACES_FRONT) {
+            NL();
+        }
+        exp = parseExp();
         if (exp == NULL) {
             exception("Expected var assign expression");
+        }
+        if (*GL() == BRACES_BACK) {
+            NL();
         }
         addSym(new SymVar(name, type, exp, isConst));
     }else if(*GL() != ASSIGN && isConst && state == PARSE_DEFENITION){
@@ -199,6 +204,12 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
     if (*GL() == COMMA)
         NL();
 }
+
+struct point {
+    int x, y, z;
+};
+
+struct point ff = {1,2,3}, b, c;
 
 void Parser::parseDeclaration(const parserState state)
 {
@@ -212,11 +223,10 @@ void Parser::parseDeclaration(const parserState state)
         isConst = true;
         NL();
     }
-    if (*GL() == T_STRUCT) {
-        parseStruct();
-        return;
+    SymType *type = parseType(isConst);
+    if (*GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym()) {
+        exception("Anonymous structs must be class members");
     }
-    SymType *type = parseType();
     while (*GL() != SEMICOLON) {
         parseDefinition(type, isConst, state);
     }
@@ -427,21 +437,25 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
 }
 
 
-void Parser::parseStruct()
+string Parser::parseStruct()
 {
     NL();
-    string name = parseName();
+    string structName = parseName(PARSE_STRUCT);
+    if (*GL() == IDENTIFICATOR && (symStack.find(structName) != NULL)) {
+        return structName;
+    }
     NL();
     symStack.push(new SymTable());
     while (*GL() != BRACES_BACK) {
         parseDeclaration();
         NL();
     }
-    SymTypeStruct *ss = new SymTypeStruct(symStack.top(), name);
+    SymTypeStruct *ss = new SymTypeStruct(symStack.top(), structName);
     symStack.pop();
     if (!symStack.top()->add(ss)) {
-        exception("Redefinition Struct \"" + name + "\"");
+        exception("Redefinition Struct \"" + structName + "\"");
     }
+    return structName;
 }
 
 void Parser::parseTypedef()
@@ -474,13 +488,13 @@ string Parser::parseName(const parserState state){
         NL();
         return name;
     } else if ((*GL() == COMMA || *GL() == BRACKET_FRONT || PARENTHESIS_BACK) && state == PARSE_FUNC_ARG_DEF) {
-        return "";
+        return "#unname#" + to_string(unnameCount++);
     } else if (state == PARSE_STRUCT && *GL() == BRACES_FRONT) {
-        
+        return "#unname#" + to_string(unnameCount++);
     }else{
         exception("Expected identificator" + (string)((state == PARSE_FUNC_ARG_DEF) ? "or no name variable" : ""));
     }
-    return "";
+    return "#unname#" + to_string(unnameCount++);
 }
 
 Node* Parser::parseFuncCall(Node* root)

@@ -8,8 +8,8 @@
 +----Functions----+
 
    int func1(
-      int 
-      float 
+     int 
+     float 
    )
 
    int func2(
