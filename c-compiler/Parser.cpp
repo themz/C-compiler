@@ -166,10 +166,11 @@ SymType* Parser::parseType(bool isConst)
     if (type == NULL) {
         exception("Undefine type");
     }
-    if(*GL() != IDENTIFICATOR)
+    if(*GL() != IDENTIFICATOR || type->isTypedef())
         NL();
     return type;
 }
+
 
 void Parser::parseDefinition(SymType *type, bool isConst, const parserState state)
 {
@@ -205,12 +206,6 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
         NL();
 }
 
-struct point {
-    int x, y, z;
-};
-
-struct point ff = {1,2,3}, b, c;
-
 void Parser::parseDeclaration(const parserState state)
 {
     bool isConst = false;
@@ -231,6 +226,7 @@ void Parser::parseDeclaration(const parserState state)
         parseDefinition(type, isConst, state);
     }
 }
+
 
 void Parser::addSym(Symbol *symbol){
     if (!symStack.top()->add(symbol)) {
@@ -460,17 +456,19 @@ string Parser::parseStruct()
 
 void Parser::parseTypedef()
 {
-    SymType* type = NULL;
     NL();
-    if (*GL() == T_STRUCT) {
-        parseStruct();
-        type = (SymType*)symStack.top()->top();
-        NL();
-    } else {
-        type = parseType();
+    SymTable *table = new SymTable();
+    symStack.push(table);
+    parseDeclaration();
+    symStack.pop();
+    for (Symbol* s : table->table) {
+        if (s->isVar()) {
+            symStack.add(new SymTypeDef(s->getType(), s->getName()));
+        } else if (s->isStruct() && s->getName()[0] != '#')
+        {
+            symStack.add(s);
+        }
     }
-    string name = GL()->getValue();
-    symStack.add(new SymTypeDef(type, name));
 }
 
 SymType *Parser::parseComplexDeclaration(SymType *type)
@@ -546,12 +544,4 @@ void Parser::exception(string msg)
 {
     throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
 }
-
-void a(){
-    typedef int eee;
-    typedef const int ttt;
-    typedef const int *** ttt1;
-
-}
-
 

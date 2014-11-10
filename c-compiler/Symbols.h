@@ -16,6 +16,7 @@ enum{
 using namespace std;
 
 //-------------Symbols--------------//
+class SymType;
 
 class Symbol
 {
@@ -31,6 +32,7 @@ public:
     virtual bool isStruct(){return false;};
     virtual bool isFunc(){return false;};
     virtual bool isPointer(){return false;};
+    virtual SymType *getType(){return NULL;};
 };
 
 //-------------SymTable--------------//
@@ -88,6 +90,8 @@ private:
 public:
     SymType(const string &name = ""): Symbol(name){};
     virtual bool isType(){return true;};
+    virtual bool isTypedef(){return false;};
+    virtual SymType *getType(){return NULL;};
     void print(int deep = 0);
 };
 
@@ -128,6 +132,7 @@ public:
     SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
     void print(int deep = 0);
     void setSize(Node *newSize){size = newSize;};
+    virtual SymType *getType(){return type;};
     //size_t getSize(){return size;};
 };
 
@@ -149,6 +154,8 @@ private:
 public:
     SymTypeDef(SymType *type, const string &name): SymType (name), type(type){};
     void print(int deep = 0);
+    virtual SymType *getType(){return type;};
+    virtual bool isTypedef(){return true;};
 };
 
 class SymTypePointer : public SymType
@@ -159,6 +166,7 @@ public:
     SymTypePointer(SymType *type, const string &name = ""): SymType(name), type(type){};
     void print(int deep = 0);
     virtual bool isPointer(){return true;};
+    virtual SymType *getType(){return type;};
 };
 
 class SymVar : public Symbol
@@ -175,6 +183,7 @@ public:
     bool isLocal(){return localVar;};
     virtual bool isVar(){return true;};
     void print(int deep = 0);
+    virtual SymType *getType(){return type;};
 };
 
 class SymFunc : public Symbol

@@ -1,7 +1,7 @@
 #include "Symbols.h"
 #include "exception.h"
 
-#define N 2
+#define N 3
 //--------------------------------SymTable--------------------------------//
 
 bool SymTable::add(Symbol *symbol)
@@ -38,7 +38,7 @@ void SymTable::printTypes(int deep)
 {
     for (Symbol* s : table) {
         if (s->isType()) {
-            s->print(deep + 1);
+            s->print(deep);
             cout << endl;
         }
     }
@@ -66,15 +66,15 @@ void SymTable::print(int deep)
 {
     string tab = string(deep, ' ');
     if (hasType()) {
-        cout << endl << tab << "+----Types--+" << endl;
+        cout << tab << "+----Types--+" << endl;
         printTypes(deep + N);
     }
     if (hasVar()) {
-        cout << endl << tab << "+----Variables----+" << endl;
+        cout << tab << "+----Variables----+" << endl;
         printVariables(deep + N);
     }
     if (hasFunc()) {
-        cout << endl << tab << "+----Functions----+" << endl;
+        cout << tab << "+----Functions----+" << endl;
         printFunctions(deep + N);
     }
 }
@@ -109,7 +109,7 @@ Symbol* SymTableStack::find(const string &name)
 {
     for (SymTable* st : tables) {
         Symbol* s = st->find(name);
-        if (st != NULL) {
+        if (s != NULL) {
             return s;
         };
     }
@@ -124,11 +124,11 @@ void SymTableStack::print(int deep)
         printTypes(deep + N);
     }
     if (top()->hasVar()) {
-        cout << tab << endl << "+----Variables----+" << endl;
+        cout << tab << "+----Variables----+" << endl;
         printVariables(deep + N);
     }
     if (top()->hasFunc()) {
-        cout << tab << endl << "+----Functions----+" << endl;
+        cout << tab << "+----Functions----+" << endl;
         printFunctions(deep + N);
     }
 }
@@ -178,11 +178,9 @@ void SymVar::print(int deep)
     if (exp != NULL) {
         cout << string(deep, ' ') <<  " = { ";
         exp->print(deep, false);
-        cout << " }" << endl;
-    } else {
-        cout << " " << endl;
+        cout << " }";
     }
-    
+    cout << endl;
 }
 
 void SymTypeArray::print(int deep)
@@ -204,31 +202,27 @@ void SymTypePointer::print(int deep)
 
 void SymTypeStruct::print(int deep)
 {
-    cout << string(deep, ' ') <<"struct " << getName() << " :";
-    table->print(deep + N);
+    cout << string(deep, ' ') <<"struct " << getName() << " :" << endl;
+    table->print(deep + N + N);
     //cout << string(deep + N, ' ') << "+-----------------+";
 }
 
 void SymFunc::print(int deep)
 {
-    cout <<  string(deep + 1, ' ')  << retType->getName() << " " << getName()<< "(";
+    cout <<  string(deep, ' ')  << retType->getName() << " " << getName()<< "(";
     if (args->getSize() > 0) {
         cout << endl;
         args->printVariables(deep + N);
-        cout << string(deep + 1, ' ') <<  ")" << endl;
-    } else {
-        cout << ")" << endl;
+        cout << string(deep, ' ');
     }
-
+    cout << ")" << endl;
 }
 
 void SymTypeDef::print(int deep)
 {
-    cout << string(deep, ' ') << "typedef ";
+    cout << string(deep, ' ') << getName() << " ";
     type->print();
-    cout << " " << getName() << endl;
 }
-
 
 
 
