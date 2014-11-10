@@ -202,7 +202,7 @@ void SymTypePointer::print(int deep)
 
 void SymTypeStruct::print(int deep)
 {
-    cout << string(deep, ' ') <<"struct " << getName() << " :" << endl;
+    cout << string(deep, ' ') <<"struct " << getName() << (table->getSize() > 0 ? " :\n" : "");
     table->print(deep + N + N);
     //cout << string(deep + N, ' ') << "+-----------------+";
 }

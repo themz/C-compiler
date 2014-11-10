@@ -14,14 +14,14 @@ int main(int argc, char* argv[])
                     "\t/p\tParse file and print symbols table\n"
                     "\tfile.in\tSource filename witn .in\n";
     string copyRight = "C-compiler v.0.64 developed by Zinov Mikhail 2014";
-    bool debug = 0;
+    bool debug = true;
 	try{
 		if (!debug)
 		{		
 			if (argc > 1)
 			{
                 string filename = argv[2];
-                freopen((filename.substr(0, filename.length() - 3) +(string) ".sol").c_str() , "w", stdout);
+                freopen((filename.substr(0, filename.length() - 3) +(string) ".out").c_str() , "w", stdout);
                 Scanner scanner(filename);
                 if (string(argv[1]) == string("/s"))
 				{

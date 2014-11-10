@@ -153,20 +153,20 @@ Node* Parser::parseExp(int priority){
     return root;
 }
 
-SymType* Parser::parseType(bool isConst)
+SymType* Parser::parseType(const parserState state, bool isConst)
 {
     string typeName = GL()->getValue();
     if (*GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR) {
         exception("Expected type");
     }
     if (*GL() == T_STRUCT) {
-        typeName = parseStruct();
+        typeName = parseStruct(state);
     }
     SymType* type = (SymType*)symStack.find(typeName);
     if (type == NULL) {
         exception("Undefine type");
     }
-    if(*GL() != IDENTIFICATOR || type->isTypedef())
+    if(*GL() != IDENTIFICATOR && !type->isTypedef() && *GL() != SEMICOLON)
         NL();
     return type;
 }
@@ -218,7 +218,7 @@ void Parser::parseDeclaration(const parserState state)
         isConst = true;
         NL();
     }
-    SymType *type = parseType(isConst);
+    SymType *type = parseType(state, isConst);
     if (*GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym()) {
         exception("Anonymous structs must be class members");
     }
@@ -433,11 +433,15 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
 }
 
 
-string Parser::parseStruct()
+string Parser::parseStruct(const parserState state)
 {
     NL();
     string structName = parseName(PARSE_STRUCT);
     if (*GL() == IDENTIFICATOR && (symStack.find(structName) != NULL)) {
+        return structName;
+    } else if (*GL() == SEMICOLON || *GL() ==  MULT ||
+              (*GL() == IDENTIFICATOR && state == PARSE_TYPEDEF)) {
+        addSym(new SymTypeStruct(new SymTable(), structName));
         return structName;
     }
     NL();
@@ -459,7 +463,7 @@ void Parser::parseTypedef()
     NL();
     SymTable *table = new SymTable();
     symStack.push(table);
-    parseDeclaration();
+    parseDeclaration(PARSE_TYPEDEF);
     symStack.pop();
     for (Symbol* s : table->table) {
         if (s->isVar()) {

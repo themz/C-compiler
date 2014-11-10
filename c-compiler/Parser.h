@@ -8,6 +8,7 @@ typedef enum {
     PARSE_FUNC_ARG_DEF,
     PARSE_FUNC_ARG,
     PARSE_STRUCT,
+    PARSE_TYPEDEF,
 } parserState;
 
 class Parser
@@ -32,11 +33,11 @@ public:
     void parseFunctionDeclaration(SymType *type, string name);
     SymTable *parseFunctionsParams();
     SymType *parseComplexDeclaration(SymType *type);
-    string parseStruct();
+    string parseStruct(const parserState state = PARSE_DEFENITION);
     void parseTypedef();
     string parseName(const parserState state = PARSE_DEFENITION);
     SymTable *parseFuncArg(const bool dec = true);
-    SymType *parseType(bool isConst = false);
+    SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
 	void parse();
     void addSym(Symbol *symbol);
 	Parser(Scanner &scanner);
