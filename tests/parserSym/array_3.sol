@@ -7,4 +7,4 @@
 
 +----Variables----+
 
-   const  a char = w 
+   a array [] of int = 1,2

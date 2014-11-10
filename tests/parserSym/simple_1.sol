@@ -1,7 +1,10 @@
 +----Types----+
-  int
-  char
-  float
-  void
+
+   int
+   char
+   float
+   void
+
 +----Variables----+
-  int a 
+
+   a int 

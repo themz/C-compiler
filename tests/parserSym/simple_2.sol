@@ -1,9 +1,12 @@
 +----Types----+
-  int
-  char
-  float
-  void
+
+   int
+   char
+   float
+   void
+
 +----Variables----+
-  int a = 5 
-  int n 
-  int b = 6 
+
+   a int = 5
+   n int 
+   b int = 6

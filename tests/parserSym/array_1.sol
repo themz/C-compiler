@@ -1,7 +1,10 @@
 +----Types----+
-  int
-  char
-  float
-  void
+
+   int
+   char
+   float
+   void
+
 +----Variables----+
-  array a[ 3 ] of int
+
+   a array [3] of int 

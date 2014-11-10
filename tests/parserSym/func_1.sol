@@ -5,6 +5,7 @@
    float
    void
 
-+----Variables----+
++----Functions----+
 
-   const  a char = w 
+   int foo()
+   float foo1()

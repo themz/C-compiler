@@ -1,16 +1,19 @@
 +----Types----+
-  int
-  char
-  float
-  void
+
+   int
+   char
+   float
+   void
+
 +----Variables----+
-  int a 
-  int b 
-  int c 
-  char d 
-  char e 
-  float ddd 
-  float ddddd 
-  void f 
-  void ff 
-  void fff 
+
+   a int 
+   b int 
+   c int 
+   d char 
+   e char 
+   ddd float 
+   ddddd float 
+   f void 
+   ff void 
+   fff void 

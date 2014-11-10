@@ -7,4 +7,5 @@
 
 +----Variables----+
 
-   const  a char = w 
+   a int = 5
+   v float = 6
