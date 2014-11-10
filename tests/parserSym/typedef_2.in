@@ -1,0 +1,2 @@
+typedef int ti;
+typedef float ***taappp[100][200];

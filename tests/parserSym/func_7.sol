@@ -1,14 +1,11 @@
 +----Types----+
-
    int
    char
    float
    void
-
 +----Functions----+
-
    int foo(
-     int 
-     float 
-     int 
+       int
+       float
+       int
    )

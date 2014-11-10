@@ -176,7 +176,7 @@ void SymVar::print(int deep)
     cout << " ";
     type->print();
     if (exp != NULL) {
-        cout << string(deep, ' ') <<  " = { ";
+        cout << " = { ";
         exp->print(deep, false);
         cout << " }";
     }

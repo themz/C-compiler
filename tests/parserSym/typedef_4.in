@@ -1,0 +1,20 @@
+typedef int r;
+typedef float ***qwe[10][20];
+typedef struct {int i;} rr;
+typedef struct 
+{
+    r aa;
+    rr *pp;
+} tt, *tt2[10][20];
+
+typedef struct ts3
+{
+    int *pts3;
+    tt b;
+} *pts3;
+
+typedef pts3 apts3[10];
+
+r a;
+qwe b;
+pts3 c;

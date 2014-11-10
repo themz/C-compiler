@@ -1,5 +1,4 @@
 +----Types----+
-
    int
    char
    float

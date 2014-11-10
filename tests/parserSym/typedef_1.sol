@@ -1,2 +1,6 @@
-Exeption: Expected type
-row:1 col:16
++----Types----+
+   int
+   char
+   float
+   void
+   ti int

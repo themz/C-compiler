@@ -1,0 +1,8 @@
+typedef int r;
+typedef float ***qwe[10][20];
+typedef struct {int i;} rr;
+typedef struct 
+{
+    r aa;
+    rr *pp;
+} tt, *tt2[10][20];

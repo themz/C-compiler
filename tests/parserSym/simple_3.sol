@@ -1,10 +1,7 @@
 +----Types----+
-
    int
    char
    float
    void
-
 +----Variables----+
-
-   const  a char = w 
+    const  a char = { w  }
