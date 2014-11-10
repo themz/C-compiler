@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
                     "\t/p\tParse file and print symbols table\n"
                     "\tfile.in\tSource filename witn .in\n";
     string copyRight = "C-compiler v.0.62 developed by Zinov Mikhail 2014";
-	bool debug = false;
+	bool debug = true;
 	try{
 		if (!debug)
 		{		

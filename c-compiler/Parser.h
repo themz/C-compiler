@@ -3,6 +3,13 @@
 #include "Scanner.h"
 #include "Symbols.h"
 
+typedef enum {
+    PARSE_DEFENITION,
+    PARSE_FUNC_ARG_DEF,
+    PARSE_FUNC_ARG,
+    PARSE_STRUCT,
+} parserState;
+
 class Parser
 {
 private:
@@ -16,13 +23,16 @@ private:
     SymTableStack symStack;
 public:
 	Node *parseExp(int priority = 0);
-    void parseDeclaration(bool inFuncDef = false);
+    void parseDeclaration(const parserState state = PARSE_DEFENITION);
+    void parseDefinition(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
     void parseFunction(const bool withBlock);
     SymVar *parseArrayDeclaration(SymType *type, string name,bool isConst, bool inFuncDef = false);
-    void parseFunctions(SymType *type, string name);
+    void parseFunctionDeclaration(SymType *type, string name);
+    SymTable *parseFunctionsParams();
     SymType *parseComplexDeclaration(SymType *type);
     void parseStruct();
     void parseTypedef();
+    string parseName(const parserState state = PARSE_DEFENITION);
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType();
 	void parse();

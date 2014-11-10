@@ -3,12 +3,6 @@
 #define NL scanner_.nextLex
 #define GL scanner_.get
 
-typedef enum {
-    PARSE_FUNC_ARG_DEF,
-    PARSE_FUNC_ARG,
-    PARSE_STRUCT,
-} parserState;
-
 Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 {
 	priorityTable[PARENTHESIS_FRONT] = 15;
@@ -84,7 +78,7 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     st->add(new SymTypeInt());
     st->add(new SymTypeChar());
     st->add(new SymTypeFloat());
-    //st->add(new SymTypeVoid());
+    st->add(new SymTypeVoid());
     symStack.push(st);
 }
 
@@ -178,11 +172,42 @@ SymType* Parser::parseType()
     return type;
 }
 
-void Parser::parseDeclaration(bool inFuncDef)
+void Parser::parseDefinition(SymType *type, bool isConst, const parserState state)
 {
     Node* exp = NULL;
+    type = parseComplexDeclaration(type);
+    string name = parseName();
+    if (*GL() == PARENTHESIS_FRONT) {
+        parseFunctionDeclaration(type, name);
+        NL();
+    }else if (*GL() == BRACKET_FRONT) {
+        addSym(parseArrayDeclaration(type, name, isConst));
+    }else if (*GL() == COMMA || *GL() == SEMICOLON) {
+        addSym(new SymVar(name, type, exp, isConst));
+    }else if (*GL() == ASSIGN){
+        NL();
+        exp = parseExp(priorityTable[COMMA] + 1);
+        if (exp == NULL) {
+            exception("Expected var assign expression");
+        }
+        addSym(new SymVar(name, type, exp, isConst));
+    }else if(*GL() != ASSIGN && isConst && state == PARSE_DEFENITION){
+        exception("Default initialization of an object of const type");
+    }else{
+        exception("Unexpected lexem!");
+    }
+    if (*GL() == COMMA)
+        NL();
+}
+
+void Parser::parseDeclaration(const parserState state)
+{
     bool isConst = false;
     string name;
+    if (*GL() == T_TYPEDEF) {
+        parseTypedef();
+        return;
+    }
     if (*GL() == T_CONST) {
         isConst = true;
         NL();
@@ -191,64 +216,9 @@ void Parser::parseDeclaration(bool inFuncDef)
         parseStruct();
         return;
     }
-    if (*GL() == T_TYPEDEF) {
-        parseTypedef();
-        return;
-    }
-    SymType *fistType = parseType(), *type = NULL;
-    while (*GL() != SEPARATOR && *GL() != ENDOF) {
-        exp = NULL;
-        if (*GL() == COMMA && !inFuncDef) {
-            NL();
-        }
-        type = parseComplexDeclaration(fistType);
-        if(inFuncDef && (*GL() == COMMA || *GL() == PARENTHESIS_BACK)) {
-            name = "";
-        }else if(inFuncDef && *GL() == BRACKET_FRONT){
-            symStack.top()->add(parseArrayDeclaration(type, name, isConst));
-            return;
-        }else if (*GL() == IDENTIFICATOR) {
-            name = GL()->getValue();
-            NL();
-        } else{
-            exception("Expected identificator");
-        }
-        if (type->isPointer() && *GL() == COMMA && inFuncDef){
-            addSym(new SymVar(name, type, exp, isConst));
-            return;
-        }
-        if(*GL() == BRACKET_FRONT) {
-            addSym(parseArrayDeclaration(type, name, isConst));
-            NL();
-            continue;
-        } else if(*GL() == PARENTHESIS_FRONT) {
-            parseFunctions(type, name);
-            return;
-        }
-        if (*GL() != ASSIGN && isConst && !inFuncDef) {
-            exception("Default initialization of an object of const type");
-        }
-        if (*GL() == ASSIGN) {
-            NL();
-            exp = parseExp(priorityTable[COMMA] + 1);
-            if (exp == NULL) {
-                exception("Expected var assign expression");
-            }
-        }
-        else if(isConst && !inFuncDef){
-            exception("Default initialization of an object of const type 'const " + type->getName() +"'");
-        }
-        addSym(new SymVar(name, type, exp, isConst));
-        if (inFuncDef) {
-            NL();
-            return;
-        }
-        if (*GL()!= COMMA && *GL() != SEPARATOR && *GL() != ENDOF) {
-            exception("Expected comma");
-        }
-    }
-    if (*GL() != SEMICOLON && *GL() != ENDOF) {
-        exception("Expected ';' after end of declaration");
+    SymType *type = parseType();
+    while (*GL() != SEMICOLON) {
+        parseDefinition(type, isConst, state);
     }
 }
 
@@ -263,9 +233,6 @@ void Parser::parse()
     while (*GL() != ENDOF) {
         parseDeclaration();
         NL();
-        if (*GL() == SEMICOLON) {
-            NL();
-        }
     }
 }
 
@@ -362,25 +329,56 @@ Node* Parser::parseFactor(int priority)
 	return root;
 }
 
-void Parser::parseFunctions(SymType *type, string name)
+void Parser::parseFunctionDeclaration(SymType *type, string name)
 {
     NL();
-    symStack.push(new SymTable());
-    while(*GL() != SEMICOLON && *GL() != PARENTHESIS_BACK && *GL() != ENDOF)
-    {
-        parseDeclaration(true);
-        NL();
-    }
+    SymTable *params = parseFunctionsParams();
     if(*GL() == BRACES_BACK){
         NL();
         NL();
         //parser block
     }
-    SymTable *tt = symStack.top();
-    symStack.pop();
-    if (!symStack.top()->add(new SymFunc(name, type, tt, NULL))) {
+    if (!symStack.top()->add(new SymFunc(name, type, params, NULL))) {
         exception("Redefinition function  \"" + name + "\"");
     }
+}
+
+SymTable* Parser::parseFunctionsParams()
+{
+    SymTable *table = new SymTable();
+    SymType *type = NULL;
+    string name = "";
+    Node *exp = NULL;
+    SymVar *var = NULL;
+    while (*GL() != PARENTHESIS_BACK) {
+        bool isConst = false;
+        exp = NULL;
+        name = "";
+        if (*GL() == T_CONST) {
+            NL();
+            isConst = true;
+        }
+        type = parseComplexDeclaration(parseType());
+        name = parseName(PARSE_FUNC_ARG_DEF);
+        if (*GL() == BRACKET_FRONT) {
+            var = parseArrayDeclaration(type, name, isConst);
+        } else {
+            if(*GL() == ASSIGN)
+            {
+                NL();
+                exp = parseExp(priorityTable[COMMA] + 1);
+            }
+            var = new SymVar(name, type, exp, isConst);
+        }
+        if(!table->add(var))
+        {
+            exception("Redefinition param name:  \"" + name + "\"");
+        }
+        if (*GL() == COMMA) {
+            NL();
+        }
+    }
+    return table;
 }
 
 SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, bool inFuncDef)
@@ -428,19 +426,11 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
     return new SymVar(name, arrType ,value, isConst);
 }
 
+
 void Parser::parseStruct()
 {
     NL();
-    string name;
-    if (*GL() == IDENTIFICATOR) {
-        name = GL()->getValue();
-        NL();
-    } else if (*GL() == BRACES_FRONT)
-    {
-        name = "";
-    } else {
-        exception("Expected identificator or unname struct");
-    }
+    string name = parseName();
     NL();
     symStack.push(new SymTable());
     while (*GL() != BRACES_BACK) {
@@ -452,8 +442,6 @@ void Parser::parseStruct()
     if (!symStack.top()->add(ss)) {
         exception("Redefinition Struct \"" + name + "\"");
     }
-
-    
 }
 
 void Parser::parseTypedef()
@@ -480,7 +468,20 @@ SymType *Parser::parseComplexDeclaration(SymType *type)
     return type;
 }
 
-
+string Parser::parseName(const parserState state){
+    if(*GL() == IDENTIFICATOR) {
+        string name = GL()->getValue();
+        NL();
+        return name;
+    } else if ((*GL() == COMMA || *GL() == BRACKET_FRONT || PARENTHESIS_BACK) && state == PARSE_FUNC_ARG_DEF) {
+        return "";
+    } else if (state == PARSE_STRUCT && *GL() == BRACES_FRONT) {
+        
+    }else{
+        exception("Expected identificator" + (string)((state == PARSE_FUNC_ARG_DEF) ? "or no name variable" : ""));
+    }
+    return "";
+}
 
 Node* Parser::parseFuncCall(Node* root)
 {
@@ -530,6 +531,13 @@ void Parser::printTable(int deep)
 void Parser::exception(string msg)
 {
     throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
+}
+
+void a(){
+    typedef int eee;
+    typedef const int ttt;
+    typedef const int *** ttt1;
+
 }
 
 

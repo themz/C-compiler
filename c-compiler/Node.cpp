@@ -10,16 +10,16 @@ UnaryOpNode::UnaryOpNode(Lexeme* op, Node* oper): OpNode(op), operand(oper)
 
 }
 
-void EmptyNode::print(int offset) const
+void EmptyNode::print(int offset, bool isTree) const
 { 
-	cout << string(offset * N, ' ') << "<empty>" << endl;
+    cout << string(isTree ? offset * N : 0, ' ') << "<empty>" << (isTree ? "\n" :"");
 }
 
-void BinaryOpNode::print(int offset) const
+void BinaryOpNode::print(int offset, bool isTree) const
 {
-	left->print(offset + 1);
-	cout << string(offset * N, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< endl;
-	right->print(offset + 1);
+	left->print(offset + 1, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
+	right->print(offset + 1, isTree);
 }
 
 bool BinaryOpNode::haveBranch()
@@ -27,56 +27,56 @@ bool BinaryOpNode::haveBranch()
     return left != NULL && right != NULL;
 }
 
-void TernaryOpNode::print(int offset) const 
+void TernaryOpNode::print(int offset, bool isTree) const
 {
-	string tab = string(offset * N, ' ');
-	condition->print(offset + 1);
-	cout << tab << "?" << endl;
-	left->print(offset + 1);
-	cout << tab << ":" << endl;
-	right->print(offset + 1);
+	string tab = string(isTree ? offset * N : 1, ' ');
+	condition->print(offset + 1, isTree);
+	cout << tab << "?" << (isTree ? "\n" :"");
+	left->print(offset + 1, isTree);
+	cout << tab << ":" << (isTree ? "\n" :"");
+	right->print(offset + 1, isTree);
 
 }
 
-void IntNode::print(int offset) const
+void IntNode::print(int offset, bool isTree) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<IntegerLexeme*>(lexeme_)->getValue()<< endl;
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<IntegerLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
 }
 
-void FloatNode::print(int offset) const
+void FloatNode::print(int offset, bool isTree) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<FloatLexeme*>(lexeme_)->getValue() << endl;
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<FloatLexeme*>(lexeme_)->getValue() << (isTree ? "\n" :"");
 }
 
-void CharNode::print(int offset) const
+void CharNode::print(int offset, bool isTree) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<CharLexeme*>(lexeme_)->getValue() << endl;
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<CharLexeme*>(lexeme_)->getValue() << (isTree ? "\n" :"");
 }
 
-void IdentifierNode::print(int offset) const
+void IdentifierNode::print(int offset, bool isTree) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<IdentificatorLexeme*>(lexeme_)->getValue()<< endl;
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<IdentificatorLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
 }
 
-void UnaryOpNode::print(int offset) const
+void UnaryOpNode::print(int offset, bool isTree) const
 {
-	cout << string(offset * N, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< endl;
-	operand->print(offset + 1);
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
+	operand->print(offset + 1, isTree);
 }
 
-void PostfixUnaryOpNode::print(int offset) const
+void PostfixUnaryOpNode::print(int offset, bool isTree) const
 {
-	operand->print(offset);
-	cout << string(offset * N, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< endl;
+	operand->print(offset, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
 }
 
-void FunctionalNode::printArgs(int offset) const
+void FunctionalNode::printArgs(int offset, bool isTree) const
 {
 	for (int i = 0; i < (int)args.size(); i++)
 	{
-		args[i]->print(offset + 1);
+		args[i]->print(offset + 1, isTree);
 		if (i < (int)args.size() - 1)
-			cout << string(offset * N, ' ') << ',' << endl;
+			cout << string(isTree ? offset * N : 0, ' ') << ',' << (isTree ? "\n" :"");
 	}
 }
 
@@ -86,29 +86,29 @@ void FunctionalNode::addArg(Node* arg)
 		args.push_back(arg); 
 }
 
-void FuncCallNode::print(int offset) const
+void FuncCallNode::print(int offset, bool isTree) const
 {
-	name->print(offset);
-	cout << string(offset * N, ' ') << "(" << endl;
-	printArgs(offset);
-	cout << string(offset * N, ' ') << ")" << endl;
+	name->print(offset, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << "(" << (isTree ? "\n" :"");
+	printArgs(offset, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << ")" << (isTree ? "\n" :"");
 }
 
-void ArrNode::print(int offset) const 
+void ArrNode::print(int offset, bool isTree) const
 {
-    name->print(offset);
-	cout << string(offset * N, ' ') << "[" << endl;
-	printArgs(offset);
-	cout << string(offset * N, ' ') << "]" << endl;
+    name->print(offset, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << "[" << (isTree ? "\n" :"");
+	printArgs(offset, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << "]" << (isTree ? "\n" :"");
 }
 
-void ArrNode::printArgs(int deep) const
+void ArrNode::printArgs(int offset, bool isTree) const
 {
     for (int i = 0; i < (int)args.size(); i++)
     {
-        args[i]->print(deep + 1);
+        args[i]->print(offset + 1, isTree);
         if (i < (int)args.size() - 1)
-            cout << string(deep * N, ' ') << ',' << endl;
+            cout << string(isTree ? offset * N : 0, ' ') << ',' << (isTree ? "\n" :"");
     }
 }
 void ArrNode::addArg(Node *arg)
@@ -117,7 +117,7 @@ void ArrNode::addArg(Node *arg)
         args.push_back(arg);
 }
 
-void TypecastNode::print(int offset) const
+void TypecastNode::print(int offset, bool isTree) const
 {
 	string typeName = "";
 	switch (dynamic_cast<ReservedWordLexeme*>(lexeme_)->getRwType())
@@ -134,9 +134,9 @@ void TypecastNode::print(int offset) const
     default:
         break;
 	}	
-	cout << string(offset * N, ' ') << typeName << endl;
-	cout << string(offset * N, ' ') << "(" << endl;
-	operand->print(offset + 1);
-	cout << string(offset * N, ' ') << ")" << endl;
+	cout << string(isTree ? offset * N : 0, ' ') << typeName << (isTree ? "\n" :"");
+	cout << string(isTree ? offset * N : 0, ' ') << "(" << (isTree ? "\n" :"");
+	operand->print(offset + 1, isTree);
+	cout << string(isTree ? offset * N : 0, ' ') << ")" << (isTree ? "\n" :"");
 }
 
