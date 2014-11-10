@@ -1,2 +1,2 @@
 Exeption: Expected parenthesis open
-row:7 col:1
+row:1 col:7
