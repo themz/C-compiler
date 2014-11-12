@@ -206,8 +206,8 @@ class Stmt
 {
 private:
 public:
-    Stmt();
-    virtual void print(int deep = 0);
+    Stmt(){};
+    virtual void print(int deep = 0){};
 };
 
 class StmtBlock

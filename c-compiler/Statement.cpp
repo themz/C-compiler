@@ -10,8 +10,11 @@ void StmtBlock::addStmt(Stmt *statement)
 
 void StmtBlock::print(int deep)
 {
-    table->print(deep + N);
+    table->print(deep);
     for (Stmt* st : statements){
-        st->print(deep);
+        cout << endl << string(deep + N, ' ') <<"{" << endl;
+        st->print(deep + N);
+        cout << endl << string(deep + N, ' ') <<"}" << endl;
+
     }
 }

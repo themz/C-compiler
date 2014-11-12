@@ -560,7 +560,7 @@ StmtBlock *Parser::parseBlock()
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
     symStack.push(new SymTable());
-    while (*GL() != BRACES_BACK) {
+    while (*GL() != BRACES_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF) {
             parseDeclaration();  
@@ -577,31 +577,52 @@ StmtBlock *Parser::parseBlock()
     return block;
 }
 
-Stmt* Parser::parseStmt()
+Stmt *Parser::parseStmt()
 {
-//    if (*GL() == T_IF)
-//        return parseIf();
-//    else if (*GL() == T_FOR)
-//        return parseFor();
-//    else if (*GL() == T_WHILE)
-//        return parseWhile();
-//    else if (*GL() == T_DO)
-//        return parseDoWhile();
-//    else if (*GL() == BRACES_FRONT)
-//        return (Stmt*)parseBlock();
-//    else if (*GL() == T_CONTINUE || *GL() == T_BREAK || *GL() == T_RETURN)
-//        return parseJumpStatement();
-//    else {
-//        SingleStmt* statement = new SingleStmt(parseExp());
-//        if (*GL() == SEMICOLON)
-//            NL();
-//        return statement;
-//    }	
+    if (*GL() == T_IF)
+        return parseIf();
+    else if (*GL() == T_FOR)
+        return parseFor();
+    else if (*GL() == T_WHILE)
+        return parseWhile();
+    else if (*GL() == T_DO)
+        return parseDoWhile();
+    else if (*GL() == BRACES_FRONT)
+        return (Stmt*)parseBlock();
+    else if (*GL() == T_CONTINUE || *GL() == T_BREAK || *GL() == T_RETURN)
+        return parseJumpStatement();
+    else {
+        SingleStmt* statement = new SingleStmt(parseExp());
+        if (*GL() == SEMICOLON)
+            NL();
+        return statement;
+    }
+}
+
+Stmt *Parser::parseIf()
+{
     return NULL;
 }
 
+Stmt *Parser::parseFor()
+{
+    return NULL;
+}
 
+Stmt *Parser::parseWhile()
+{
+    return NULL;
+}
 
+Stmt *Parser::parseDoWhile()
+{
+    return NULL;
+}
+
+Stmt *Parser::parseJumpStatement()
+{
+    return NULL;
+}
 
 
 

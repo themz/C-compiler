@@ -209,7 +209,13 @@ void SymTypeStruct::print(int deep)
 
 void SymFunc::print(int deep)
 {
-    cout <<  string(deep, ' ')  << retType->getName() << " " << getName()<< "(";
+    cout <<  string(deep, ' ');
+    if (retType->isStruct()) {
+        cout << retType->getName();
+    } else {
+        retType->print();
+    }
+    cout << " " << getName()<< "(";
     if (args->getSize() > 0) {
         cout << endl;
         args->printVariables(deep + N);

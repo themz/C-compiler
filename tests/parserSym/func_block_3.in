@@ -1,0 +1,6 @@
+void*** c(float)
+{
+	int a = 6, v = 8, g = 'w';
+	void* b;
+	void foo(), bar(int);
+}
