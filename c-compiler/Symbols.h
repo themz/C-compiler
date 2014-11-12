@@ -2,10 +2,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Statement.h"
-
-class Node;
-class SymTable;
+#include "exception.h"
+#include "Node.h"
 
 enum{
     Variable,
@@ -17,6 +15,9 @@ using namespace std;
 
 //-------------Symbols--------------//
 class SymType;
+class Stmt;
+class StmtBlock;
+
 
 class Symbol
 {
@@ -198,4 +199,38 @@ public:
     void print(int deep = 0);
     int getArgCount(){return args->getSize();};
 };
+
+//------------------------stmt
+
+class Stmt
+{
+private:
+public:
+    Stmt();
+    virtual void print(int deep = 0);
+};
+
+class StmtBlock
+{
+private:
+    vector<Stmt*> statements;
+    SymTable *table;
+public:
+    void addStmt(Stmt *statement);
+    void setSymTable(SymTable *tbl){table = tbl;};
+    StmtBlock(SymTable *table){};
+    StmtBlock(){};
+    virtual void print(int deep = 0);
+};
+
+class SingleStmt : public Stmt
+{
+private:
+    Node* exp;
+public:
+    SingleStmt(Node* exp): exp(exp) {}
+    void print(int deep = 0) const { exp->print(deep); }
+};
+
+
 

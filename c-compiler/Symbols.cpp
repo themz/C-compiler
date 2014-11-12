@@ -1,5 +1,6 @@
 #include "Symbols.h"
-#include "exception.h"
+
+
 
 #define N 3
 //--------------------------------SymTable--------------------------------//
@@ -145,7 +146,6 @@ void SymTableStack::printVariables(int deep)
     for (SymTable* st : tables){
         st->printVariables(deep);
     }
-
 };
 
 void SymTableStack::printFunctions(int deep)
@@ -215,7 +215,15 @@ void SymFunc::print(int deep)
         args->printVariables(deep + N);
         cout << string(deep, ' ');
     }
-    cout << ")" << endl;
+    cout << ")";
+    if (body != NULL) {
+        cout << endl << string(deep, ' ') <<"{" << endl;
+        body->print(deep);
+        cout << endl << string(deep, ' ') <<"}" << endl;
+    } else {
+        cout << endl;
+    }
+
 }
 
 void SymTypeDef::print(int deep)

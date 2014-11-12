@@ -1,4 +1,3 @@
-#pragma once
 #include "Lexeme.h"
 
 class SynNode

@@ -1,5 +1,4 @@
 #pragma once
-#include "Node.h"
 #include "Scanner.h"
 #include "Symbols.h"
 
@@ -24,8 +23,15 @@ private:
     SymTableStack symStack;
     int unnameCount = 0;
     bool defStruct = false;
-public:
-	Node *parseExp(int priority = 0);
+    
+    void parseTypedef();
+    StmtBlock *parseBlock();
+    Stmt *parseStmt();
+    Stmt *parseIf();
+    Stmt *parseFor();
+    Stmt *parseWhile();
+    Stmt *parseDoWhile();
+    Stmt *parseJumpStatement();
     void parseDeclaration(const parserState state = PARSE_DEFENITION);
     void parseDefinition(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
     void parseFunction(const bool withBlock);
@@ -34,13 +40,15 @@ public:
     SymTable *parseFunctionsParams();
     SymType *parseComplexDeclaration(SymType *type);
     string parseStruct(const parserState state = PARSE_DEFENITION);
-    void parseTypedef();
     string parseName(const parserState state = PARSE_DEFENITION);
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
-	void parse();
     void addSym(Symbol *symbol);
+    void exception(string msg);
+    void parseSemicolon();
+public:
+	Node *parseExp(int priority = 0);
+	void parse();
 	Parser(Scanner &scanner);
     void printTable(int deep = 0);
-    void exception(string msg);
 };
