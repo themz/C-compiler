@@ -174,7 +174,6 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
     string name = parseName();
     if (*GL() == PARENTHESIS_FRONT) {
         parseFunctionDeclaration(type, name);
-        //NL();
     }else if (*GL() == BRACKET_FRONT) {
         addSym(parseArrayDeclaration(type, name, isConst));
     }else if (*GL() == COMMA || *GL() == SEMICOLON) {
@@ -554,13 +553,13 @@ Node* Parser::parseArrIndex(Node* root)
 
 StmtBlock *Parser::parseBlock()
 {
-    NL(); //{
+    NL();
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
     symStack.push(new SymTable());
     while (*GL() != BRACES_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
-        if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF) {
+        if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF || *GL() == T_STRUCT) {
             parseDeclaration();
             NL();
         } else {
@@ -570,7 +569,7 @@ StmtBlock *Parser::parseBlock()
             }
         }
     }
-    NL(); //}
+    NL();
     block->setSymTable(symStack.top());
     symStack.pop();
     return block;
