@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 	}
 	catch(compiler_exception& exc)
 	{
-		cout << "Exeption: " << exc.getExceptionMsg() << endl;
+		cout << "Error: " << exc.getExceptionMsg() << endl;
 		if (exc.getPrintingPos())
 		{
 			cout << "row:" << exc.getExRow()<< " " << "col:" << exc.getExCol();

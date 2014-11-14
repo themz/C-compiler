@@ -1,2 +1,2 @@
-Exeption: Expected type
+Error: Expected type
 row:1 col:10

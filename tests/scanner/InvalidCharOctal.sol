@@ -1,2 +1,2 @@
-Exeption: Invalid characters in octal char 
+Error: Invalid characters in octal char 
 row:1 col:3

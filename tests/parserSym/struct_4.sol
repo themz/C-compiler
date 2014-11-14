@@ -3,13 +3,13 @@
    char
    float
    void
-   struct a :
+   struct $a :
          +----Types--+
-            struct b :
+            struct $b :
                   +----Types--+
-                     struct c :
+                     struct $c :
                            +----Types--+
-                              struct d
+                              struct $d
                            +----Variables----+
                                a float
                                b float

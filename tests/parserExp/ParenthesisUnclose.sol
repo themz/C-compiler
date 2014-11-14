@@ -1,2 +1,2 @@
-Exeption: Expected parenthesis close
+Error: Expected parenthesis close
 row:1 col:22
