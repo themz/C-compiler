@@ -1,7 +1,5 @@
 #include "Symbols.h"
 
-
-
 #define N 3
 //--------------------------------SymTable--------------------------------//
 
@@ -9,7 +7,11 @@ bool SymTable::add(Symbol *symbol)
 {
     Symbol *s = find(symbol->getName());
     if (s != NULL) {
-        return false;
+        if ((s->isStruct() && symbol->isVar()) || (symbol->isStruct() && s->isVar())) {
+            
+        } else {
+            return false;
+        }
     }
     table.push_back(symbol);
     hFunc = max(symbol->isFunc(), hFunc);

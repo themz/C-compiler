@@ -3,11 +3,15 @@
 #include "Symbols.h"
 
 typedef enum {
+    PARSE,
     PARSE_DEFENITION,
     PARSE_FUNC_ARG_DEF,
     PARSE_FUNC_ARG,
     PARSE_STRUCT,
     PARSE_TYPEDEF,
+    PARSE_CYCLE,
+    PARSE_FUNC,
+    PARSE_IF
 } parserState;
 
 class Parser
@@ -23,7 +27,7 @@ private:
     SymTableStack symStack;
     int unnameCount = 0;
     bool defStruct = false;
-    
+    parserState pState = PARSE;
     void parseTypedef();
     StmtBlock *parseBlock();
     Stmt *parseStmt();
@@ -46,6 +50,7 @@ private:
     void addSym(Symbol *symbol);
     void exception(string msg);
     void parseSemicolon();
+    Node *parseCondition();
 public:
 	Node *parseExp(int priority = 0);
 	void parse();

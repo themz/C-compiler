@@ -87,11 +87,10 @@ Node* Parser::parseExp(int priority){
             return parseFactor();
     Node* l = parseExp(priority + 1);
     Node* root = l;
-    Lexeme* lex = GL();
-    if (!lex || *lex == ENDOF || *lex == PARENTHESIS_BACK || *lex == BRACKET_BACK || *lex == COLON || *lex == SEPARATOR){
+    if (GL() == NULL || *GL() == ENDOF || *GL() == PARENTHESIS_BACK || *GL() == BRACKET_BACK || *GL() == COLON || *GL() == SEPARATOR){
             return root;
     }
-    OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
+    OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(GL());
     while(opLex && priorityTable[opLex->getOpType()] >= priority)
     {
         OperationType op = opLex->getOpType();
@@ -113,13 +112,11 @@ Node* Parser::parseExp(int priority){
             {
                 NL();
                 Node* l = parseExp();
-                Lexeme* le = GL();
-                OperationLexeme* sepLex = dynamic_cast<OperationLexeme*>(le);
-                if (*sepLex != COLON)
+                if (*GL() != COLON)
                     exception("Missed branch of ternary operator");
                 NL();
                 Node* r = parseExp();
-                root = new TernaryOpNode(sepLex, root, l, r);
+                root = new TernaryOpNode(GL(), root, l, r);
                 break;
             }
             case(DOT):
@@ -148,7 +145,7 @@ Node* Parser::parseExp(int priority){
                 root = bn;
                 break;
         }
-    opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
+    opLex = dynamic_cast<OperationLexeme*>(GL());
     }     
     return root;
 }
@@ -224,7 +221,7 @@ void Parser::parseDeclaration(const parserState state)
     if (*GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym()) {
         exception("Anonymous structs must be class members");
     }
-    while (*GL() != SEMICOLON && *GL() != ENDOF) {
+    while (*GL() != SEMICOLON && *GL() != BRACES_BACK && *GL() != ENDOF) {
         parseDefinition(type, isConst, state);
     }
 }
@@ -268,21 +265,19 @@ Node* Parser::parseFactor(int priority)
         break;
 	case RESERVEDWORD:
 		{
-			ReservedWordType rwType = dynamic_cast<ReservedWordLexeme*>(lex)->getRwType();
-			if (rwType == T_CHAR || rwType == T_INT || rwType == T_FLOAT)
+
+			if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
 			{
-                scanner_.nextLex();
-                OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
-				if (!opLex || opLex->getOpType() != PARENTHESIS_FRONT)
+                NL();
+				if (*GL() != PARENTHESIS_FRONT)
 					exception("Expected open parenthesis");
-                scanner_.nextLex();
+                NL();
 				root = new TypecastNode(lex, parseExp());
-				opLex = dynamic_cast<OperationLexeme*>(scanner_.get());
-				if (!opLex || opLex->getOpType() != PARENTHESIS_BACK)
+				if (*GL() != PARENTHESIS_BACK)
 					exception("Expected close parenthesis");
                 NL();
 			} 
-			else if (rwType == T_SIZEOF)
+			else if (*lex == T_SIZEOF)
 			{
 				
 			}
@@ -298,8 +293,7 @@ Node* Parser::parseFactor(int priority)
             {
                 NL();
                 root = parseExp();
-                Lexeme* lex = GL();
-                if(!lex || *lex != PARENTHESIS_BACK)
+                if(*GL() != PARENTHESIS_BACK)
                 {
                     exception("Expected parenthesis close");
                 }
@@ -312,7 +306,8 @@ Node* Parser::parseFactor(int priority)
             }
             else if (*opLex == PARENTHESIS_BACK) 
             {
-                exception("Expected parenthesis open");
+                if (pState != PARSE_CYCLE && pState != PARSE_IF)
+                    exception("Expected parenthesis open");
                 break;
             }
             else if (*opLex == BRACKET_FRONT)
@@ -338,6 +333,8 @@ Node* Parser::parseFactor(int priority)
 
 void Parser::parseFunctionDeclaration(SymType *type, string name)
 {
+    parserState p = pState;
+    pState = PARSE_FUNC;
     NL();
     StmtBlock *body = NULL;
     SymTable *params = parseFunctionsParams();
@@ -351,6 +348,7 @@ void Parser::parseFunctionDeclaration(SymType *type, string name)
     if (!symStack.top()->add(new SymFunc(name, type, params, body))) {
         exception("Redefinition function  \"" + name + "\"");
     }
+    pState = p;
 }
 
 void Parser::parseSemicolon()
@@ -556,25 +554,36 @@ Node* Parser::parseArrIndex(Node* root)
 
 StmtBlock *Parser::parseBlock()
 {
-    NL();
+    NL(); //{
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
     symStack.push(new SymTable());
     while (*GL() != BRACES_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF) {
-            parseDeclaration();  
-        } else if (s != NULL && (s->isVar() || s->isFunc())) {
-            parseExp();
+            parseDeclaration();
+            NL();
         } else {
-            block->addStmt(parseStmt());
+            Stmt *s = parseStmt();
+            if (s != NULL) {
+                block->addStmt(s);
+            }
         }
-        NL();
     }
+    NL(); //}
     block->setSymTable(symStack.top());
     symStack.pop();
-    NL();
     return block;
+}
+
+Node *Parser::parseCondition()
+{
+    NL();
+    Node *con = parseExp();
+    if (con == NULL) {
+        exception("Expected condition!");
+    }
+    return con;
 }
 
 Stmt *Parser::parseStmt()
@@ -592,39 +601,113 @@ Stmt *Parser::parseStmt()
     else if (*GL() == T_CONTINUE || *GL() == T_BREAK || *GL() == T_RETURN)
         return parseJumpStatement();
     else {
-        SingleStmt* statement = new SingleStmt(parseExp());
-        if (*GL() == SEMICOLON)
-            NL();
+        Node *exp = parseExp();
+        StmtSingle* statement = NULL;
+        if(exp != NULL)
+            statement = new StmtSingle(exp);
+        NL();
         return statement;
     }
 }
 
 Stmt *Parser::parseIf()
 {
-    return NULL;
+    parserState p = pState;
+    pState = PARSE_IF;
+    NL();
+    Node *con = parseCondition();
+    NL();
+    Stmt *trueBlock = parseStmt();
+    Stmt *falseBlock = NULL;
+    if (*GL() == T_ELSE)
+    {
+        NL();
+        falseBlock = parseStmt();
+    }
+    pState = p;
+    return new StmtIf(con, trueBlock, falseBlock);
 }
 
 Stmt *Parser::parseFor()
 {
-    return NULL;
+    parserState p = pState;
+    pState = PARSE_CYCLE;
+    Stmt *body = NULL;
+    NL();
+    if (*GL() != PARENTHESIS_FRONT) {
+        exception("Expected open parenthesis");
+    }
+    NL();
+    Node *ini = parseExp();
+    NL();
+    Node *con = parseExp();
+    NL();
+    Node *inc = parseExp();
+    NL();
+    if(*GL() == SEMICOLON) {
+        
+    } else if (*GL() == BRACES_FRONT) {
+        body = parseBlock();
+    } else {
+        exception("Expected { or ;");
+    }
+    pState = p;
+    return new StmtFor(ini, con, inc, body);
 }
 
 Stmt *Parser::parseWhile()
 {
-    return NULL;
+    parserState p = pState;
+    pState = PARSE_CYCLE;
+    NL();
+    pState = p;
+    return new StmtWhile(parseCondition(), parseBlock());
+
 }
 
 Stmt *Parser::parseDoWhile()
 {
-    return NULL;
+    parserState p = pState;
+    pState = PARSE_CYCLE;
+    NL();
+    Stmt* body = parseBlock();
+    if (*GL() != T_WHILE) {
+        exception("Expected while");
+    }
+    Node *con = parseCondition();
+    pState = p;
+    return new StmtDoWhile(con, body);
 }
 
 Stmt *Parser::parseJumpStatement()
 {
-    return NULL;
+    Stmt * statment = NULL;
+    if (*GL() == T_BREAK) {
+        if (pState != PARSE_CYCLE) {
+            exception("'break' statement not in loop statement");
+        }
+        statment = new StmtBreak();
+        NL();
+    } else if(*GL() == T_CONTINUE) {
+        if (pState != PARSE_CYCLE) {
+            exception("'continue' statement not in loop statement");
+        }
+        statment = new StmtContinue();
+        NL();
+    } else if (*GL() == T_RETURN){
+        if (pState != PARSE_FUNC) {
+            exception("'return' statement not in function block statement");
+        }
+        NL();
+        Node *exp = parseExp();
+        statment = new StmtReturn(exp);
+    }
+    if (*GL() != SEMICOLON) {
+        exception("Expected ;");
+    }
+    NL();
+    return statment;
 }
-
-
 
 void Parser::printTable(int deep)
 {

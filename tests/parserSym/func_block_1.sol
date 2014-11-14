@@ -6,7 +6,7 @@
 +----Functions----+
    int a()
    {
-      +----Variables----+
-          b int
+   +----Variables----+
+       b int
 
    }

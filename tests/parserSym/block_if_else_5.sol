@@ -4,12 +4,17 @@
    float
    void
 +----Functions----+
-   int a(
-       b int
-   )
+   int main()
    {
    +----Variables----+
        a int
-       b int
+
+      {
+         if (a) {
+            a++
+         } else {
+            a--
+         }
+      }
 
    }

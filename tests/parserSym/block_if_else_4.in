@@ -1,0 +1,11 @@
+int main()
+{
+	int a, b, c;
+	if (a){
+		a++;
+	} else {
+		if (b) {} else { 
+			if (c) {} else {} 
+		} 
+	}
+}

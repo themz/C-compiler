@@ -1,0 +1,10 @@
+int main()
+{
+	int a;
+	if (a) 
+	{
+		int b = 9;
+	} else {
+		int b = 9;
+	}
+}

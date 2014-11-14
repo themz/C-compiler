@@ -1,0 +1,10 @@
+struct a {
+	int a;
+	struct b {
+		int a, b;
+		struct c {
+			float a, b, c, d;
+			struct d {};
+		};
+	};
+};

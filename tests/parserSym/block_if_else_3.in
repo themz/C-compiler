@@ -1,0 +1,15 @@
+int main()
+{
+	int a, b;
+	if (a > 0 && b < 0) 
+	{
+		if (b) 
+		{
+			a--;
+			b++;
+		}
+	} else {
+		if (a) {} else {}
+		if (b) {} else {}
+	}
+}

@@ -208,9 +208,10 @@ private:
 public:
     Stmt(){};
     virtual void print(int deep = 0){};
+    virtual bool isSingle(){return false;};
 };
 
-class StmtBlock
+class StmtBlock : public Stmt
 {
 private:
     vector<Stmt*> statements;
@@ -223,13 +224,84 @@ public:
     virtual void print(int deep = 0);
 };
 
-class SingleStmt : public Stmt
+class StmtSingle : public Stmt
 {
 private:
     Node* exp;
 public:
-    SingleStmt(Node* exp): exp(exp) {}
-    void print(int deep = 0) const { exp->print(deep); }
+    StmtSingle(Node* exp): exp(exp) {}
+    void print(int deep = 0);
+    bool isSingle(){return true;};
+};
+
+class StmtIf : public Stmt
+{
+private:
+    Node *condition;
+    Stmt *trueBlock;
+    Stmt *falseBlock;
+public:
+    StmtIf(Node *cond, Stmt *tBlock, Stmt *fBlock): condition(cond), trueBlock(tBlock), falseBlock(fBlock) {};
+    void print(int deep = 0);
+};
+
+class StmtCycle : public Stmt
+{
+protected:
+    Node *condition;
+    Stmt* body;
+public:
+    StmtCycle(Node *cond, Stmt* b): condition(cond), body(b) {}
+    virtual void print(int deep = 0){};
+};
+
+class StmtWhile : public StmtCycle
+{
+public:
+    StmtWhile(Node *cond, Stmt *b): StmtCycle(cond, b) {}
+    void print(int deep = 0);
+};
+
+class StmtDoWhile : public StmtCycle
+{
+public:
+    StmtDoWhile(Node *cond, Stmt *b): StmtCycle(cond, b) {}
+    void print(int deep = 0);
+};
+
+class StmtFor : public StmtCycle
+{
+private:
+    Node *init;
+    Node *inc;
+public:
+    StmtFor(Node *cond, Node *inc, Node *init, Stmt *body): StmtCycle(cond, body), init(init), inc(inc) {}
+    void print(int deep = 0 );
+};
+
+class StmtJump : public Stmt
+{
+};
+
+class StmtBreak : public StmtJump
+{
+public:
+    void print(int deep = 0);
+};
+
+class StmtContinue : public StmtJump
+{
+public:
+    void print(int deep = 0);
+};
+
+class StmtReturn : public StmtJump
+{
+private:
+    Node *retArg;
+public:
+    StmtReturn(Node *ret): retArg(ret) {}
+    void print(int deep = 0);
 };
 
 
