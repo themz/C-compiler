@@ -5,7 +5,7 @@
    void
 +----Functions----+
    int foo(
-       int
-       float
-       int
+       #unname#0 int
+       #unname#1 float
+       #unname#2 int
    )

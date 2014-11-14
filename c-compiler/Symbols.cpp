@@ -7,11 +7,7 @@ bool SymTable::add(Symbol *symbol)
 {
     Symbol *s = find(symbol->getName());
     if (s != NULL) {
-        if ((s->isStruct() && symbol->isVar()) || (symbol->isStruct() && s->isVar())) {
-            
-        } else {
-            return false;
-        }
+        return false;
     }
     table.push_back(symbol);
     hFunc = max(symbol->isFunc(), hFunc);
@@ -115,6 +111,10 @@ Symbol* SymTableStack::find(const string &name)
         if (s != NULL) {
             return s;
         };
+        s = st->find('$' + name);
+        if (s != NULL) {
+            return s;
+        };
     }
     return NULL;
 };
@@ -172,9 +172,7 @@ void SymVar::print(int deep)
     if (isConst()) {
         cout << " const ";
     }
-    if (getName()[0] != '#') {
-        cout << " " << getName();
-    }
+    cout << " " << getName();
     cout << " ";
     type->print();
     if (exp != NULL) {

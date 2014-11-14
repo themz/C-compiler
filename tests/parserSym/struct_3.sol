@@ -3,6 +3,6 @@
    char
    float
    void
-   struct point
+   struct $point
 +----Variables----+
-    const  a struct point
+    const  a struct $point

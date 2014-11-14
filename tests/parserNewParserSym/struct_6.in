@@ -1,0 +1,6 @@
+int main()
+{
+	struct a{
+		struct a;
+	}
+}

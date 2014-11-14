@@ -5,8 +5,8 @@
    void
 +----Functions----+
    int func1(
-       int
-       float
+       #unname#0 int
+       #unname#1 float
    )
    int func2(
        a int

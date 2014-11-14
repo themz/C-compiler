@@ -5,6 +5,6 @@
    void
 +----Functions----+
    int main(
-       int
-       float
+       #unname#0 int
+       #unname#1 float
    )

@@ -3,7 +3,7 @@
    char
    float
    void
-   struct str_name :
+   struct $str_name :
          +----Variables----+
              a int
 
