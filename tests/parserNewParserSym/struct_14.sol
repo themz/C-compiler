@@ -7,9 +7,6 @@
    int main()
    {
    +----Types--+
-      struct $a :
-            +----Types--+
-               struct $a
-
+      struct $a
 
    }

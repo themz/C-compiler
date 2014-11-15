@@ -87,7 +87,8 @@ Node* Parser::parseExp(int priority){
             return parseFactor();
     Node* l = parseExp(priority + 1);
     Node* root = l;
-    if (GL() == NULL || *GL() == ENDOF || *GL() == PARENTHESIS_BACK || *GL() == BRACKET_BACK || *GL() == COLON || *GL() == SEPARATOR){
+    if (GL() == NULL || *GL() == ENDOF || *GL() == PARENTHESIS_BACK ||
+        *GL() == BRACKET_BACK || *GL() == COLON || *GL() == SEPARATOR) {
             return root;
     }
     OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(GL());
@@ -122,20 +123,51 @@ Node* Parser::parseExp(int priority){
             case(DOT):
             {
                 NL();
-                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
-                if (r == NULL) {
-                    exception("Missed branch of binary operator");
+                if (*root->lexeme_ != IDENTIFICATOR) {
+                    exception("Left expression must be identificator");
                 }
-                else if(r->lexeme_->getLexType() != IDENTIFICATOR){
+                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
+                if(strct == NULL) {
+                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
+                } else if (!strct->getType()->isStruct()){
+                    exception("Member '"+ strct->getName() +"'  reference base type '"
+                              + strct->getType()->getName() + "' is not a structure ");
+                }
+                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
+                if(r->lexeme_->getLexType() != IDENTIFICATOR){
                     exception("Expected identificator");
+                }
+                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
+                if(member == NULL) {
+                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
                 }
                 root = new BinaryOpNode(opLex, root, r);
                 break;
             }
-            //case BRACKET_BACK:
-            //    root =  NULL;
-            //break;
-        //case(ARROW):
+            case(ARROW):
+            {
+                NL();
+//                if (*root->lexeme_ != IDENTIFICATOR) {
+//                    exception("Left expression must be identificator");
+//                }
+//                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
+//                if(strct == NULL) {
+//                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
+//                } else if (!strct->getType()->isStruct()){
+//                    exception("Member '"+ strct->getName() +"'  reference base type '"
+//                              + strct->getType()->getName() + "' is not a structure ");
+//                }
+//                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
+//                if(r->lexeme_->getLexType() != IDENTIFICATOR){
+//                    exception("Expected identificator");
+//                }
+//                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
+//                if(member == NULL) {
+//                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
+//                }
+//                root = new BinaryOpNode(opLex, root, r);
+                break;
+            }
         default:
                 NL();
                 BinaryOpNode *bn = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));
@@ -160,10 +192,16 @@ SymType* Parser::parseType(const parserState state, bool isConst)
         typeName = parseStruct(state);
     }
     SymType* type = (SymType*)symStack.find(typeName);
+    
     if (type == NULL) {
         exception("Undefine type");
     }
-    NL();
+    if (type->isStruct() && (SymTypeStruct*)type->isEmpty()) {
+        return type;
+    }
+    if (*GL() != IDENTIFICATOR) {
+        NL();
+    }
     return type;
 }
 
@@ -209,6 +247,9 @@ void Parser::parseDeclaration(const parserState state)
     bool isConst = false;
     string name;
     if (*GL() == T_TYPEDEF) {
+        if (state == PARSE_TYPEDEF) {
+            exception("Duplicate 'typedef' declaration specifier");
+        }
         parseTypedef();
         return;
     }
@@ -445,24 +486,41 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
 string Parser::parseStruct(const parserState state)
 {
     NL();
+    if (*GL() != IDENTIFICATOR && *GL() != BRACES_FRONT) {
+        exception("Declaration of anonymous struct must be a definition");
+    }
     string structName = parseName(PARSE_STRUCT);
-    if (*GL() == IDENTIFICATOR && (symStack.find(structName) != NULL)) {
-        return structName;
-    } else if (*GL() == SEMICOLON || *GL() ==  MULT ||
-              (*GL() == IDENTIFICATOR && state == PARSE_TYPEDEF)) {
-        addSym(new SymTypeStruct(new SymTable(), structName));
-        return structName;
+    if (symStack.find('$' + structName) == NULL) {
+        symStack.add(new SymTypeStruct(NULL, '$' + structName));
     }
-    NL();
-    symStack.push(new SymTable());
-    while (*GL() != BRACES_BACK) {
-        parseDeclaration();
+    if(*GL() == BRACES_FRONT) {
         NL();
-    }
-    SymTypeStruct *ss = new SymTypeStruct(symStack.top(), structName);
-    symStack.pop();
-    if (!symStack.top()->add(ss)) {
-        exception("Redefinition Struct \"" + structName + "\"");
+        symStack.push(new SymTable());
+        while (*GL() != BRACES_BACK) {
+            parseDeclaration();
+            NL();
+        }
+        SymTable* table = symStack.top();
+        symStack.pop();
+        Symbol *str = symStack.find('$' + structName );
+        if (str != NULL) {
+            if (str->isStruct()) {
+                if(str->isEmpty()){
+                    dynamic_cast<SymTypeStruct *>(str)->setTable(table);
+                } else {
+                    exception("Redefinition Struct \"" + structName + "\"");
+                }
+            } else {
+                symStack.add(new SymTypeStruct(table, '$' + structName));
+            }
+        } else {
+            symStack.add(new SymTypeStruct(table, '$' + structName));
+        }
+
+    } else if(*GL() == SEMICOLON) {
+//        if (symStack.find('$' + structName) == NULL) {
+//            symStack.add(new SymTypeStruct(NULL, '$' + structName));
+//        }
     }
     return structName;
 }

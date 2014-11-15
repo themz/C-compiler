@@ -1,0 +1,12 @@
+int main()
+{		
+		struct a{
+			struct b{
+				int ss;
+			};
+			struct bd{
+				int ss;
+			}
+
+		}
+}

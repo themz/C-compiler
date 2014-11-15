@@ -8,8 +8,8 @@
    {
    +----Types--+
       struct $a :
-            +----Types--+
-               struct $a
+            +----Variables----+
+                a int
 
 
    }

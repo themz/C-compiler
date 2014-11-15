@@ -100,21 +100,22 @@ SymTable* SymTableStack::top()
 void SymTableStack::add(Symbol* s)
 {
     if (!top()->add(s)) {
-        throw parser_exception("Redefinition type " + s->getName(), false);
+        throw parser_exception("Redefinition " + s->getName(), false);
     }
 }
 
 Symbol* SymTableStack::find(const string &name)
 {
     for (SymTable* st : tables) {
-        Symbol* s = st->find(name);
+        Symbol* s = st->find('$' + name);
         if (s != NULL) {
             return s;
         };
-        s = st->find('$' + name);
+        s = st->find(name);
         if (s != NULL) {
             return s;
         };
+
     }
     return NULL;
 };
@@ -202,8 +203,11 @@ void SymTypePointer::print(int deep)
 
 void SymTypeStruct::print(int deep)
 {
-    cout << string(deep, ' ') <<"struct " << getName() << (table->getSize() > 0 ? " :\n" : "");
-    table->print(deep + N + N);
+    cout << string(deep, ' ') <<"struct " << getName();
+    if (table != NULL) {
+        cout << (table->getSize() > 0 ? " :\n" : "");
+        table->print(deep + N + N);
+    }
     //cout << string(deep + N, ' ') << "+-----------------+";
 }
 

@@ -17,6 +17,7 @@ using namespace std;
 class SymType;
 class Stmt;
 class StmtBlock;
+class SymTable;
 
 
 class Symbol
@@ -34,6 +35,7 @@ public:
     virtual bool isFunc(){return false;};
     virtual bool isPointer(){return false;};
     virtual SymType *getType(){return NULL;};
+    virtual bool isEmpty(){return false;}
 };
 
 //-------------SymTable--------------//
@@ -94,6 +96,7 @@ public:
     virtual bool isTypedef(){return false;};
     virtual bool isEmpty(){return false;}
     virtual SymType *getType(){return NULL;};
+    virtual void setTable(SymTable *t){};
     void print(int deep = 0);
 };
 
@@ -147,8 +150,9 @@ public:
     Symbol *find(const string &name);
     virtual bool isStruct(){return true;};
     virtual bool isType(){return true;};
-    bool isEmpty(){return table->getSize() == 0;};
     void print(int deep = 0);
+    virtual void setTable(SymTable *t){ table = t;}
+    virtual bool isEmpty(){return table == NULL;}
 };
 
 class SymTypeDef : public SymType
