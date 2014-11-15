@@ -12,10 +12,7 @@
                 a int
 
    +----Variables----+
-       gg struct $bb :
-      +----Variables----+
-          a int
-
+       gg struct $bb
        t int
        a int = { gg.a }
 
