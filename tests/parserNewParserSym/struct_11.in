@@ -1,0 +1,9 @@
+int main(){
+	struct bb{
+		int a;
+	};
+	struct bb gg;
+	int t;
+	//int ad = gg.a;  
+	int a = uu.q;
+}

@@ -207,6 +207,11 @@ void SymTypeStruct::print(int deep)
     //cout << string(deep + N, ' ') << "+-----------------+";
 }
 
+Symbol *SymTypeStruct::find(const string &name)
+{
+    return table->find(name);
+}
+
 void SymFunc::print(int deep)
 {
     cout <<  string(deep, ' ');

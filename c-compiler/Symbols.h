@@ -92,6 +92,7 @@ public:
     SymType(const string &name = ""): Symbol(name){};
     virtual bool isType(){return true;};
     virtual bool isTypedef(){return false;};
+    virtual bool isEmpty(){return false;}
     virtual SymType *getType(){return NULL;};
     void print(int deep = 0);
 };
@@ -143,8 +144,10 @@ private:
     SymTable *table;
 public:
     SymTypeStruct(SymTable *table, const string &name): SymType(name), table(table){};
+    Symbol *find(const string &name);
     virtual bool isStruct(){return true;};
     virtual bool isType(){return true;};
+    bool isEmpty(){return table->getSize() == 0;};
     void print(int deep = 0);
 };
 
