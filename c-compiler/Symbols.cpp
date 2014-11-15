@@ -19,11 +19,10 @@ bool SymTable::add(Symbol *symbol)
 
 Symbol *SymTable::find(const string &name)
 {
-    for (Symbol* s : table) {
-        if (s->getName() == name) {
-            return s;
+    for (int i = (int)table.size() - 1; i >= 0; i--) {
+        if (table[i]->getName() == name) {
+            return table[i];
         };
-
     }
     return NULL;
 };
