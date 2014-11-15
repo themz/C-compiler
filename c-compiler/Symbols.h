@@ -28,7 +28,7 @@ public:
     Symbol(const string &name = ""): name(name){};
     string getName(){return name;};
     bool isAnonymousSym(){return name[0] == '#';};
-    virtual void print(int deep = 0){};
+    virtual void print(int deep = 0, bool printType = true){};
     virtual bool isType(){return false;};
     virtual bool isVar(){return false;};
     virtual bool isStruct(){return false;};
@@ -54,10 +54,10 @@ public:
     bool hasType(){return hType;};
     bool hasVar(){return hVar;};
     bool hasFunc(){return hFunc;};
-    void print(int deep = 0);
-    void printTypes(int deep = 0);
-    void printVariables(int deep = 0);
-    void printFunctions(int deep = 0);
+    void print(int deep = 0, bool printType = true);
+    void printTypes(int deep = 0, bool printType = true);
+    void printVariables(int deep = 0, bool printType = true);
+    void printFunctions(int deep = 0, bool printType = true);
     int getSize(){return size;};
     Symbol *top();
     Symbol *find(const string &name);
@@ -72,10 +72,10 @@ public:
     SymTable* top();
     bool existsInLastNamespace(const string& name);
     void add(Symbol* s);
-    void print(int deep = 0);
-    void printTypes(int deep = 0);
-    void printVariables(int deep = 0);
-    void printFunctions(int deep = 0);
+    void print(int deep = 0, bool printType = true);
+    void printTypes(int deep = 0, bool printType = true);
+    void printVariables(int deep = 0, bool printType = true);
+    void printFunctions(int deep = 0, bool printType = true);
     void push(SymTable* table);
     void pop();
 };
@@ -84,7 +84,7 @@ class EmptySymbol : public Symbol
 {
 private:
 public:
-    void print(){cout << " Empty symbol " << endl;};
+    void print(int deep = 0, bool printType = true){cout << " Empty symbol " << endl;};
 };
 
 class SymType : public Symbol
@@ -97,7 +97,7 @@ public:
     virtual bool isEmpty(){return false;}
     virtual SymType *getType(){return NULL;};
     virtual void setTable(SymTable *t){};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class SymTypeInt : public SymType
@@ -135,7 +135,7 @@ private:
     SymType *type;
 public:
     SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     void setSize(Node *newSize){size = newSize;};
     virtual SymType *getType(){return type;};
     //size_t getSize(){return size;};
@@ -150,7 +150,7 @@ public:
     Symbol *find(const string &name);
     virtual bool isStruct(){return true;};
     virtual bool isType(){return true;};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     virtual void setTable(SymTable *t){ table = t;}
     virtual bool isEmpty(){return table == NULL;}
 };
@@ -161,7 +161,7 @@ private:
     SymType *type;
 public:
     SymTypeDef(SymType *type, const string &name): SymType (name), type(type){};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     virtual SymType *getType(){return type;};
     virtual bool isTypedef(){return true;};
 };
@@ -172,7 +172,7 @@ private:
     SymType *type;
 public:
     SymTypePointer(SymType *type, const string &name = ""): SymType(name), type(type){};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
     virtual SymType *getType(){return type;};
 };
@@ -190,7 +190,7 @@ public:
     bool isConst(){return constVar;};
     bool isLocal(){return localVar;};
     virtual bool isVar(){return true;};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     virtual SymType *getType(){return type;};
 };
 
@@ -203,7 +203,7 @@ private:
 public:
     SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):Symbol(name), retType(retType), args(args), body(body){};
     virtual bool isFunc(){return true;};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     int getArgCount(){return args->getSize();};
 };
 
@@ -214,7 +214,7 @@ class Stmt
 private:
 public:
     Stmt(){};
-    virtual void print(int deep = 0){};
+    virtual void print(int deep = 0, bool printType = true){};
     virtual bool isSingle(){return false;};
 };
 
@@ -228,7 +228,7 @@ public:
     void setSymTable(SymTable *tbl){table = tbl;};
     StmtBlock(SymTable *table){};
     StmtBlock(){};
-    virtual void print(int deep = 0);
+    virtual void print(int deep = 0, bool printType = true);
 };
 
 class StmtSingle : public Stmt
@@ -237,7 +237,7 @@ private:
     Node* exp;
 public:
     StmtSingle(Node* exp): exp(exp) {}
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
     bool isSingle(){return true;};
 };
 
@@ -249,7 +249,7 @@ private:
     Stmt *falseBlock;
 public:
     StmtIf(Node *cond, Stmt *tBlock, Stmt *fBlock): condition(cond), trueBlock(tBlock), falseBlock(fBlock) {};
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtCycle : public Stmt
@@ -259,21 +259,21 @@ protected:
     Stmt* body;
 public:
     StmtCycle(Node *cond, Stmt* b): condition(cond), body(b) {}
-    virtual void print(int deep = 0){};
+    virtual void print(int deep = 0, bool printType = true){};
 };
 
 class StmtWhile : public StmtCycle
 {
 public:
     StmtWhile(Node *cond, Stmt *b): StmtCycle(cond, b) {}
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtDoWhile : public StmtCycle
 {
 public:
     StmtDoWhile(Node *cond, Stmt *b): StmtCycle(cond, b) {}
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtFor : public StmtCycle
@@ -283,7 +283,7 @@ private:
     Node *inc;
 public:
     StmtFor(Node *cond, Node *inc, Node *init, Stmt *body): StmtCycle(cond, body), init(init), inc(inc) {}
-    void print(int deep = 0 );
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtJump : public Stmt
@@ -293,13 +293,13 @@ class StmtJump : public Stmt
 class StmtBreak : public StmtJump
 {
 public:
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtContinue : public StmtJump
 {
 public:
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 class StmtReturn : public StmtJump
@@ -308,7 +308,7 @@ private:
     Node *retArg;
 public:
     StmtReturn(Node *ret): retArg(ret) {}
-    void print(int deep = 0);
+    void print(int deep = 0, bool printType = true);
 };
 
 

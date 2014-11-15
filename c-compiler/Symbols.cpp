@@ -32,7 +32,7 @@ Symbol *SymTable::top()
     return table.size() > 0 ? table.back() : NULL;
 }
 
-void SymTable::printTypes(int deep)
+void SymTable::printTypes(int deep, bool printType)
 {
     for (Symbol* s : table) {
         if (s->isType()) {
@@ -42,7 +42,7 @@ void SymTable::printTypes(int deep)
     }
 }
 
-void SymTable::printVariables(int deep)
+void SymTable::printVariables(int deep, bool printType)
 {
     for (Symbol* s : table) {
         if (s->isVar()) {
@@ -51,7 +51,7 @@ void SymTable::printVariables(int deep)
     }
 }
 
-void SymTable::printFunctions(int deep)
+void SymTable::printFunctions(int deep, bool printType)
 {
     for (Symbol* s : table) {
         if (s->isFunc()) {
@@ -60,20 +60,20 @@ void SymTable::printFunctions(int deep)
     }
 }
 
-void SymTable::print(int deep)
+void SymTable::print(int deep, bool printType)
 {
     string tab = string(deep, ' ');
     if (hasType()) {
         cout << tab << "+----Types--+" << endl;
-        printTypes(deep + N);
+        printTypes(deep + N, printType);
     }
     if (hasVar()) {
         cout << tab << "+----Variables----+" << endl;
-        printVariables(deep + N);
+        printVariables(deep + N, printType);
     }
     if (hasFunc()) {
         cout << tab << "+----Functions----+" << endl;
-        printFunctions(deep + N);
+        printFunctions(deep + N,printType);
     }
 }
 
@@ -119,7 +119,7 @@ Symbol* SymTableStack::find(const string &name)
     return NULL;
 };
 
-void SymTableStack::print(int deep)
+void SymTableStack::print(int deep, bool printType)
 {
     string tab = string(deep, ' ');
     if (top()->hasType()) {
@@ -136,37 +136,37 @@ void SymTableStack::print(int deep)
     }
 }
 
-void SymTableStack::printTypes(int deep)
+void SymTableStack::printTypes(int deep, bool printType)
 {
     for (SymTable* st : tables){
-        st->printTypes(deep);
+        st->printTypes(deep, printType);
     }
 };
 
-void SymTableStack::printVariables(int deep)
+void SymTableStack::printVariables(int deep, bool printType)
 {
     for (SymTable* st : tables){
-        st->printVariables(deep);
+        st->printVariables(deep, printType);
     }
 };
 
-void SymTableStack::printFunctions(int deep)
+void SymTableStack::printFunctions(int deep, bool printType)
 {
     for (SymTable* st : tables){
-        st->printFunctions(deep);
+        st->printFunctions(deep, printType);
     }
 };
 
 //---------------------------------symbols---------------------------------//
 
 
-void SymType::print(int deep)
+void SymType::print(int deep, bool printType)
 {
     cout << string(deep, ' ') << getName();
 }
 
 
-void SymVar::print(int deep)
+void SymVar::print(int deep, bool printType)
 {
     cout << string(deep, ' ');
     if (isConst()) {
@@ -174,7 +174,7 @@ void SymVar::print(int deep)
     }
     cout << " " << getName();
     cout << " ";
-    type->print();
+    type->print(0, !type->isStruct());
     if (exp != NULL) {
         cout << " = { ";
         exp->print(deep, false);
@@ -183,7 +183,7 @@ void SymVar::print(int deep)
     cout << endl;
 }
 
-void SymTypeArray::print(int deep)
+void SymTypeArray::print(int deep, bool printType)
 {
     cout << "array [" ;
     if(size != NULL)
@@ -194,16 +194,16 @@ void SymTypeArray::print(int deep)
     }
 }
 
-void SymTypePointer::print(int deep)
+void SymTypePointer::print(int deep, bool printType)
 {
     cout << "pointer to ";
-    type->print(deep);
+    type->print(deep, !type->isStruct() && printType);
 }
 
-void SymTypeStruct::print(int deep)
+void SymTypeStruct::print(int deep, bool printType)
 {
     cout << string(deep, ' ') <<"struct " << getName();
-    if (table != NULL) {
+    if (table != NULL && printType) {
         cout << (table->getSize() > 0 ? " :\n" : "");
         table->print(deep + N + N);
     }
@@ -215,7 +215,7 @@ Symbol *SymTypeStruct::find(const string &name)
     return table->find(name);
 }
 
-void SymFunc::print(int deep)
+void SymFunc::print(int deep, bool printType)
 {
     cout <<  string(deep, ' ');
     if (retType->isStruct()) {
@@ -240,7 +240,7 @@ void SymFunc::print(int deep)
 
 }
 
-void SymTypeDef::print(int deep)
+void SymTypeDef::print(int deep, bool printType)
 {
     cout << string(deep, ' ') << getName() << " ";
     type->print();

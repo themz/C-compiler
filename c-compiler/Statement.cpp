@@ -8,7 +8,7 @@ void StmtBlock::addStmt(Stmt *statement)
     statements.push_back(statement);
 }
 
-void StmtBlock::print(int deep)
+void StmtBlock::print(int deep, bool printType)
 {
     table->print(deep);
     //cout << string(deep + N, ' ') << "+----Stmt----+" << endl;
@@ -21,7 +21,7 @@ void StmtBlock::print(int deep)
     }
 }
 
-void StmtIf::print(int deep)
+void StmtIf::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "if (";
     condition->print(0, false);
@@ -36,7 +36,7 @@ void StmtIf::print(int deep)
     cout << endl;
 }
 
-void StmtSingle::print(int deep)
+void StmtSingle::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') ;
     if (exp != NULL) {
@@ -48,7 +48,7 @@ void StmtSingle::print(int deep)
 
 }
 
-void StmtFor::print(int deep)
+void StmtFor::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "for (";
     if (init != NULL) {
@@ -73,7 +73,7 @@ void StmtFor::print(int deep)
     }
 }
 
-void StmtWhile::print(int deep)
+void StmtWhile::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "while (";
     condition->print(0,false);
@@ -87,7 +87,7 @@ void StmtWhile::print(int deep)
     }
 }
 
-void StmtDoWhile::print(int deep)
+void StmtDoWhile::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << " do ";
     if (body != NULL) {
@@ -103,7 +103,7 @@ void StmtDoWhile::print(int deep)
 }
 
 
-void StmtReturn::print(int deep)
+void StmtReturn::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "return ";
     if(retArg != NULL)
@@ -115,12 +115,12 @@ void StmtReturn::print(int deep)
     cout << endl;
 }
 
-void StmtBreak::print(int deep)
+void StmtBreak::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "break;" << endl;
 }
 
-void StmtContinue::print(int deep)
+void StmtContinue::print(int deep, bool printType)
 {
     cout << string(deep + N, ' ') << "continue;" << endl;
 }
