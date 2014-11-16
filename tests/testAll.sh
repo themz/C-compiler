@@ -1,4 +1,5 @@
 #!/bin/bash
+clear;
 echo ''
 bash scannerTest.sh
 echo ''
