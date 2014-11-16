@@ -19,10 +19,10 @@ bool SymTable::add(Symbol *symbol)
 
 Symbol *SymTable::find(const string &name)
 {
-    for (int i = (int)table.size() - 1; i >= 0; i--) {
-        if (table[i]->getName() == name) {
-            return table[i];
-        };
+    for (Symbol* s : table) {
+        if (s->getName() == name) {
+            return s;
+        }
     }
     return NULL;
 };
@@ -105,16 +105,15 @@ void SymTableStack::add(Symbol* s)
 
 Symbol* SymTableStack::find(const string &name)
 {
-    for (SymTable* st : tables) {
-        Symbol* s = st->find('$' + name);
+    for (int i = (int)tables.size() - 1; i >= 0; i--) {
+        Symbol* s = tables[i]->find('$' + name);
         if (s != NULL) {
             return s;
         };
-        s = st->find(name);
+        s = tables[i]->find(name);
         if (s != NULL) {
             return s;
         };
-
     }
     return NULL;
 };
