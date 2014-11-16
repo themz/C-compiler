@@ -1,0 +1,3 @@
+int main(){
+	int *const *const *const const *const const a;
+}

@@ -195,7 +195,7 @@ void SymTypeArray::print(int deep, bool printType)
 
 void SymTypePointer::print(int deep, bool printType)
 {
-    cout << "pointer to ";
+    cout << (isConst() ? "const " : "" ) <<"pointer to ";
     type->print(deep, !type->isStruct() && printType);
 }
 

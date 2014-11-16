@@ -23,15 +23,7 @@
 int main()
 {		
 
-struct a{
-	struct d{
-		int a;
-	};
-};
-
-struct;
-
-
+int *const *const *const a;
 
 // 	struct bb{
 // 		int a;

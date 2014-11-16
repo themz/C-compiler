@@ -34,8 +34,9 @@ public:
     virtual bool isStruct(){return false;};
     virtual bool isFunc(){return false;};
     virtual bool isPointer(){return false;};
+    virtual bool isEmpty(){return false;};
+    virtual bool isConst(){return false;};
     virtual SymType *getType(){return NULL;};
-    virtual bool isEmpty(){return false;}
 };
 
 //-------------SymTable--------------//
@@ -170,11 +171,13 @@ class SymTypePointer : public SymType
 {
 private:
     SymType *type;
+    bool cnst;
 public:
-    SymTypePointer(SymType *type, const string &name = ""): SymType(name), type(type){};
+    SymTypePointer(SymType *type, const bool isConst = false, const string &name = ""): SymType(name), type(type), cnst(isConst){};
     void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
     virtual SymType *getType(){return type;};
+    virtual bool isConst(){return cnst;};
 };
 
 class SymVar : public Symbol
@@ -183,11 +186,11 @@ private:
     SymType* type;
     Node* exp;
     bool localVar;
-    bool constVar;
+    bool cnst;
 public:
     SymVar(const string &name, SymType* type, Node* exp, bool constVar = false, bool localVar = true)
-        : Symbol(name), type(type), exp(exp), constVar(constVar), localVar(localVar){}
-    bool isConst(){return constVar;};
+        : Symbol(name), type(type), exp(exp), cnst(constVar), localVar(localVar){}
+    virtual bool isConst(){return cnst;};
     bool isLocal(){return localVar;};
     virtual bool isVar(){return true;};
     void print(int deep = 0, bool printType = true);

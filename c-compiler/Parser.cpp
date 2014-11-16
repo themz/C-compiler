@@ -188,10 +188,9 @@ SymType* Parser::parseType(const parserState state, bool isConst)
     return type;
 }
 
-void Parser::parseDefinition(SymType *type, bool isConst, const parserState state)
+void Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserState state)
 {
     Node* exp = NULL;
-    type = parseComplexDeclaration(type);
     string name = parseName();
     if (*GL() == PARENTHESIS_FRONT) {
         parseFunctionDeclaration(type, name);
@@ -219,7 +218,13 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
         NL();
 }
 
-void Parser::parseDeclaration(const parserState state)
+void Parser::parseDeclarator(SymType *type, bool isConst, const parserState state)
+{
+    type = parsePointerDeclaration(type);
+    parseDirectDeclarator(type, isConst, state);
+}
+
+void Parser::parseTypeSpec(const parserState state)
 {
     parseSemicolon();
     if (*GL() == ENDOF) {
@@ -241,7 +246,7 @@ void Parser::parseDeclaration(const parserState state)
                   *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
 #warning Убрать BRACE_BACK и ENDOF
     while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
-        parseDefinition(type, isConst, state);
+        parseDeclarator(type, isConst, state);
     }
 }
 
@@ -254,7 +259,7 @@ void Parser::addSym(Symbol *symbol){
 void Parser::parse()
 {
     while (*GL() != ENDOF) {
-        parseDeclaration();
+        parseTypeSpec();
         NL();
     }
 }
@@ -386,7 +391,7 @@ SymTable* Parser::parseFunctionsParams()
             NL();
             isConst = true;
         }
-        type = parseComplexDeclaration(parseType());
+        type = parsePointerDeclaration(parseType());
         name = parseName(PARSE_FUNC_ARG_DEF);
         if (*GL() == BRACKET_FRONT) {
             var = parseArrayDeclaration(type, name, isConst);
@@ -459,7 +464,7 @@ string Parser::parseStruct(const parserState state)
         NL();
         symStack.push(new SymTable());
         while (*GL() != BRACE_BACK) {
-            parseDeclaration();
+            parseTypeSpec();
             NL();
         }
         SymTable* table = symStack.top();
@@ -488,7 +493,7 @@ void Parser::parseTypedef()
     NL();
     SymTable *table = new SymTable();
     symStack.push(table);
-    parseDeclaration(PARSE_TYPEDEF);
+    parseTypeSpec(PARSE_TYPEDEF);
     symStack.pop();
     for (Symbol* s : table->table) {
         if (s->isVar()) {
@@ -500,11 +505,14 @@ void Parser::parseTypedef()
     }
 }
 
-SymType *Parser::parseComplexDeclaration(SymType *type)
+SymType *Parser::parsePointerDeclaration(SymType *type)
 {
     while (*GL() == MULT) {
-        type = new SymTypePointer(type);
         NL();
+        type = new SymTypePointer(type, *GL() == T_CONST);
+        while (*GL() == T_CONST) {
+            NL();
+        }
     };
     return type;
 }
@@ -574,7 +582,7 @@ StmtBlock *Parser::parseBlock()
     while (*GL() != BRACE_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF || *GL() == T_STRUCT) {
-            parseDeclaration();
+            parseTypeSpec();
             NL();
         } else {
             Stmt *s = parseStmt();

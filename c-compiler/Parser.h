@@ -36,13 +36,14 @@ private:
     Stmt *parseWhile();
     Stmt *parseDoWhile();
     Stmt *parseJumpStatement();
-    void parseDeclaration(const parserState state = PARSE_DEFENITION);
-    void parseDefinition(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
+    void parseDeclarator(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
+    void parseTypeSpec(const parserState state = PARSE_DEFENITION);
+    void parseDirectDeclarator(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
     void parseFunction(const bool withBlock);
     SymVar *parseArrayDeclaration(SymType *type, string name,bool isConst, bool inFuncDef = false);
     void parseFunctionDeclaration(SymType *type, string name);
     SymTable *parseFunctionsParams();
-    SymType *parseComplexDeclaration(SymType *type);
+    SymType *parsePointerDeclaration(SymType *type);
     string parseStruct(const parserState state = PARSE_DEFENITION);
     string parseName(const parserState state = PARSE_DEFENITION);
     SymTable *parseFuncArg(const bool dec = true);
