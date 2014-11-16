@@ -1,2 +1,2 @@
-Error: Redifinition variable 'a'
+Error: Redefinition variable 'a'
 row:2 col:17

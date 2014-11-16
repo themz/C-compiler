@@ -3,96 +3,76 @@
 #define NL scanner_.nextLex
 #define GL scanner_.get
 
-class lexBuffer {
-    int curIndex;
-    vector<Lexeme *> lexemes;
-public:
-    void push(Lexeme *l);
-    void delCurLex();
-    void delLex(int indx);
-    void setToOpenParenthisOrStart();
-    Lexeme *curLex();
-    Lexeme *prevLex();
-    Lexeme *nextLex();
-    int getCurIndex(){return curIndex;};
-    bool empty(){return lexemes.empty();};
-    void setCurIndex(int idx){curIndex = idx;};
-    int size(){return (int)lexemes.size();};
-    void next(){curIndex++;};
-    void prev(){curIndex--;};
-};
-
-
 Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 {
-	priorityTable[PARENTHESIS_FRONT] = 15;
-	priorityTable[BRACKET_FRONT] = 15;
-	priorityTable[ARROW] = 15;
-	priorityTable[DOT] = 15;
-	priorityTable[LOGICAL_NOT] = 14;
-	priorityTable[BITWISE_NOT] = 14;
-	priorityTable[INC] = 14;
-	priorityTable[DEC] = 14;
-	priorityTable[MULT] = 13;
-	priorityTable[DIV] = 13;
-	priorityTable[MOD] = 13;
-	priorityTable[PLUS] = 12;
-	priorityTable[MINUS] = 12;
-	priorityTable[BITWISE_SHIFT_LEFT] = 11;
-	priorityTable[BITWISE_SHIFT_RIGHT] = 11;
-	priorityTable[LESS] = 10;
-	priorityTable[LESS_OR_EQUAL] = 10;
-	priorityTable[GREATER] = 10;
-	priorityTable[GREATER_OR_EQUAL] = 10;
-	priorityTable[EQUAL] = 9;
-	priorityTable[NOT_EQUAL] = 9;
-	priorityTable[BITWISE_AND] = 8;	
-	priorityTable[BITWISE_XOR] = 7;
-	priorityTable[BITWISE_OR] = 6;
-	priorityTable[LOGICAL_AND] = 5;
-	priorityTable[LOGICAL_OR] = 4;
-	priorityTable[QUESTION] = 3;
-	priorityTable[ASSIGN] = 2;
-	priorityTable[PLUS_ASSIGN] = 2;
-	priorityTable[MINUS_ASSIGN] = 2;
-	priorityTable[MULT_ASSIGN] = 2;
-	priorityTable[DIV_ASSIGN] = 2;
-	priorityTable[MOD_ASSIGN] = 2;
-	priorityTable[AND_ASSIGN] = 2;
-	priorityTable[OR_ASSIGN] = 2;
-	priorityTable[BITWISE_XOR_ASSIGN] = 2;
-	priorityTable[AND_ASSIGN] = 2;
-	priorityTable[OR_ASSIGN] = 2;
-	priorityTable[BITWISE_SHIFT_LEFT_ASSIGN] = 2;
-	priorityTable[BITWISE_SHIFT_RIGHT_ASSIGN] = 2;
-	priorityTable[COMMA] = 1;
-	priorityTable[COLON] = 0; 
-
-	unaryOps[LOGICAL_NOT] = true;
-	unaryOps[MULT] = true; 
-	unaryOps[INC] = true;
-	unaryOps[DEC] = true;
-	unaryOps[BITWISE_AND] = true; 
-	unaryOps[PLUS] = true;
-	unaryOps[MINUS] = true;
-	unaryOps[BITWISE_NOT] = true;
-
-	rightAssocOps[ASSIGN] = true;
-	rightAssocOps[PLUS_ASSIGN] = true;
-	rightAssocOps[MINUS_ASSIGN] = true;
-	rightAssocOps[MULT_ASSIGN] = true;
-	rightAssocOps[DIV_ASSIGN] = true;
-	rightAssocOps[MOD_ASSIGN] = true;
-	rightAssocOps[AND_ASSIGN] = true;
-	rightAssocOps[OR_ASSIGN] = true;
-	rightAssocOps[BITWISE_XOR_ASSIGN] = true;
-	rightAssocOps[BITWISE_SHIFT_LEFT_ASSIGN] = true;
-	rightAssocOps[BITWISE_SHIFT_RIGHT_ASSIGN] = true;
-	rightAssocOps[LOGICAL_NOT] = true;
-	rightAssocOps[BITWISE_NOT] = true;
-	rightAssocOps[MULT] = true;
-	rightAssocOps[BITWISE_AND] = true;
-	rightAssocOps[QUESTION] = true;
+    priorityTable[PARENTHESIS_FRONT] = 15;
+    priorityTable[BRACKET_FRONT] = 15;
+    priorityTable[ARROW] = 15;
+    priorityTable[DOT] = 15;
+    priorityTable[LOGICAL_NOT] = 14;
+    priorityTable[BITWISE_NOT] = 14;
+    priorityTable[INC] = 14;
+    priorityTable[DEC] = 14;
+    priorityTable[MULT] = 13;
+    priorityTable[DIV] = 13;
+    priorityTable[MOD] = 13;
+    priorityTable[PLUS] = 12;
+    priorityTable[MINUS] = 12;
+    priorityTable[BITWISE_SHIFT_LEFT] = 11;
+    priorityTable[BITWISE_SHIFT_RIGHT] = 11;
+    priorityTable[LESS] = 10;
+    priorityTable[LESS_OR_EQUAL] = 10;
+    priorityTable[GREATER] = 10;
+    priorityTable[GREATER_OR_EQUAL] = 10;
+    priorityTable[EQUAL] = 9;
+    priorityTable[NOT_EQUAL] = 9;
+    priorityTable[BITWISE_AND] = 8;
+    priorityTable[BITWISE_XOR] = 7;
+    priorityTable[BITWISE_OR] = 6;
+    priorityTable[LOGICAL_AND] = 5;
+    priorityTable[LOGICAL_OR] = 4;
+    priorityTable[QUESTION] = 3;
+    priorityTable[ASSIGN] = 2;
+    priorityTable[PLUS_ASSIGN] = 2;
+    priorityTable[MINUS_ASSIGN] = 2;
+    priorityTable[MULT_ASSIGN] = 2;
+    priorityTable[DIV_ASSIGN] = 2;
+    priorityTable[MOD_ASSIGN] = 2;
+    priorityTable[AND_ASSIGN] = 2;
+    priorityTable[OR_ASSIGN] = 2;
+    priorityTable[BITWISE_XOR_ASSIGN] = 2;
+    priorityTable[AND_ASSIGN] = 2;
+    priorityTable[OR_ASSIGN] = 2;
+    priorityTable[BITWISE_SHIFT_LEFT_ASSIGN] = 2;
+    priorityTable[BITWISE_SHIFT_RIGHT_ASSIGN] = 2;
+    priorityTable[COMMA] = 1;
+    priorityTable[COLON] = 0;
+    
+    unaryOps[LOGICAL_NOT] = true;
+    unaryOps[MULT] = true;
+    unaryOps[INC] = true;
+    unaryOps[DEC] = true;
+    unaryOps[BITWISE_AND] = true;
+    unaryOps[PLUS] = true;
+    unaryOps[MINUS] = true;
+    unaryOps[BITWISE_NOT] = true;
+    
+    rightAssocOps[ASSIGN] = true;
+    rightAssocOps[PLUS_ASSIGN] = true;
+    rightAssocOps[MINUS_ASSIGN] = true;
+    rightAssocOps[MULT_ASSIGN] = true;
+    rightAssocOps[DIV_ASSIGN] = true;
+    rightAssocOps[MOD_ASSIGN] = true;
+    rightAssocOps[AND_ASSIGN] = true;
+    rightAssocOps[OR_ASSIGN] = true;
+    rightAssocOps[BITWISE_XOR_ASSIGN] = true;
+    rightAssocOps[BITWISE_SHIFT_LEFT_ASSIGN] = true;
+    rightAssocOps[BITWISE_SHIFT_RIGHT_ASSIGN] = true;
+    rightAssocOps[LOGICAL_NOT] = true;
+    rightAssocOps[BITWISE_NOT] = true;
+    rightAssocOps[MULT] = true;
+    rightAssocOps[BITWISE_AND] = true;
+    rightAssocOps[QUESTION] = true;
     NL();
     SymTable *st = new SymTable();
     st->add(new SymTypeInt());
@@ -104,12 +84,12 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 
 Node* Parser::parseExp(int priority){
     if (priority > 15)
-            return parseFactor();
+        return parseFactor();
     Node* l = parseExp(priority + 1);
     Node* root = l;
     if (GL() == NULL || *GL() == ENDOF || *GL() == PARENTHESIS_BACK ||
         *GL() == BRACKET_BACK || *GL() == COLON || *GL() == SEPARATOR) {
-            return root;
+        return root;
     }
     OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(GL());
     while(opLex && priorityTable[opLex->getOpType()] >= priority)
@@ -160,36 +140,36 @@ Node* Parser::parseExp(int priority){
             case(ARROW):
             {
                 NL();
-//                if (*root->lexeme_ != IDENTIFICATOR) {
-//                    exception("Left expression must be identificator");
-//                }
-//                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
-//                if(strct == NULL) {
-//                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
-//                } else if (!strct->getType()->isStruct()){
-//                    exception("Member '"+ strct->getName() +"'  reference base type '"
-//                              + strct->getType()->getName() + "' is not a structure ");
-//                }
-//                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
-//                if(r->lexeme_->getLexType() != IDENTIFICATOR){
-//                    exception("Expected identificator");
-//                }
-//                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
-//                if(member == NULL) {
-//                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
-//                }
-//                root = new BinaryOpNode(opLex, root, r);
+                //                if (*root->lexeme_ != IDENTIFICATOR) {
+                //                    exception("Left expression must be identificator");
+                //                }
+                //                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
+                //                if(strct == NULL) {
+                //                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
+                //                } else if (!strct->getType()->isStruct()){
+                //                    exception("Member '"+ strct->getName() +"'  reference base type '"
+                //                              + strct->getType()->getName() + "' is not a structure ");
+                //                }
+                //                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
+                //                if(r->lexeme_->getLexType() != IDENTIFICATOR){
+                //                    exception("Expected identificator");
+                //                }
+                //                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
+                //                if(member == NULL) {
+                //                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
+                //                }
+                //                root = new BinaryOpNode(opLex, root, r);
                 break;
             }
-        default:
+            default:
                 NL();
                 BinaryOpNode *bn = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));
                 exception("Missed branch of binary operator", !bn->haveBranch());
                 root = bn;
                 break;
         }
-    opLex = dynamic_cast<OperationLexeme*>(GL());
-    }     
+        opLex = dynamic_cast<OperationLexeme*>(GL());
+    }
     return root;
 }
 
@@ -217,14 +197,16 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
         return parseDeclarator(type, isConst);
     } else {
         exception("Expected identificator", *GL() != IDENTIFICATOR);
-        exception("Redifinition variable '" + GL()->getValue() + "'",
+        exception("Redefinition variable '" + GL()->getValue() + "'",
                   symStack.top()->find(GL()->getValue()) != NULL);
     }
     var = new SymVar(GL()->getValue(), type, NULL, isConst);
     NL();
     if (*GL() == PARENTHESIS_FRONT) {
         parseFunctionDeclaration(type, var->getName());
-        NL();
+        if (*GL() == COMMA) {
+            NL();
+        }
         return NULL;
     }else if(*GL() == BRACKET_FRONT) {
         var->setType(parseArrayDeclaration(var->getType()));
@@ -251,7 +233,7 @@ void Parser::parseTypeSpec(const parserState state)
         return;
     }
     bool isConst = false;
-
+    string name;
     if (*GL() == T_TYPEDEF) {
         exception("Duplicate 'typedef' declaration specifier", state == PARSE_TYPEDEF);
         parseTypedef();
@@ -262,13 +244,12 @@ void Parser::parseTypeSpec(const parserState state)
         NL();
     }
     SymType *type = parseType(state, isConst);
-    string name = parseDec(type);
-//        exception("Anonymous structs must be class members",
-//                  *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
-//#warning Убрать BRACE_BACK и ENDOF
-//    while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
-//            symStack.add(parseDeclarator(type, isConst, state));
-//    }
+    exception("Anonymous structs must be class members",
+              *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
+#warning Убрать BRACE_BACK и ENDOF
+    while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
+        symStack.add(parseDeclarator(type, isConst, state));
+    }
 }
 
 void Parser::addSym(Symbol *symbol){
@@ -287,49 +268,49 @@ void Parser::parse()
 
 Node* Parser::parseFactor(int priority)
 {
-	Node* root = NULL;
+    Node* root = NULL;
     bool needNext = true;
-	Lexeme* lex = GL();
-	if (*lex == ENDOF)
-	{
-		return root;
-	}
-	switch (lex->getLexType())
-	{
-	case(IDENTIFICATOR):
-		root = new IdentifierNode(lex);
-		break;
-	case(INTEGER):
-		root = new IntNode(lex);
-		break;
-	case(FLOAT):
-		root = new FloatNode(lex);
-		break;
-	case(CHAR):
-		root = new CharNode(lex);
-        break;
-	case RESERVEDWORD:
-		{
-
-			if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
-			{
+    Lexeme* lex = GL();
+    if (*lex == ENDOF)
+    {
+        return root;
+    }
+    switch (lex->getLexType())
+    {
+        case(IDENTIFICATOR):
+            root = new IdentifierNode(lex);
+            break;
+        case(INTEGER):
+            root = new IntNode(lex);
+            break;
+        case(FLOAT):
+            root = new FloatNode(lex);
+            break;
+        case(CHAR):
+            root = new CharNode(lex);
+            break;
+        case RESERVEDWORD:
+        {
+            
+            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
+            {
                 NL();
                 exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
                 NL();
-				root = new TypecastNode(lex, parseExp());
+                root = new TypecastNode(lex, parseExp());
                 exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
                 NL();
-			} 
-			else if (*lex == T_SIZEOF)
-			{
-				
-			}
-			else 
-				exception("Expected typecast word: int(), float(), char() or sizeof()");
+            }
+            else if (*lex == T_SIZEOF)
+            {
+                
+            }
+            else
+                exception("Expected typecast word: int(), float(), char() or sizeof()");
             needNext = false;
-			break;
-		}
-	case(OPERATION):
+            break;
+        }
+        case(OPERATION):
         {
             OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
             if (*opLex == PARENTHESIS_FRONT)
@@ -338,13 +319,13 @@ Node* Parser::parseFactor(int priority)
                 root = parseExp();
                 exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK);
             }
-            else if (unaryOps[opLex->getOpType()]) 
+            else if (unaryOps[opLex->getOpType()])
             {
                 NL();
                 root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
                 needNext = false;
             }
-            else if (*opLex == PARENTHESIS_BACK) 
+            else if (*opLex == PARENTHESIS_BACK)
             {
                 exception("Expected parenthesis open", pState != PARSE_CYCLE && pState != PARSE_IF);
                 break;
@@ -355,19 +336,19 @@ Node* Parser::parseFactor(int priority)
                 root = parseExp();
                 needNext = false;
             }
-//            else 
-//            {
-//                throw parser_exception ("Empty expression is not allowed", false);
-//            }
+            //            else
+            //            {
+            //                throw parser_exception ("Empty expression is not allowed", false);
+            //            }
             break;
         }
-	default:
+        default:
             break;
     }
     if (needNext) {
         NL();
     }
-	return root;
+    return root;
 }
 
 void Parser::parseFunctionDeclaration(SymType *type, string name)
@@ -403,7 +384,6 @@ SymTable* Parser::parseFunctionsParams()
     SymType *type = NULL;
     string name = "";
     Node *exp = NULL;
-    SymVar *var = NULL;
     while (*GL() != PARENTHESIS_BACK) {
         bool isConst = false;
         exp = NULL;
@@ -415,16 +395,11 @@ SymTable* Parser::parseFunctionsParams()
         type = parsePointerDeclaration(parseType());
         name = parseName(PARSE_FUNC_ARG_DEF);
         if (*GL() == BRACKET_FRONT) {
-            var->setType(parseArrayDeclaration(type));
+            type = parseArrayDeclaration(type);
         } else {
-            if(*GL() == ASSIGN)
-            {
-                NL();
-                exp = parseExp(priorityTable[COMMA] + 1);
-            }
-            var = new SymVar(name, type, exp, isConst);
+            exception("C does not support default arguments", *GL() == ASSIGN);
         }
-        exception("Redefinition param name:  \"" + name + "\"", !table->add(var));
+        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst)));
         if (*GL() == COMMA) {
             NL();
         }
@@ -450,11 +425,9 @@ SymType *Parser::parseArrayDeclaration(SymType *type)
     }
     for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
         if (i == (int)sizes.size() - 1) {
-            //dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]->lexeme_-> );
-        } else {
-            
-        }
-            //arrType = new SymTypeArray(sizes[i], arrType);
+            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
+        } else
+            arrType = new SymTypeArray(sizes[i], arrType);
     };
     return arrType;
 }
@@ -567,86 +540,6 @@ SymType *Parser::parsePointerDeclaration(SymType *type)
     return type;
 }
 
-string Parser::parseDec(SymType *type)
-{
-    lexBuffer* lb = new lexBuffer();
-    int nameIndex = 0;
-    string name = "";
-    while (*GL() != SEMICOLON) {      //Случай конца обявления int *a;
-        if (*GL() == IDENTIFICATOR) {
-            exception("Unexpected identificator '" + GL()->getValue() + "'", nameIndex != 0);
-            nameIndex = lb->size();
-        }
-        lb->push(GL());
-        NL();
-    }
-    lb->setCurIndex(nameIndex);
-    name = lb->curLex()->getValue();
-    //lb->delCurLex();
-    vector<int> sizes;
-    while (lb->size() != 1) {
-        if (*lb->nextLex() == BRACKET_FRONT) {
-            lb->next();
-            while (*lb->curLex() == BRACKET_FRONT) {
-                lb->delCurLex();
-                if (*lb->curLex() == INTEGER) {
-                    sizes.push_back(dynamic_cast<IntegerLexeme *>(lb->curLex())->getIntValue());
-                    lb->delCurLex();
-                }
-                if (*lb->curLex() == BRACKET_BACK) {
-                    lb->delCurLex();
-                } else {
-                    exception("Expected array size exp or []");
-                }
-            }
-            for (int i = (int)sizes.size() - 1 ; i >= 0; i--) {
-                type = new SymTypeArray(sizes[i], type);
-            }
-            sizes.clear();
-            lb->prev();
-        }
-        while (*lb->prevLex() == MULT) {
-            type = new SymTypePointer(type);
-            lb->prev();
-            lb->delCurLex();
-            if(lb->empty()){
-                break;
-            }
-        }
-        if(*lb->nextLex() == PARENTHESIS_BACK && *lb->prevLex() == PARENTHESIS_FRONT)
-        {
-            lb->delLex(lb->getCurIndex() + 1);
-            lb->delLex(lb->getCurIndex() - 1);
-            lb->prev();
-        }
-//        while(*stackLex[indx] == BRACKET_FRONT) {             //Массив
-//            stackLex.erase(stackLex.begin() + indx);
-//            if (*stackLex[indx] == INTEGER) {
-//                size =  dynamic_cast<IntegerLexeme *>(stackLex[indx])->getIntValue();
-//                stackLex.erase(stackLex.begin() + indx);
-//            }
-//            if (*stackLex[indx] == BRACKET_BACK)
-//            {
-//                stackLex.erase(stackLex.begin() + indx);
-//            } else {
-//                exception("Expected array size");
-//            }
-//            type = new SymTypeArray(size, type);
-//        }
-//        if (*stackLex[indx] == MULT) {                     //указатель
-//            stackLex.erase(stackLex.begin() + indx);
-//            if (*stackLex[indx] == T_CONST) {
-//                type = new SymTypePointer(type, true);
-//                stackLex.erase(stackLex.begin() + indx);
-//            } else {
-//                type = new SymTypePointer(type, true);
-//            }
-//        }
-    }
-    
-    return "name";
-}
-
 string Parser::parseName(const parserState state){
     if(*GL() == IDENTIFICATOR) {
         string name = GL()->getValue();
@@ -664,40 +557,40 @@ string Parser::parseName(const parserState state){
 
 Node* Parser::parseFuncCall(Node* root)
 {
-	Lexeme* lex = scanner_.get();
-	Node* r = NULL;
-	if (*lex == PARENTHESIS_FRONT)
-		{
-            scanner_.nextLex();
-            Lexeme* l = scanner_.get();
-			r = new FuncCallNode(root->lexeme_, root);
-			while (*l != PARENTHESIS_BACK)
-			{
-                dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
-				l = scanner_.get();
-                exception("Expected parenthesis close after function argument list", *l == ENDOF);
-				if (*l == COMMA){
-                    scanner_.nextLex();
-				}
-			}
-            scanner_.nextLex();
-		}
-	else
+    Lexeme* lex = scanner_.get();
+    Node* r = NULL;
+    if (*lex == PARENTHESIS_FRONT)
+    {
+        scanner_.nextLex();
+        Lexeme* l = scanner_.get();
+        r = new FuncCallNode(root->lexeme_, root);
+        while (*l != PARENTHESIS_BACK)
+        {
+            dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
+            l = scanner_.get();
+            exception("Expected parenthesis close after function argument list", *l == ENDOF);
+            if (*l == COMMA){
+                scanner_.nextLex();
+            }
+        }
+        scanner_.nextLex();
+    }
+    else
         exception("Expected PARENTHESIS_FRONT");
-	return r;
+    return r;
 }
 
 Node* Parser::parseArrIndex(Node* root)
 {
-	Node* r = NULL;
-	if (*GL() == BRACKET_FRONT)
-		{
-            r = (root == NULL) ? new ArrNode(NULL, root) : new ArrNode(root->lexeme_, root);
-            NL();
-            dynamic_cast<ArrNode*>(r)->addArg(parseExp());
-            exception("Expected bracket close after array index", *GL() != BRACKET_BACK);
-        }
-	return r;
+    Node* r = NULL;
+    if (*GL() == BRACKET_FRONT)
+    {
+        r = (root == NULL) ? new ArrNode(NULL, root) : new ArrNode(root->lexeme_, root);
+        NL();
+        dynamic_cast<ArrNode*>(r)->addArg(parseExp());
+        exception("Expected bracket close after array index", *GL() != BRACKET_BACK);
+    }
+    return r;
 }
 
 
@@ -809,7 +702,7 @@ Stmt *Parser::parseWhile()
     NL();
     pState = p;
     return new StmtWhile(parseCondition(), parseBlock());
-
+    
 }
 
 Stmt *Parser::parseDoWhile()
@@ -856,60 +749,3 @@ void Parser::exception(string msg, bool cond)
     if (cond)
         throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
 }
-
-
-//------------------Helper
-
-void lexBuffer::push(Lexeme *l)
-{
-    lexemes.push_back(l);
-}
-
-void lexBuffer::delCurLex()
-{
-    delLex(curIndex);
-}
-
-void lexBuffer::delLex(int indx)
-{
-    lexemes.erase(lexemes.begin() + indx);
-}
-
-Lexeme *lexBuffer::curLex()
-{
-    curIndex = max(min(curIndex, (int)lexemes.size() - 1), 0);
-    return lexemes[curIndex];
-}
-
-Lexeme *lexBuffer::prevLex()
-{
-    if (curIndex - 1 >= 0) {
-        return lexemes[curIndex - 1];
-    } else if(lexemes.size() > 0){
-        return lexemes[0];
-    } else {
-        return NULL;
-    }
-}
-
-void lexBuffer::setToOpenParenthisOrStart()
-{
-    for (int i = curIndex; i >= 0 ; i--) {
-        if (*lexemes[i] == PARENTHESIS_FRONT) {
-            curIndex = i;
-        }
-    }
-}
-
-Lexeme *lexBuffer::nextLex()
-{
-    if (curIndex + 1  < lexemes.size() - 1) {
-        return lexemes[curIndex + 1];
-    } else if(lexemes.size() > 0){
-        return lexemes[lexemes.size() - 1];
-    } else {
-        return NULL;
-    }
-}
-
-

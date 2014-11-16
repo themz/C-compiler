@@ -19,11 +19,17 @@
 
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 
+void*** c(float add)
+{
+	int a = 6, v = 8, g = 'w';
+	void* b;
+	void foo(), bar(int);
+}
 
 int main()
 {		
 
-	int a[]();
+	int vv;
 // 	struct bb gg;
 // 	int t;
 // 	//int ad = gg.a;  

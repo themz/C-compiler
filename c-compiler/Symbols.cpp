@@ -187,7 +187,10 @@ void SymVar::print(int deep, bool printType)
 
 void SymTypeArray::print(int deep, bool printType)
 {
-    cout << "array ["  << size << "] of ";
+    cout << "array [" ;
+    if(size != NULL)
+        size->print(0,false);
+    cout << "] of ";
     if (type != NULL) {
         type->print();
     }
@@ -220,7 +223,7 @@ void SymFunc::print(int deep, bool printType)
     if (retType->isStruct()) {
         cout << retType->getName();
     } else {
-        retType->print(deep, printType);
+        retType->print();
     }
     cout << " " << getName()<< "(";
     if (args->getSize() > 0 && printType) {
@@ -236,7 +239,7 @@ void SymFunc::print(int deep, bool printType)
     } else {
         cout << endl;
     }
-
+    
 }
 
 void SymTypeDef::print(int deep, bool printType)
@@ -244,102 +247,3 @@ void SymTypeDef::print(int deep, bool printType)
     cout << string(deep, ' ') << getName() << " ";
     type->print();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

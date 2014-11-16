@@ -17,9 +17,9 @@
        b float
    )
    int func4(
-       const  a float = { 8 }
+       const  #unname#2 float
    )
    int func5(
-       const  a float = { 8 }
-       const  b float = { 1+2+3 }
+       const  #unname#3 float
+       const  b float
    )

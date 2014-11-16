@@ -14,6 +14,6 @@
    +----Variables----+
        gg struct $bb
        t int
-       a int = { gg.a }
+       a int = { ,gg.a }
 
    }

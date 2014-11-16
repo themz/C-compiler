@@ -48,7 +48,7 @@ private:
     SymType *parsePointerDeclaration(SymType *type);
     string parseStruct(const parserState state = PARSE_DEFENITION);
     string parseName(const parserState state = PARSE_DEFENITION);
-    string parseDec(SymType *type);
+    //string parseDec(SymType *type);
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
     void addSym(Symbol *symbol);
