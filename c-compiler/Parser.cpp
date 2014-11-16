@@ -201,12 +201,12 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
         addSym(new SymVar(name, type, exp, isConst));
     }else if (*GL() == ASSIGN){
         NL();
-        if (*GL() == BRACES_FRONT) {
+        if (*GL() == BRACE_FRONT) {
             NL();
         }
         exp = parseExp();
         exception("Expected var assign expression", exp == NULL);
-        if (*GL() == BRACES_BACK) {
+        if (*GL() == BRACE_BACK) {
             NL();
         }
         addSym(new SymVar(name, type, exp, isConst));
@@ -239,8 +239,8 @@ void Parser::parseDeclaration(const parserState state)
     SymType *type = parseType(state, isConst);
         exception("Anonymous structs must be class members",
                   *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
-#warning Убрать BRACES_BACK и ENDOF
-    while (*GL() != SEMICOLON && *GL() != BRACES_BACK && *GL() != ENDOF) {
+#warning Убрать BRACE_BACK и ENDOF
+    while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
         parseDefinition(type, isConst, state);
     }
 }
@@ -351,7 +351,7 @@ void Parser::parseFunctionDeclaration(SymType *type, string name)
     NL();
     StmtBlock *body = NULL;
     SymTable *params = parseFunctionsParams();
-    if(*GL() == BRACES_FRONT){
+    if(*GL() == BRACE_FRONT){
         body = parseBlock();
     } else if(*GL() == SEMICOLON || *GL() == COMMA){
         //parseSemicolon();
@@ -450,15 +450,15 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
 string Parser::parseStruct(const parserState state)
 {
     NL();
-    exception("Declaration of anonymous struct must be a definition", *GL() != IDENTIFICATOR && *GL() != BRACES_FRONT);
+    exception("Declaration of anonymous struct must be a definition", *GL() != IDENTIFICATOR && *GL() != BRACE_FRONT);
     string structName = parseName(PARSE_STRUCT);
     if (symStack.find('$' + structName) == NULL) {
         symStack.add(new SymTypeStruct(NULL, '$' + structName));
     }
-    if(*GL() == BRACES_FRONT) {
+    if(*GL() == BRACE_FRONT) {
         NL();
         symStack.push(new SymTable());
-        while (*GL() != BRACES_BACK) {
+        while (*GL() != BRACE_BACK) {
             parseDeclaration();
             NL();
         }
@@ -516,7 +516,7 @@ string Parser::parseName(const parserState state){
         return name;
     } else if ((*GL() == COMMA || *GL() == BRACKET_FRONT || PARENTHESIS_BACK) && state == PARSE_FUNC_ARG_DEF) {
         return "#unname#" + to_string(unnameCount++);
-    } else if (state == PARSE_STRUCT && *GL() == BRACES_FRONT) {
+    } else if (state == PARSE_STRUCT && *GL() == BRACE_FRONT) {
         return "#unname#" + to_string(unnameCount++);
     }else{
         exception("Expected identificator" + (string)((state == PARSE_FUNC_ARG_DEF) ? "or no name variable" : ""));
@@ -571,7 +571,7 @@ StmtBlock *Parser::parseBlock()
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
     symStack.push(new SymTable());
-    while (*GL() != BRACES_BACK && *GL() != ENDOF) {
+    while (*GL() != BRACE_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF || *GL() == T_STRUCT) {
             parseDeclaration();
@@ -607,7 +607,7 @@ Stmt *Parser::parseStmt()
         return parseWhile();
     else if (*GL() == T_DO)
         return parseDoWhile();
-    else if (*GL() == BRACES_FRONT)
+    else if (*GL() == BRACE_FRONT)
         return (Stmt*)parseBlock();
     else if (*GL() == T_CONTINUE || *GL() == T_BREAK || *GL() == T_RETURN)
         return parseJumpStatement();
@@ -655,7 +655,7 @@ Stmt *Parser::parseFor()
     NL();
     if(*GL() == SEMICOLON) {
         
-    } else if (*GL() == BRACES_FRONT) {
+    } else if (*GL() == BRACE_FRONT) {
         body = parseBlock();
     } else {
         exception("Expected { or ;");

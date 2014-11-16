@@ -194,10 +194,10 @@ Lexeme*  Scanner::getSeparatorLexeme()
         switch (buffer_[0])
         {
             case('}'):
-                t = BRACES_BACK;
+                t = BRACE_BACK;
                 break;
             case('{'):
-                t = BRACES_FRONT;
+                t = BRACE_FRONT;
                 break;
             default:
                 break;

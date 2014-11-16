@@ -66,8 +66,8 @@ typedef enum {
 } OperationType;
 
 typedef enum {
-    BRACES_FRONT,
-    BRACES_BACK,
+    BRACE_FRONT,
+    BRACE_BACK,
     SEMICOLON,
 } SeparatorType;
 
