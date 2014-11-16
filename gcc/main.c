@@ -23,14 +23,11 @@
 int main()
 {		
 
-	struct a{
-		int v;
-		struct a{
-			float v;
-		};
-		struct a xxx;
+struct a{
+	struct d{
+		int a;
 	};
-
+};
 
 
 

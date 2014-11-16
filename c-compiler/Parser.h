@@ -48,7 +48,7 @@ private:
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
     void addSym(Symbol *symbol);
-    void exception(string msg);
+    void exception(string msg, bool cond = true);
     void parseSemicolon();
     Node *parseCondition();
 public:
