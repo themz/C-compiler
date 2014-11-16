@@ -192,14 +192,10 @@ SymType* Parser::parseType(const parserState state, bool isConst)
         typeName = parseStruct(state);
     }
     SymType* type = (SymType*)symStack.find(typeName);
-    
     if (type == NULL) {
         exception("Undefine type");
     }
-    if (type->isStruct() && (SymTypeStruct*)type->isEmpty()) {
-        return type;
-    }
-    if (*GL() != IDENTIFICATOR) {
+    if (!type->isStruct()){
         NL();
     }
     return type;
@@ -261,6 +257,7 @@ void Parser::parseDeclaration(const parserState state)
     if (*GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym()) {
         exception("Anonymous structs must be class members");
     }
+#warning Убрать BRACES_BACK и ENDOF
     while (*GL() != SEMICOLON && *GL() != BRACES_BACK && *GL() != ENDOF) {
         parseDefinition(type, isConst, state);
     }
@@ -502,7 +499,7 @@ string Parser::parseStruct(const parserState state)
         }
         SymTable* table = symStack.top();
         symStack.pop();
-        Symbol *str = symStack.find('$' + structName );
+        Symbol *str = symStack.top()->find('$' + structName );
         if (str != NULL) {
             if (str->isStruct()) {
                 if(str->isEmpty()){
@@ -516,11 +513,7 @@ string Parser::parseStruct(const parserState state)
         } else {
             symStack.add(new SymTypeStruct(table, '$' + structName));
         }
-
-    } else if(*GL() == SEMICOLON) {
-//        if (symStack.find('$' + structName) == NULL) {
-//            symStack.add(new SymTypeStruct(NULL, '$' + structName));
-//        }
+        NL();
     }
     return structName;
 }
@@ -771,8 +764,9 @@ void Parser::printTable(int deep)
     symStack.print(deep);
 }
 
-void Parser::exception(string msg)
+void Parser::exception(string msg, bool cond)
 {
-    throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
+    if (cond)
+        throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
 }
 
