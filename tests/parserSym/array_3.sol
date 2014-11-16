@@ -4,4 +4,4 @@
    float
    void
 +----Variables----+
-    a array [] of int = { 1,2 }
+    a array [] of int

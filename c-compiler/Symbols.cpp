@@ -98,6 +98,9 @@ SymTable* SymTableStack::top()
 
 void SymTableStack::add(Symbol* s)
 {
+    if (s == NULL) {
+        return;
+    }
     if (!top()->add(s)) {
         throw parser_exception("Redefinition " + s->getName(), false);
     }
@@ -220,16 +223,16 @@ void SymFunc::print(int deep, bool printType)
     if (retType->isStruct()) {
         cout << retType->getName();
     } else {
-        retType->print();
+        retType->print(deep, printType);
     }
     cout << " " << getName()<< "(";
-    if (args->getSize() > 0) {
+    if (args->getSize() > 0 && printType) {
         cout << endl;
         args->printVariables(deep + N);
         cout << string(deep, ' ');
     }
     cout << ")";
-    if (body != NULL) {
+    if (body != NULL && printType) {
         cout << endl << string(deep, ' ') <<"{" << endl;
         body->print(deep);
         cout << endl << string(deep, ' ') <<"}" << endl;

@@ -23,11 +23,7 @@
 int main()
 {		
 
-int *const *const *const a;
-
-// 	struct bb{
-// 		int a;
-// 	};
+	int b[] = {1,2,3,};
 // 	struct bb gg;
 // 	int t;
 // 	//int ad = gg.a;  

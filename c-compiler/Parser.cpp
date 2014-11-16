@@ -188,40 +188,40 @@ SymType* Parser::parseType(const parserState state, bool isConst)
     return type;
 }
 
-void Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserState state)
+SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserState state)
 {
-    Node* exp = NULL;
-    string name = parseName();
-    if (*GL() == PARENTHESIS_FRONT) {
-        parseFunctionDeclaration(type, name);
-    }else if (*GL() == BRACKET_FRONT) {
-        addSym(parseArrayDeclaration(type, name, isConst));
-    }else if (*GL() == COMMA || *GL() == SEMICOLON) {
-        addSym(new SymVar(name, type, exp, isConst));
-    }else if (*GL() == ASSIGN){
+    SymVar *var = NULL;
+    if(*GL() == PARENTHESIS_FRONT)
+    {
         NL();
-        if (*GL() == BRACE_FRONT) {
-            NL();
-        }
-        exp = parseExp();
-        exception("Expected var assign expression", exp == NULL);
-        if (*GL() == BRACE_BACK) {
-            NL();
-        }
-        addSym(new SymVar(name, type, exp, isConst));
-    }else if(*GL() != ASSIGN && isConst && state == PARSE_DEFENITION){
-        exception("Default initialization of an object of const type");
-    }else{
-        exception("Unexpected lexem!");
+        return parseDeclarator(type, isConst);
+    } else {
+        exception("Expected identificator", *GL() != IDENTIFICATOR);
+        exception("Redifinition variable '" + GL()->getValue() + "'",
+                  symStack.top()->find(GL()->getValue()) != NULL);
     }
-    if (*GL() == COMMA)
+    var = new SymVar(GL()->getValue(), type, NULL, isConst);
+    NL();
+    if (*GL() == PARENTHESIS_FRONT) {
+        parseFunctionDeclaration(type, var->getName());
         NL();
+        return NULL;
+    }else if(*GL() == BRACKET_FRONT) {
+        var->setType(parseArrayDeclaration(var->getType()));
+    }
+    if(*GL() == ASSIGN)
+    {
+        parseInitializer(var);
+    }
+    if (*GL() == COMMA) {
+        NL();
+    }
+    return var;
 }
 
-void Parser::parseDeclarator(SymType *type, bool isConst, const parserState state)
+SymVar* Parser::parseDeclarator(SymType *type, bool isConst, const parserState state)
 {
-    type = parsePointerDeclaration(type);
-    parseDirectDeclarator(type, isConst, state);
+    return parseDirectDeclarator(parsePointerDeclaration(type), isConst, state);
 }
 
 void Parser::parseTypeSpec(const parserState state)
@@ -246,7 +246,7 @@ void Parser::parseTypeSpec(const parserState state)
                   *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
 #warning Убрать BRACE_BACK и ENDOF
     while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
-        parseDeclarator(type, isConst, state);
+            symStack.add(parseDeclarator(type, isConst, state));
     }
 }
 
@@ -394,7 +394,7 @@ SymTable* Parser::parseFunctionsParams()
         type = parsePointerDeclaration(parseType());
         name = parseName(PARSE_FUNC_ARG_DEF);
         if (*GL() == BRACKET_FRONT) {
-            var = parseArrayDeclaration(type, name, isConst);
+            var->setType(parseArrayDeclaration(type));
         } else {
             if(*GL() == ASSIGN)
             {
@@ -412,7 +412,7 @@ SymTable* Parser::parseFunctionsParams()
     return table;
 }
 
-SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, bool inFuncDef)
+SymType *Parser::parseArrayDeclaration(SymType *type)
 {
     vector<Node *> sizes;
     SymType *arrType = new SymTypeArray(NULL, type);
@@ -433,22 +433,7 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
         } else
             arrType = new SymTypeArray(sizes[i], arrType);
     };
-    if (*GL() == ASSIGN) {
-        NL();
-        NL();
-        value = parseExp();
-        NL();
-    } else if (*GL() == SEPARATOR) {
-        exception("Default initialization of an object of const type ", isConst);
-        exception("Definition of variable with array type needs an explicit size or an initializer", sizes.size() == 0);
-    } else if(*GL() == COMMA){
-        //
-    } else if(*GL() == PARENTHESIS_BACK){
-        //NL();
-    } else {
-        exception("Expected assign or separator");
-    }
-    return new SymVar(name, arrType ,value, isConst);
+    return arrType;
 }
 
 
@@ -503,6 +488,48 @@ void Parser::parseTypedef()
             symStack.add(s);
         }
     }
+}
+
+Node *Parser::parseInitList()
+{
+    int deep = 0;
+    BinaryOpNode *op = NULL;
+    Node *exp = NULL;
+    exception("Expected expression", *GL() == SEMICOLON);
+    while (*GL() != SEMICOLON && *GL() !=ENDOF) {
+        if ( *GL() == BRACE_FRONT) {
+            deep++;
+            NL();
+            continue;
+        } else if ( *GL() == BRACE_BACK) {
+            deep--;
+            NL();
+            if (deep == 0) {
+                break;
+            }
+            continue;
+        } else if(*GL() == COMMA)
+        {
+            NL();
+            continue;
+        }
+        exp = parseExp(priorityTable[COMMA] + 1);
+        exception("Expected expression", exp == NULL);
+        op = new BinaryOpNode(new OperationLexeme(scanner_.getLine(),scanner_.getCol(), "," ,SEPARATOR, COMMA), op, exp);
+    }
+    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON);
+    exception("Imbalance brace ",deep != 0);
+    return op;
+}
+
+void Parser::parseInitializer(SymVar *var)
+{
+    NL();
+    Node *val = parseInitList();
+    SymType *type = var->getType();
+    exception("scalar initializer cannot be empty", val == NULL && !type->isStruct() && !type->isArray());
+    var->setVal(val);
+    
 }
 
 SymType *Parser::parsePointerDeclaration(SymType *type)

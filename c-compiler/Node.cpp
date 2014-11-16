@@ -17,9 +17,17 @@ void EmptyNode::print(int offset, bool isTree) const
 
 void BinaryOpNode::print(int offset, bool isTree) const
 {
-	left->print(offset + 1, isTree);
+    if (left != NULL) {
+        left->print(offset + 1, isTree);
+    } else {
+        cout << string(isTree ? offset * N : 0, ' ') << "";
+    }
 	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
-	right->print(offset + 1, isTree);
+    if (right != NULL) {
+        right->print(offset + 1, isTree);
+    } else {
+        cout << string(isTree ? offset * N : 0, ' ') << "";
+    } 
 }
 
 bool BinaryOpNode::haveBranch()

@@ -47,6 +47,8 @@ protected:
 	Node* right;
 public:	
 	BinaryOpNode(Lexeme* lex, Node* l, Node* r): OpNode(lex), left(l), right(r){};
+    Node *getRight(){return right;};
+    Node *getLeft(){return left;};
     bool haveBranch();
 	void print(int deep = 0, bool isTree = true) const;
 };

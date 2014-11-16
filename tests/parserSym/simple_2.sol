@@ -4,4 +4,4 @@
    float
    void
 +----Variables----+
-    a int = { 5,n,b=6 }
+    a int = { ,5,n,b=6 }

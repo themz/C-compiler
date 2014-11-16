@@ -4,5 +4,5 @@
    float
    void
 +----Variables----+
-    a int = { 5 }
-    v float = { 6 }
+    a int = { ,5 }
+    v float = { ,6 }
