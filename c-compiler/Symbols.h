@@ -134,12 +134,12 @@ public:
 class SymTypeArray: public SymType
 {
 private:
-    Node *size;
+    int size;
     SymType *type;
 public:
-    SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
+    SymTypeArray(int size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
     void print(int deep = 0, bool printType = true);
-    void setSize(Node *newSize){size = newSize;};
+    void setSize(int newSize){size = newSize;};
     virtual SymType *getType(){return type;};
     virtual bool isArray(){return true;};
     //size_t getSize(){return size;};
@@ -176,7 +176,7 @@ private:
     Symbol *type;
     bool cnst;
 public:
-    SymTypePointer(SymType *type, const bool isConst = false, const string &name = ""): SymType(name), type(type), cnst(isConst){};
+    SymTypePointer(Symbol *type, const bool isConst = false, const string &name = ""): SymType(name), type(type), cnst(isConst){};
     void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
     virtual SymType *getType(){return (SymType*)type;};

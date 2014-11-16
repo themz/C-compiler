@@ -3,6 +3,26 @@
 #define NL scanner_.nextLex
 #define GL scanner_.get
 
+class lexBuffer {
+    int curIndex;
+    vector<Lexeme *> lexemes;
+public:
+    void push(Lexeme *l);
+    void delCurLex();
+    void delLex(int indx);
+    void setToOpenParenthisOrStart();
+    Lexeme *curLex();
+    Lexeme *prevLex();
+    Lexeme *nextLex();
+    int getCurIndex(){return curIndex;};
+    bool empty(){return lexemes.empty();};
+    void setCurIndex(int idx){curIndex = idx;};
+    int size(){return (int)lexemes.size();};
+    void next(){curIndex++;};
+    void prev(){curIndex--;};
+};
+
+
 Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
 {
 	priorityTable[PARENTHESIS_FRONT] = 15;
@@ -231,7 +251,7 @@ void Parser::parseTypeSpec(const parserState state)
         return;
     }
     bool isConst = false;
-    string name;
+
     if (*GL() == T_TYPEDEF) {
         exception("Duplicate 'typedef' declaration specifier", state == PARSE_TYPEDEF);
         parseTypedef();
@@ -242,12 +262,13 @@ void Parser::parseTypeSpec(const parserState state)
         NL();
     }
     SymType *type = parseType(state, isConst);
-        exception("Anonymous structs must be class members",
-                  *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
-#warning Убрать BRACE_BACK и ENDOF
-    while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
-            symStack.add(parseDeclarator(type, isConst, state));
-    }
+    string name = parseDec(type);
+//        exception("Anonymous structs must be class members",
+//                  *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
+//#warning Убрать BRACE_BACK и ENDOF
+//    while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
+//            symStack.add(parseDeclarator(type, isConst, state));
+//    }
 }
 
 void Parser::addSym(Symbol *symbol){
@@ -429,9 +450,11 @@ SymType *Parser::parseArrayDeclaration(SymType *type)
     }
     for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
         if (i == (int)sizes.size() - 1) {
-            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
-        } else
-            arrType = new SymTypeArray(sizes[i], arrType);
+            //dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]->lexeme_-> );
+        } else {
+            
+        }
+            //arrType = new SymTypeArray(sizes[i], arrType);
     };
     return arrType;
 }
@@ -542,6 +565,86 @@ SymType *Parser::parsePointerDeclaration(SymType *type)
         }
     };
     return type;
+}
+
+string Parser::parseDec(SymType *type)
+{
+    lexBuffer* lb = new lexBuffer();
+    int nameIndex = 0;
+    string name = "";
+    while (*GL() != SEMICOLON) {      //Случай конца обявления int *a;
+        if (*GL() == IDENTIFICATOR) {
+            exception("Unexpected identificator '" + GL()->getValue() + "'", nameIndex != 0);
+            nameIndex = lb->size();
+        }
+        lb->push(GL());
+        NL();
+    }
+    lb->setCurIndex(nameIndex);
+    name = lb->curLex()->getValue();
+    //lb->delCurLex();
+    vector<int> sizes;
+    while (lb->size() != 1) {
+        if (*lb->nextLex() == BRACKET_FRONT) {
+            lb->next();
+            while (*lb->curLex() == BRACKET_FRONT) {
+                lb->delCurLex();
+                if (*lb->curLex() == INTEGER) {
+                    sizes.push_back(dynamic_cast<IntegerLexeme *>(lb->curLex())->getIntValue());
+                    lb->delCurLex();
+                }
+                if (*lb->curLex() == BRACKET_BACK) {
+                    lb->delCurLex();
+                } else {
+                    exception("Expected array size exp or []");
+                }
+            }
+            for (int i = (int)sizes.size() - 1 ; i >= 0; i--) {
+                type = new SymTypeArray(sizes[i], type);
+            }
+            sizes.clear();
+            lb->prev();
+        }
+        while (*lb->prevLex() == MULT) {
+            type = new SymTypePointer(type);
+            lb->prev();
+            lb->delCurLex();
+            if(lb->empty()){
+                break;
+            }
+        }
+        if(*lb->nextLex() == PARENTHESIS_BACK && *lb->prevLex() == PARENTHESIS_FRONT)
+        {
+            lb->delLex(lb->getCurIndex() + 1);
+            lb->delLex(lb->getCurIndex() - 1);
+            lb->prev();
+        }
+//        while(*stackLex[indx] == BRACKET_FRONT) {             //Массив
+//            stackLex.erase(stackLex.begin() + indx);
+//            if (*stackLex[indx] == INTEGER) {
+//                size =  dynamic_cast<IntegerLexeme *>(stackLex[indx])->getIntValue();
+//                stackLex.erase(stackLex.begin() + indx);
+//            }
+//            if (*stackLex[indx] == BRACKET_BACK)
+//            {
+//                stackLex.erase(stackLex.begin() + indx);
+//            } else {
+//                exception("Expected array size");
+//            }
+//            type = new SymTypeArray(size, type);
+//        }
+//        if (*stackLex[indx] == MULT) {                     //указатель
+//            stackLex.erase(stackLex.begin() + indx);
+//            if (*stackLex[indx] == T_CONST) {
+//                type = new SymTypePointer(type, true);
+//                stackLex.erase(stackLex.begin() + indx);
+//            } else {
+//                type = new SymTypePointer(type, true);
+//            }
+//        }
+    }
+    
+    return "name";
 }
 
 string Parser::parseName(const parserState state){
@@ -753,4 +856,60 @@ void Parser::exception(string msg, bool cond)
     if (cond)
         throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
 }
+
+
+//------------------Helper
+
+void lexBuffer::push(Lexeme *l)
+{
+    lexemes.push_back(l);
+}
+
+void lexBuffer::delCurLex()
+{
+    delLex(curIndex);
+}
+
+void lexBuffer::delLex(int indx)
+{
+    lexemes.erase(lexemes.begin() + indx);
+}
+
+Lexeme *lexBuffer::curLex()
+{
+    curIndex = max(min(curIndex, (int)lexemes.size() - 1), 0);
+    return lexemes[curIndex];
+}
+
+Lexeme *lexBuffer::prevLex()
+{
+    if (curIndex - 1 >= 0) {
+        return lexemes[curIndex - 1];
+    } else if(lexemes.size() > 0){
+        return lexemes[0];
+    } else {
+        return NULL;
+    }
+}
+
+void lexBuffer::setToOpenParenthisOrStart()
+{
+    for (int i = curIndex; i >= 0 ; i--) {
+        if (*lexemes[i] == PARENTHESIS_FRONT) {
+            curIndex = i;
+        }
+    }
+}
+
+Lexeme *lexBuffer::nextLex()
+{
+    if (curIndex + 1  < lexemes.size() - 1) {
+        return lexemes[curIndex + 1];
+    } else if(lexemes.size() > 0){
+        return lexemes[lexemes.size() - 1];
+    } else {
+        return NULL;
+    }
+}
+
 

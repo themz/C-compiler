@@ -23,7 +23,7 @@
 int main()
 {		
 
-	int b[] = {1,2,3,};
+	int a[]();
 // 	struct bb gg;
 // 	int t;
 // 	//int ad = gg.a;  

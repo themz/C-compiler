@@ -187,10 +187,7 @@ void SymVar::print(int deep, bool printType)
 
 void SymTypeArray::print(int deep, bool printType)
 {
-    cout << "array [" ;
-    if(size != NULL)
-        size->print(0,false);
-    cout << "] of ";
+    cout << "array ["  << size << "] of ";
     if (type != NULL) {
         type->print();
     }
