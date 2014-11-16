@@ -29,6 +29,8 @@ struct a{
 	};
 };
 
+struct;
+
 
 
 // 	struct bb{

@@ -123,24 +123,17 @@ Node* Parser::parseExp(int priority){
             case(DOT):
             {
                 NL();
-                if (*root->lexeme_ != IDENTIFICATOR) {
-                    exception("Left expression must be identificator");
-                }
+                exception("Left expression must be identificator", *root->lexeme_ != IDENTIFICATOR);
                 SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
-                if(strct == NULL) {
-                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
-                } else if (!strct->getType()->isStruct()){
+                exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'", strct == NULL);
+                if (!strct->getType()->isStruct()){
                     exception("Member '"+ strct->getName() +"'  reference base type '"
                               + strct->getType()->getName() + "' is not a structure ");
                 }
                 Node* r = parseExp(priority + (int)!rightAssocOps[op]);
-                if(r->lexeme_->getLexType() != IDENTIFICATOR){
-                    exception("Expected identificator");
-                }
+                exception("Expected identificator", r->lexeme_->getLexType() != IDENTIFICATOR);
                 Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
-                if(member == NULL) {
-                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
-                }
+                exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'", member == NULL);
                 root = new BinaryOpNode(opLex, root, r);
                 break;
             }
@@ -171,9 +164,7 @@ Node* Parser::parseExp(int priority){
         default:
                 NL();
                 BinaryOpNode *bn = new BinaryOpNode(opLex, root, parseExp(priority + (int)!rightAssocOps[op]));
-                if (!bn->haveBranch()) {
-                    exception("Missed branch of binary operator");
-                }
+                exception("Missed branch of binary operator", !bn->haveBranch());
                 root = bn;
                 break;
         }
@@ -185,16 +176,12 @@ Node* Parser::parseExp(int priority){
 SymType* Parser::parseType(const parserState state, bool isConst)
 {
     string typeName = GL()->getValue();
-    if (*GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR) {
-        exception("Expected type");
-    }
+    exception("Expected type", *GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR);
     if (*GL() == T_STRUCT) {
         typeName = parseStruct(state);
     }
     SymType* type = (SymType*)symStack.find(typeName);
-    if (type == NULL) {
-        exception("Undefine type");
-    }
+    exception("Undefine type", type == NULL);
     if (!type->isStruct()){
         NL();
     }
@@ -218,9 +205,7 @@ void Parser::parseDefinition(SymType *type, bool isConst, const parserState stat
             NL();
         }
         exp = parseExp();
-        if (exp == NULL) {
-            exception("Expected var assign expression");
-        }
+        exception("Expected var assign expression", exp == NULL);
         if (*GL() == BRACES_BACK) {
             NL();
         }
@@ -243,9 +228,7 @@ void Parser::parseDeclaration(const parserState state)
     bool isConst = false;
     string name;
     if (*GL() == T_TYPEDEF) {
-        if (state == PARSE_TYPEDEF) {
-            exception("Duplicate 'typedef' declaration specifier");
-        }
+        exception("Duplicate 'typedef' declaration specifier", state == PARSE_TYPEDEF);
         parseTypedef();
         return;
     }
@@ -254,9 +237,8 @@ void Parser::parseDeclaration(const parserState state)
         NL();
     }
     SymType *type = parseType(state, isConst);
-    if (*GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym()) {
-        exception("Anonymous structs must be class members");
-    }
+        exception("Anonymous structs must be class members",
+                  *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
 #warning Убрать BRACES_BACK и ENDOF
     while (*GL() != SEMICOLON && *GL() != BRACES_BACK && *GL() != ENDOF) {
         parseDefinition(type, isConst, state);
@@ -306,12 +288,10 @@ Node* Parser::parseFactor(int priority)
 			if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
 			{
                 NL();
-				if (*GL() != PARENTHESIS_FRONT)
-					exception("Expected open parenthesis");
+                exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
                 NL();
 				root = new TypecastNode(lex, parseExp());
-				if (*GL() != PARENTHESIS_BACK)
-					exception("Expected close parenthesis");
+                exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
                 NL();
 			} 
 			else if (*lex == T_SIZEOF)
@@ -330,10 +310,7 @@ Node* Parser::parseFactor(int priority)
             {
                 NL();
                 root = parseExp();
-                if(*GL() != PARENTHESIS_BACK)
-                {
-                    exception("Expected parenthesis close");
-                }
+                exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK);
             }
             else if (unaryOps[opLex->getOpType()]) 
             {
@@ -343,8 +320,7 @@ Node* Parser::parseFactor(int priority)
             }
             else if (*opLex == PARENTHESIS_BACK) 
             {
-                if (pState != PARSE_CYCLE && pState != PARSE_IF)
-                    exception("Expected parenthesis open");
+                exception("Expected parenthesis open", pState != PARSE_CYCLE && pState != PARSE_IF);
                 break;
             }
             else if (*opLex == BRACKET_FRONT)
@@ -422,10 +398,7 @@ SymTable* Parser::parseFunctionsParams()
             }
             var = new SymVar(name, type, exp, isConst);
         }
-        if(!table->add(var))
-        {
-            exception("Redefinition param name:  \"" + name + "\"");
-        }
+        exception("Redefinition param name:  \"" + name + "\"", !table->add(var));
         if (*GL() == COMMA) {
             NL();
         }
@@ -446,9 +419,7 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
             break;
         }
         sizes.push_back(parseExp());
-        if (*GL() != BRACKET_BACK) {
-            exception("Expected bracket back after array count");
-        }
+        exception("Expected bracket back after array count", *GL() != BRACKET_BACK);
         NL();
     }
     for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
@@ -463,12 +434,8 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
         value = parseExp();
         NL();
     } else if (*GL() == SEPARATOR) {
-        if (isConst) {
-            exception("Default initialization of an object of const type ");
-        } else if(sizes.size() == 0) {
-            exception("Definition of variable with array type needs an explicit size or an initializer");
-        }
-        
+        exception("Default initialization of an object of const type ", isConst);
+        exception("Definition of variable with array type needs an explicit size or an initializer", sizes.size() == 0);
     } else if(*GL() == COMMA){
         //
     } else if(*GL() == PARENTHESIS_BACK){
@@ -483,9 +450,7 @@ SymVar *Parser::parseArrayDeclaration(SymType *type, string name, bool isConst, 
 string Parser::parseStruct(const parserState state)
 {
     NL();
-    if (*GL() != IDENTIFICATOR && *GL() != BRACES_FRONT) {
-        exception("Declaration of anonymous struct must be a definition");
-    }
+    exception("Declaration of anonymous struct must be a definition", *GL() != IDENTIFICATOR && *GL() != BRACES_FRONT);
     string structName = parseName(PARSE_STRUCT);
     if (symStack.find('$' + structName) == NULL) {
         symStack.add(new SymTypeStruct(NULL, '$' + structName));
@@ -572,8 +537,7 @@ Node* Parser::parseFuncCall(Node* root)
 			{
                 dynamic_cast<FuncCallNode*>(r)->addArg(parseExp(priorityTable[COMMA] + 1));
 				l = scanner_.get();
-				if (*l == ENDOF)
-					exception("Expected parenthesis close after function argument list");
+                exception("Expected parenthesis close after function argument list", *l == ENDOF);
 				if (*l == COMMA){
                     scanner_.nextLex();
 				}
@@ -593,8 +557,7 @@ Node* Parser::parseArrIndex(Node* root)
             r = (root == NULL) ? new ArrNode(NULL, root) : new ArrNode(root->lexeme_, root);
             NL();
             dynamic_cast<ArrNode*>(r)->addArg(parseExp());
-            if (*GL() != BRACKET_BACK)
-                exception("Expected bracket close after array index");
+            exception("Expected bracket close after array index", *GL() != BRACKET_BACK);
         }
 	return r;
 }
@@ -630,9 +593,7 @@ Node *Parser::parseCondition()
 {
     NL();
     Node *con = parseExp();
-    if (con == NULL) {
-        exception("Expected condition!");
-    }
+    exception("Expected condition!", con == NULL);
     return con;
 }
 
@@ -684,9 +645,7 @@ Stmt *Parser::parseFor()
     pState = PARSE_CYCLE;
     Stmt *body = NULL;
     NL();
-    if (*GL() != PARENTHESIS_FRONT) {
-        exception("Expected open parenthesis");
-    }
+    exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
     NL();
     Node *ini = parseExp();
     NL();
@@ -721,9 +680,7 @@ Stmt *Parser::parseDoWhile()
     pState = PARSE_CYCLE;
     NL();
     Stmt* body = parseBlock();
-    if (*GL() != T_WHILE) {
-        exception("Expected while");
-    }
+    exception("Expected while", *GL() != T_WHILE);
     Node *con = parseCondition();
     pState = p;
     return new StmtDoWhile(con, body);
@@ -733,28 +690,20 @@ Stmt *Parser::parseJumpStatement()
 {
     Stmt * statment = NULL;
     if (*GL() == T_BREAK) {
-        if (pState != PARSE_CYCLE) {
-            exception("'break' statement not in loop statement");
-        }
+        exception("'break' statement not in loop statement", pState != PARSE_CYCLE);
         statment = new StmtBreak();
         NL();
     } else if(*GL() == T_CONTINUE) {
-        if (pState != PARSE_CYCLE) {
-            exception("'continue' statement not in loop statement");
-        }
+        exception("'continue' statement not in loop statement", pState != PARSE_CYCLE);
         statment = new StmtContinue();
         NL();
     } else if (*GL() == T_RETURN){
-        if (pState != PARSE_FUNC) {
-            exception("'return' statement not in function block statement");
-        }
+        exception("'return' statement not in function block statement", pState != PARSE_FUNC);
         NL();
         Node *exp = parseExp();
         statment = new StmtReturn(exp);
     }
-    if (*GL() != SEMICOLON) {
-        exception("Expected ;");
-    }
+    exception("Expected ;", *GL() != SEMICOLON);
     NL();
     return statment;
 }
