@@ -342,6 +342,10 @@ Node* Parser::parseFactor(int priority)
             //            }
             break;
         }
+        case (SEPARATOR):
+        {
+            needNext = false;
+        }
         default:
             break;
     }
@@ -681,23 +685,23 @@ Stmt *Parser::parseFor()
     exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
     NL();
     Node *ini = parseExp();
-    if (ini != NULL) {
-        NL();
-    }
+    NL();
     Node *con = parseExp();
-    if (con != NULL) {
-        NL();
+    NL();
+    Node *inc = NULL;
+    if (*GL() != PARENTHESIS_BACK) {
+         inc = parseExp();
     }
-    Node *inc = parseExp();
-    if (inc != NULL) {
-        NL();
+    if (*GL() != PARENTHESIS_BACK) {
+        exception("Expected ')'");
     }
+    NL();
     if(*GL() == SEMICOLON) {
         NL();
     } else if (*GL() == BRACE_FRONT) {
         body = parseBlock();
     } else {
-        exception("Expected { or ;");
+        exception("Unexpected lexeme '" + GL()->getValue() + "'");
     }
     pState = p;
     return new StmtFor(ini, con, inc, body);
