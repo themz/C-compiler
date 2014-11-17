@@ -8,13 +8,14 @@
    )
    {
    +----Types--+
-      struct $bb :
+      struct $a :
             +----Variables----+
-                a int
+                bb int
+                ii int
 
    +----Variables----+
-       gg struct $bb
-       t int
-       a int = { ,gg.a }
+       a struct $a
+       bb struct $a
+       y int = { ,bb.bb }
 
    }

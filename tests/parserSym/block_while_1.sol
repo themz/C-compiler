@@ -4,8 +4,12 @@
    float
    void
 +----Functions----+
-   int main()
+   int main(
+   )
    {
+   +----Variables----+
+       a int
+       g int
 
       {
          while (a+a==g){

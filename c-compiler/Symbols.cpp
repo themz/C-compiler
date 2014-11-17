@@ -46,7 +46,9 @@ void SymTable::printVariables(int deep, bool printType)
 {
     for (Symbol* s : table) {
         if (s->isVar()) {
-            s->print(deep);
+            if (!dynamic_cast<SymVar *>(s)->isParam()) {
+                s->print(deep);
+            }
         }
     }
 }
@@ -56,6 +58,17 @@ void SymTable::printFunctions(int deep, bool printType)
     for (Symbol* s : table) {
         if (s->isFunc()) {
             s->print(deep);
+        }
+    }
+}
+
+void SymTable::printParam(int deep, bool printType)
+{
+    for (Symbol* s : table) {
+        if (s->isVar()) {
+            if (dynamic_cast<SymVar *>(s)->isParam()) {
+                s->print(deep);
+            }
         }
     }
 }
@@ -228,7 +241,7 @@ void SymFunc::print(int deep, bool printType)
     cout << " " << getName()<< "(";
     if (args->getSize() > 0 && printType) {
         cout << endl;
-        args->printVariables(deep + N);
+        args->printParam(deep + N);
         cout << string(deep, ' ');
     }
     cout << ")";

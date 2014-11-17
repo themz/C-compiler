@@ -8,4 +8,4 @@ int main()
 			if (c) {} else {} 
 		} 
 	}
-}
+};

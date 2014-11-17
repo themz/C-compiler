@@ -1,4 +1,4 @@
-int main(int a)
+int main(int ss)
 {
 	int a, b;
 	if (a > 0 && b < 0) 
@@ -9,4 +9,4 @@ int main(int a)
 		int c, b, a;
 		c = b + (++a >> 2);
 	}
-}
+};

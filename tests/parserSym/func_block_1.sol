@@ -4,7 +4,8 @@
    float
    void
 +----Functions----+
-   int a()
+   int a(
+   )
    {
    +----Variables----+
        b int

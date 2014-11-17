@@ -7,4 +7,4 @@ int main()
 	} else {
 		int b = 9;
 	}
-}
+};

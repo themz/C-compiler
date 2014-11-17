@@ -4,7 +4,8 @@
    float
    void
 +----Functions----+
-   int main()
+   int main(
+   )
    {
    +----Variables----+
        a const pointer to const pointer to const pointer to const pointer to int

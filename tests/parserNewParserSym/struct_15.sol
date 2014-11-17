@@ -4,7 +4,8 @@
    float
    void
 +----Functions----+
-   int main()
+   int main(
+   )
    {
    +----Types--+
       struct $a :

@@ -1,2 +1,2 @@
 Error: Use of undeclared identifier 'uu'
-row:8 col:17
+row:8 col:15

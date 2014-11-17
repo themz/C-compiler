@@ -19,12 +19,16 @@
 
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 
-int main(){
-	int a;
-	int b = c;
-	return 0;
+int main()
+{
+	struct a{
+		int a;
+		int b;
+	};
+	struct a d;
+	int u;
+	int k = d.a;
 }
-
 
  //тест 0
 	

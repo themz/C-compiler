@@ -5,7 +5,7 @@
    void
 +----Functions----+
    int main(
-       a int
+       ss int
    )
    {
    +----Variables----+

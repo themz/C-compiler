@@ -4,7 +4,8 @@
    float
    void
 +----Functions----+
-   int main()
+   int main(
+   )
    {
    +----Variables----+
        a int
@@ -15,7 +16,7 @@
             a++
          }
          if (b>a) {
-            a=max(a,b)
+            a=b
          } else {
             a--
          }

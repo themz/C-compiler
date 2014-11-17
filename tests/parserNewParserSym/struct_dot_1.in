@@ -1,0 +1,10 @@
+int main()
+{
+	struct a{
+		int bb;
+		int ii;
+	};
+	a bb;
+
+	int y = bb.bb;
+}
