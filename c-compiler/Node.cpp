@@ -66,6 +66,11 @@ void IdentifierNode::print(int offset, bool isTree) const
 	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<IdentificatorLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");
 }
 
+void IdentifierNode::setVar(SymVar *v)
+{
+    var = v;
+}
+
 void UnaryOpNode::print(int offset, bool isTree) const
 {
 	cout << string(isTree ? offset * N : 0, ' ') << dynamic_cast<OperationLexeme*>(lexeme_)->getValue()<< (isTree ? "\n" :"");

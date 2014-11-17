@@ -16,16 +16,16 @@
          if (a>0&&b<0) {
          +----Variables----+
              a int
-             bb int
-             cxx int
+             b int
+             c int
 
             {
                a=b+c<<2
             }
          } else {
          +----Variables----+
-             cxx int
-             bb int
+             c int
+             b int
              a int
 
             {

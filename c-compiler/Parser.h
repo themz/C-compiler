@@ -14,6 +14,14 @@ typedef enum {
     PARSE_IF
 } parserState;
 
+typedef enum {
+    NONE,
+    PARSE_EXP,
+    PARSE_EXP_SYM,
+    PARSE_LEX,
+    COD_GEN,
+} comState;
+
 class Parser
 {
 private:
@@ -56,6 +64,7 @@ private:
     void parseSemicolon();
     Node *parseCondition();
 public:
+    comState cState = NONE;
 	Node *parseExp(int priority = 0);
 	void parse();
 	Parser(Scanner &scanner);

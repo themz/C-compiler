@@ -188,6 +188,11 @@ Node* Parser::parseFactor(int priority)
         case(IDENTIFICATOR):
         {
             SymVar *v = NULL;
+            if (cState == PARSE_EXP_SYM) {
+                v = (SymVar*)symStack.find(lex->getValue());
+                exception("Use of undeclared identifier '" + lex->getValue() + "'", v == NULL);
+                exception("'" + lex->getValue() + "' is not variable", v->Symbol::isVar());
+            }
             root = new IdentifierNode(lex, v);
             break;
         }

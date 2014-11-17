@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "exception.h"
-#include "Node.h"
+#include "Lexeme.h"
 
 using namespace std;
 
@@ -11,6 +11,9 @@ class SymType;
 class Stmt;
 class StmtBlock;
 class SymTable;
+class SymVar;
+
+//------------------------- Expression node -------------------------
 
 class SynNode
 {
@@ -97,8 +100,11 @@ public:
 
 class IdentifierNode : public Node
 {
+    SymVar* var;
 public:
-    IdentifierNode(Lexeme* t): Node(t) {}
+    SymVar *getVar(){return var;};
+    void setVar(SymVar *var);
+    IdentifierNode(Lexeme* t, SymVar* v): Node(t) { var = v;};
     void print(int deep = 0, bool isTree = true) const;
 };
 
@@ -152,7 +158,7 @@ public:
     void print(int deep = 0, bool isTree = true) const;
 };
 
-//-------------Symbols--------------//
+//------------------------- Symbols -------------------------
 
 
 
@@ -351,7 +357,7 @@ public:
     int getArgCount(){return args->getSize();};
 };
 
-//------------------------stmt
+//------------------------ Statments -------------------------
 
 class Stmt
 {

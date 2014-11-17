@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 				else if (string(argv[1]) == string("/px"))
 				{
                     Parser p(scanner);
+                    p.cState = PARSE_EXP;
                     Node* r = p.parseExp();
 					if (r)
 					{
@@ -39,9 +40,10 @@ int main(int argc, char* argv[])
 				}
                 else if (string(argv[1]) == string("/p"))
                 {
-                    Parser papser(scanner);
-                    papser.parse();
-                    papser.printTable();
+                    Parser parser(scanner);
+                    parser.cState = PARSE_EXP_SYM;
+                    parser.parse();
+                    parser.printTable();
                 }
 				else
 				{
@@ -61,7 +63,9 @@ int main(int argc, char* argv[])
             switch (3) {
                 case 1:
                 {
-                    Node* r =  Parser(scanner).parseExp();
+                    Parser p(scanner);
+                    p.cState = PARSE_EXP;
+                    Node* r =  p.parseExp();
                     if (r)
                     {
                         r->print();
@@ -78,9 +82,10 @@ int main(int argc, char* argv[])
                 }
                 case 3:
                 {
-                    Parser papser(scanner);
-                    papser.parse();
-                    papser.printTable();
+                    Parser parser(scanner);
+                    parser.cState = PARSE_EXP_SYM;
+                    parser.parse();
+                    parser.printTable();
                     break;
                 }
                 default:

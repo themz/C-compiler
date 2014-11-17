@@ -3,10 +3,10 @@ int main(int a)
 	int a, b;
 	if (a > 0 && b < 0) 
 	{
-		int a, bb, cxx;
+		int a, b, c;
 		a = b + (c << 2);
 	} else {
-		int cxx, bb, a;
+		int c, b, a;
 		c = b + (++a >> 2);
 	}
 }

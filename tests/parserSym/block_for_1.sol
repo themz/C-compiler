@@ -6,9 +6,11 @@
 +----Functions----+
    int main()
    {
+   +----Variables----+
+       i int
 
       {
-         for (i++;i=0;i<10){
+         for (i=0;i<10;i++){
          +----Variables----+
              a int = { ,9 }
 
