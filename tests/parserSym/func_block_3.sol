@@ -9,7 +9,9 @@
    )
    {
    +----Variables----+
-       a int = { ,6,v=8,g=w  }
+       a int = { ,6 }
+       v int = { ,8 }
+       g int = { ,w  }
        b pointer to void
    +----Functions----+
       void foo()

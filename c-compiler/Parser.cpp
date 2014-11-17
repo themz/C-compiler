@@ -186,8 +186,11 @@ Node* Parser::parseFactor(int priority)
     switch (lex->getLexType())
     {
         case(IDENTIFICATOR):
-            root = new IdentifierNode(lex);
+        {
+            SymVar *v = NULL;
+            root = new IdentifierNode(lex, v);
             break;
+        }
         case(INTEGER):
             root = new IntNode(lex);
             break;
@@ -491,7 +494,7 @@ Node *Parser::parseInitList()
     BinaryOpNode *op = NULL;
     Node *exp = NULL;
     exception("Expected expression", *GL() == SEMICOLON);
-    while (*GL() != SEMICOLON && *GL() !=ENDOF) {
+    while (*GL() != SEMICOLON && *GL() !=ENDOF && !(deep == 0 && *GL() == COMMA)) {
         if ( *GL() == BRACE_FRONT) {
             deep++;
             NL();
@@ -512,7 +515,10 @@ Node *Parser::parseInitList()
         exception("Expected expression", exp == NULL);
         op = new BinaryOpNode(new OperationLexeme(scanner_.getLine(),scanner_.getCol(), "," ,SEPARATOR, COMMA), op, exp);
     }
-    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON);
+    if (*GL() == COMMA) {
+        NL();
+    }
+    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON && *GL() != IDENTIFICATOR);
     exception("Imbalance brace ",deep != 0);
     return op;
 }
