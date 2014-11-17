@@ -35,6 +35,7 @@ int main()
 	{
 
 	}
+	for (1;2;3){}
 
 // 	struct bb gg;
 // 	int t;
