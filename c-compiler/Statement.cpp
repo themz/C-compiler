@@ -69,8 +69,9 @@ void StmtFor::print(int deep, bool printType)
         body->print(deep + N);
         cout << endl << string(deep + N, ' ') <<  "}" << endl;
     } else {
-        cout << ";";
+        cout << ";" << endl;
     }
+    
 }
 
 void StmtWhile::print(int deep, bool printType)

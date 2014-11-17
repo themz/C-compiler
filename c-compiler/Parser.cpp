@@ -670,6 +670,8 @@ Stmt *Parser::parseIf()
     return new StmtIf(con, trueBlock, falseBlock);
 }
 
+#warning обработать случай for(;;)
+
 Stmt *Parser::parseFor()
 {
     parserState p = pState;
@@ -679,13 +681,19 @@ Stmt *Parser::parseFor()
     exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
     NL();
     Node *ini = parseExp();
-    NL();
+    if (ini != NULL) {
+        NL();
+    }
     Node *con = parseExp();
-    NL();
+    if (con != NULL) {
+        NL();
+    }
     Node *inc = parseExp();
-    NL();
+    if (inc != NULL) {
+        NL();
+    }
     if(*GL() == SEMICOLON) {
-        
+        NL();
     } else if (*GL() == BRACE_FRONT) {
         body = parseBlock();
     } else {

@@ -290,7 +290,7 @@ private:
     Node *init;
     Node *inc;
 public:
-    StmtFor(Node *cond, Node *inc, Node *init, Stmt *body): StmtCycle(cond, body), init(init), inc(inc) {}
+    StmtFor(Node *init, Node *cond, Node *inc, Stmt *body): StmtCycle(cond, body), init(init), inc(inc) {}
     void print(int deep = 0, bool printType = true);
 };
 
