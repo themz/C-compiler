@@ -40,7 +40,6 @@
 		CE8664C719DA638700797989 /* Lexeme.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Lexeme.cpp; sourceTree = "<group>"; };
 		CE8664C819DA638700797989 /* Lexeme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Lexeme.h; sourceTree = "<group>"; };
 		CE8664C919DA638700797989 /* Node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Node.cpp; sourceTree = "<group>"; };
-		CE8664CA19DA638700797989 /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
 		CE8664CB19DA638700797989 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		CE8664CC19DA638700797989 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
 		CE8664CD19DA638700797989 /* Scanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scanner.cpp; sourceTree = "<group>"; };
@@ -85,7 +84,6 @@
 				CE3CC1FB19E7FCD100379EA6 /* Symbols.cpp */,
 				CE3CC1FC19E7FCD100379EA6 /* Symbols.h */,
 				CE8664C919DA638700797989 /* Node.cpp */,
-				CE8664CA19DA638700797989 /* Node.h */,
 				CE3CC1FE19E94D4300379EA6 /* Statement.cpp */,
 				CE8664CB19DA638700797989 /* Parser.cpp */,
 				CE8664CC19DA638700797989 /* Parser.h */,

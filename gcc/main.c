@@ -19,31 +19,12 @@
 
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 
-void c(float add)
-{
-	int a = 6, v = 8, g = 'w';
-	void* b;
-	void foo(), bar(int);
+int main(){
+	int a;
+	int b = c;
+	return 0;
 }
 
-int main()
-{		
-
-	int vv;
-	int i = 0;
-	for (i = 0; i < 10; i++)
-	{
-
-	}
-	for (1;2;3){}
-
-// 	struct bb gg;
-// 	int t;
-// 	//int ad = gg.a;  
-// 	int a = gg.a;
-// 	//int foo(int, float);
- 	return 0;
- }
 
  //тест 0
 	

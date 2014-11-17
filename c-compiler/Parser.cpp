@@ -173,6 +173,93 @@ Node* Parser::parseExp(int priority){
     return root;
 }
 
+
+Node* Parser::parseFactor(int priority)
+{
+    Node* root = NULL;
+    bool needNext = true;
+    Lexeme* lex = GL();
+    if (*lex == ENDOF)
+    {
+        return root;
+    }
+    switch (lex->getLexType())
+    {
+        case(IDENTIFICATOR):
+            root = new IdentifierNode(lex);
+            break;
+        case(INTEGER):
+            root = new IntNode(lex);
+            break;
+        case(FLOAT):
+            root = new FloatNode(lex);
+            break;
+        case(CHAR):
+            root = new CharNode(lex);
+            break;
+        case RESERVEDWORD:
+        {
+            
+            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
+            {
+                NL();
+                exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
+                NL();
+                root = new TypecastNode(lex, parseExp());
+                exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
+                NL();
+            }
+            else if (*lex == T_SIZEOF)
+            {
+                
+            }
+            else
+                exception("Expected typecast word: int(), float(), char() or sizeof()");
+            needNext = false;
+            break;
+        }
+        case(OPERATION):
+        {
+            OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
+            if (*opLex == PARENTHESIS_FRONT)
+            {
+                NL();
+                root = parseExp();
+                exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK);
+            }
+            else if (unaryOps[opLex->getOpType()])
+            {
+                NL();
+                root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
+                needNext = false;
+            }
+            else if (*opLex == PARENTHESIS_BACK)
+            {
+                exception("Expected parenthesis open", pState != PARSE_CYCLE && pState != PARSE_IF);
+                break;
+            }
+            else if (*opLex == BRACKET_FRONT)
+            {
+                NL();
+                root = parseExp();
+                needNext = false;
+            }
+            break;
+        }
+        case (SEPARATOR):
+        {
+            needNext = false;
+        }
+        default:
+            break;
+    }
+    if (needNext) {
+        NL();
+    }
+    return root;
+}
+
+
 SymType* Parser::parseType(const parserState state, bool isConst)
 {
     string typeName = GL()->getValue();
@@ -246,7 +333,6 @@ void Parser::parseTypeSpec(const parserState state)
     SymType *type = parseType(state, isConst);
     exception("Anonymous structs must be class members",
               *GL() == SEMICOLON && type->isStruct() && type->isAnonymousSym());
-#warning Убрать BRACE_BACK и ENDOF
     while (*GL() != SEMICOLON && *GL() != BRACE_BACK && *GL() != ENDOF) {
         symStack.add(parseDeclarator(type, isConst, state));
     }
@@ -264,95 +350,6 @@ void Parser::parse()
         parseTypeSpec();
         NL();
     }
-}
-
-Node* Parser::parseFactor(int priority)
-{
-    Node* root = NULL;
-    bool needNext = true;
-    Lexeme* lex = GL();
-    if (*lex == ENDOF)
-    {
-        return root;
-    }
-    switch (lex->getLexType())
-    {
-        case(IDENTIFICATOR):
-            root = new IdentifierNode(lex);
-            break;
-        case(INTEGER):
-            root = new IntNode(lex);
-            break;
-        case(FLOAT):
-            root = new FloatNode(lex);
-            break;
-        case(CHAR):
-            root = new CharNode(lex);
-            break;
-        case RESERVEDWORD:
-        {
-            
-            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
-            {
-                NL();
-                exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
-                NL();
-                root = new TypecastNode(lex, parseExp());
-                exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
-                NL();
-            }
-            else if (*lex == T_SIZEOF)
-            {
-                
-            }
-            else
-                exception("Expected typecast word: int(), float(), char() or sizeof()");
-            needNext = false;
-            break;
-        }
-        case(OPERATION):
-        {
-            OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(lex);
-            if (*opLex == PARENTHESIS_FRONT)
-            {
-                NL();
-                root = parseExp();
-                exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK);
-            }
-            else if (unaryOps[opLex->getOpType()])
-            {
-                NL();
-                root = new UnaryOpNode(lex, parseExp(priorityTable[DEC]));
-                needNext = false;
-            }
-            else if (*opLex == PARENTHESIS_BACK)
-            {
-                exception("Expected parenthesis open", pState != PARSE_CYCLE && pState != PARSE_IF);
-                break;
-            }
-            else if (*opLex == BRACKET_FRONT)
-            {
-                NL();
-                root = parseExp();
-                needNext = false;
-            }
-            //            else
-            //            {
-            //                throw parser_exception ("Empty expression is not allowed", false);
-            //            }
-            break;
-        }
-        case (SEPARATOR):
-        {
-            needNext = false;
-        }
-        default:
-            break;
-    }
-    if (needNext) {
-        NL();
-    }
-    return root;
 }
 
 void Parser::parseFunctionDeclaration(SymType *type, string name)
@@ -400,9 +397,8 @@ SymTable* Parser::parseFunctionsParams()
         name = parseName(PARSE_FUNC_ARG_DEF);
         if (*GL() == BRACKET_FRONT) {
             type = parseArrayDeclaration(type);
-        } else {
-            exception("C does not support default arguments", *GL() == ASSIGN);
         }
+        exception("C does not support default arguments", *GL() == ASSIGN);
         exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst)));
         if (*GL() == COMMA) {
             NL();
@@ -416,7 +412,6 @@ SymType *Parser::parseArrayDeclaration(SymType *type)
 {
     vector<Node *> sizes;
     SymType *arrType = new SymTypeArray(NULL, type);
-    Node *value = NULL;
     while (*GL() == BRACKET_FRONT) {
         NL();
         if (*GL() == BRACKET_BACK) {
@@ -673,8 +668,6 @@ Stmt *Parser::parseIf()
     pState = p;
     return new StmtIf(con, trueBlock, falseBlock);
 }
-
-#warning обработать случай for(;;)
 
 Stmt *Parser::parseFor()
 {
