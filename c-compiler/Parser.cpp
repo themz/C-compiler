@@ -80,6 +80,7 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     st->add(new SymTypeFloat());
     st->add(new SymTypeVoid());
     symStack.push(st);
+    lb = new lexBuffer();
 }
 
 Node* Parser::parseExp(int priority){
@@ -272,9 +273,61 @@ SymType* Parser::parseType(const parserState state, bool isConst)
     return type;
 }
 
+
+//============================================================      complex
+
+SymType* Parser::parseDecComArray(SymType *type)
+{
+    vector<Node *> sizes;
+    SymType *arrType = new SymTypeArray(NULL, type);
+    while (*lb->getLex() == BRACKET_FRONT) {
+        lb->next();
+        if (*lb->getLex() == BRACKET_BACK) {
+            lb->next();
+            break;
+        }
+        
+        sizes.push_back(parseExp());
+        exception("Expected bracket back after array count", *GL() != BRACKET_BACK);
+        NL();
+    }
+    for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
+        if (i == (int)sizes.size() - 1) {
+            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
+        } else
+            arrType = new SymTypeArray(sizes[i], arrType);
+    };
+    return arrType;
+}
+
+
+SymType* Parser::parseDecComplexType()
+{
+    SymType *type = NULL;
+    if (*lb->nextLex() == BRACKET_FRONT) {
+        type = parseDecComArray(type);
+    }
+
+    return type;
+}
+
+string Parser::parseDec(SymType *globType)
+{
+    
+    while(*GL() != SEMICOLON && *GL() != COMMA)
+    {
+        lb->push(GL());
+        NL();
+    }
+    lb->setIndexToId();
+    SymType* curType = parseDecComplexType();
+    return lb->getName();
+}
+
 SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserState state)
 {
     SymVar *var = NULL;
+    //string VarName = parseDec(type);
     if(*GL() == PARENTHESIS_FRONT)
     {
         NL();
@@ -301,6 +354,8 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
     if (var->getType()->isStruct() && var->getType()->isEmpty()) {
         exception("Variable has incomplete type 'struct " + var->getType()->getName() +"'");
     }
+    
+    
     if(*GL() == ASSIGN)
     {
         parseInitializer(var);
@@ -314,8 +369,15 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
     return var;
 }
 
+
+
+//============================================================      complex
+
+
 SymVar* Parser::parseDeclarator(SymType *type, bool isConst, const parserState state)
 {
+    //Перейдём на прасинг сложных обьявлений
+    // SymVar* v = parseDirectDeclarator(type, isConst, state);
     SymVar* v = parseDirectDeclarator(parsePointerDeclaration(type), isConst, state);
     //exception("Expected ';' after declaration or function_definition", *GL() != SEMICOLON);
     return v;
@@ -771,3 +833,90 @@ void Parser::exception(string msg, bool cond)
     if (cond)
         throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
 }
+
+//------------------Helper
+
+void lexBuffer::push(Lexeme *l)
+{
+    lexemes.push_back(l);
+}
+
+void lexBuffer::delCurLex()
+{
+    delLex(curIndex);
+}
+
+void lexBuffer::delLex(int indx)
+{
+    lexemes.erase(lexemes.begin() + indx);
+}
+
+Lexeme *lexBuffer::curLex()
+{
+    curIndex = max(min(curIndex, (int)lexemes.size() - 1), 0);
+    return lexemes[curIndex];
+}
+
+Lexeme *lexBuffer::prevLex()
+{
+    if (curIndex - 1 >= 0) {
+        return lexemes[curIndex - 1];
+    } else if(lexemes.size() > 0){
+        return lexemes[0];
+    } else {
+        return NULL;
+    }
+}
+
+void lexBuffer::setToOpenParenthisOrStart()
+{
+    for (int i = curIndex; i >= 0 ; i--) {
+        if (*lexemes[i] == PARENTHESIS_FRONT) {
+            curIndex = i;
+        }
+    }
+}
+
+Lexeme *lexBuffer::nextLex()
+{
+    if (curIndex + 1  < lexemes.size() - 1) {
+        return lexemes[curIndex + 1];
+    } else if(lexemes.size() > 0){
+        return lexemes[lexemes.size() - 1];
+    } else {
+        return NULL;
+    }
+}
+
+void lexBuffer::setIndexToId()
+{
+    for (int i = 0; i < lexemes.size(); i++) {
+        if (*lexemes[i] == IDENTIFICATOR) {
+            curIndex = i;
+            idIndex = i;
+            if (hasId) {
+                throw parser_exception("The declaration can not be more than one identifier", lexemes[i]->getCol(), lexemes[i]->getLine());
+            }
+            hasId = true;
+        }
+        if (*lexemes[i] == PARENTHESIS_FRONT) {
+            curDeep++;
+            deeps.push_back(curDeep);
+        } else if (*lexemes[i] == PARENTHESIS_BACK) {
+            deeps.push_back(curDeep);
+            curDeep--;
+        } else {
+            deeps.push_back(curDeep);
+        }
+        maxDeep = max(maxDeep,curDeep);
+    }
+    if (maxDeep > deeps[curIndex]) {
+        throw parser_exception("Incorrect declaration");
+    }
+}
+
+string lexBuffer::getName()
+{
+    return (hasId) ? lexemes[idIndex]->getValue() : "#unname#";
+}
+

@@ -771,13 +771,11 @@ void Scanner::nextLex()
     }
 }
 
-typedef struct point sp;
-
 Lexeme* Scanner::get()
 {
-    if (buffer_.length() > 0) {
-        cout << buffer_ << endl;
-    };
+//    if (buffer_.length() > 0) {
+//        cout << buffer_ << endl;
+//    };
     buffer_.clear();
 	return curLexem_;	
 }

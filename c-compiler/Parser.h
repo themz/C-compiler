@@ -23,6 +23,8 @@ typedef enum {
     COD_GEN,
 } comState;
 
+class lexBuffer;
+
 class Parser
 {
 private:
@@ -57,17 +59,55 @@ private:
     SymType *parsePointerDeclaration(SymType *type);
     string parseStruct(const parserState state = PARSE_DEFENITION);
     string parseName(const parserState state = PARSE_DEFENITION);
-    //string parseDec(SymType *type);
+    
+    string parseDec(SymType *type);
+    
+    SymType* parseDecComArray(SymType *type);
+    SymType* parseDecComPointer(SymType *type);
+    SymType* parseDecComFunc(SymType *type);
+    SymType* parseDecComplexType();
+    
+    
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
     void addSym(Symbol *symbol);
     void exception(string msg, bool cond = true);
     void parseSemicolon();
     Node *parseCondition();
+    lexBuffer* lb;
 public:
     comState cState = NONE;
 	Node *parseExp(int priority = 0);
 	void parse();
 	Parser(Scanner &scanner);
     void printTable(int deep = 0);
+};
+
+class lexBuffer {
+    int curIndex;
+    vector<Lexeme *> lexemes;
+    vector<int> deeps;
+    int curDeep = 0;
+    int maxDeep = 0;
+    bool hasId = false;
+    int idIndex = 0;
+public:
+    void push(Lexeme *l);
+    void delCurLex();
+    void delLex(int indx);
+    void setToOpenParenthisOrStart();
+    int getCurDeep(){return curDeep;};
+    Lexeme *curLex();
+    Lexeme *prevLex();
+    Lexeme *nextLex();
+    int getCurIndex(){return curIndex;};
+    bool empty(){return lexemes.empty();};
+    void setCurIndex(int idx){curIndex = idx;};
+    int size(){return (int)lexemes.size();};
+    void next(){curIndex++;};
+    void prev(){curIndex--;};
+    void setIndexToId();
+    Lexeme *getLex(){return lexemes[curIndex];};
+    lexBuffer():lexemes(0){};
+    string getName();
 };
