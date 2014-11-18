@@ -5,7 +5,7 @@
    void
 +----Functions----+
    pointer to pointer to pointer to void c(
-       #unname#0 float
+       s float
    )
    {
    +----Variables----+
@@ -16,7 +16,7 @@
    +----Functions----+
       void foo()
       void bar(
-          #unname#1 int
+          #unname#0 int
       )
 
    }

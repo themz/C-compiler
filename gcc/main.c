@@ -18,17 +18,20 @@
 
 
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
-
 int main()
 {
-	struct a{
-		int a;
-		int b;
-	};
-	struct a d;
-	int u;
-	int k = d.a;
-}
+    // for (1; 2; 3)
+    // return 1;
+    //     do
+    //         if (42)
+    //             666;
+    //         else
+    //             while (777)
+    //                 1;
+    //     while (9000);
 
+	char (*(*x[3])())[5];
+
+}
  //тест 0
 	

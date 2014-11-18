@@ -29,14 +29,17 @@ public:
     friend class Parser;
     Node(): lexeme_(0) {}
     Node(Lexeme* lex): lexeme_(lex) {}
-    virtual void print(int deep = 0, bool isTree = true) const = 0;
+    virtual bool isLvalue(){ return false; };
+    virtual bool isModifiableLvalue(){ return false; }
+    virtual SymType* getType(){ return NULL; }
+    virtual void print(int deep = 0, bool isTree = true){};
 };
 
 class EmptyNode : public Node
 {
 public:
     EmptyNode(): Node(0) {}
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
 };
 
 class OpNode : public Node
@@ -52,7 +55,10 @@ protected:
     Node* operand;
 public:
     UnaryOpNode(Lexeme* op, Node* oper);
-    void print(int deep = 0, bool isTree = true) const;
+    bool isModifiableLvalue();
+    bool isLvalue();
+    SymType* getType();
+    void print(int deep = 0, bool isTree = true);
 };
 
 class BinaryOpNode : public OpNode
@@ -64,8 +70,11 @@ public:
     BinaryOpNode(Lexeme* lex, Node* l, Node* r): OpNode(lex), left(l), right(r){};
     Node *getRight(){return right;};
     Node *getLeft(){return left;};
+    bool isModifiableLvalue();
+    bool isLvalue();
     bool haveBranch();
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
 class TernaryOpNode : public BinaryOpNode
@@ -74,28 +83,31 @@ private:
     Node* condition;
 public:
     TernaryOpNode(Lexeme* op, Node* c, Node* l, Node* r): BinaryOpNode(op, l, r), condition(c){};
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
 };
 
 class IntNode : public Node
 {
 public:
     IntNode(Lexeme* t): Node(t) {}
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
 class FloatNode : public Node
 {
 public:
     FloatNode(Lexeme* t): Node(t) {}
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
 class CharNode : public Node
 {
 public:
     CharNode(Lexeme* t): Node(t) {}
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
 class IdentifierNode : public Node
@@ -104,49 +116,48 @@ class IdentifierNode : public Node
 public:
     SymVar *getVar(){return var;};
     void setVar(SymVar *var);
+    bool isModifiableLvalue();
+    bool isLvalue(){ return true; }
     IdentifierNode(Lexeme* t, SymVar* v): Node(t) { var = v;};
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
-class FunctionalNode : public Node
-{
-protected:
-    Node* name;
-    mutable vector<Node*> args;
-    void printArgs(int deep, bool isTree = true) const;
-public:
-    FunctionalNode(Lexeme* lex, Node* n): Node(lex), name(n), args(0){}
-    void addArg(Node* arg);
-};
-
-class FuncCallNode : public FunctionalNode
+class FuncCallNode : public Node
 {
 private:
-    
+    Node* name;
+    mutable vector<Node*> args;
 public:
-    FuncCallNode(Lexeme* t, Node* f): FunctionalNode(t, f){}
-    void print(int deep = 0, bool isTree = true) const;
+    FuncCallNode(Lexeme* t, Node* f): Node(t), name(f), args(0) {}
+    void print(int deep = 0, bool isTree = true);
+    void printArgs(int deep, bool isTree = true);
+    void addArg(Node* arg);
 };
 
 class ArrNode : public Node
 {
 private:
     Node* name;
-    mutable vector<Node*> args;
+    mutable vector<Node*> index;
+    SymType* type;
 public:
-    void printArgs(int deep, bool isTree = true) const;
-    ArrNode(Lexeme* t, Node* arr): Node(t),name(arr), args(0){};
-    void addArg(Node* arg);
-    void print(int deep = 0, bool isTree = true) const;
-    bool isModifiableLvalue() const;
-    bool isLvalue() const { return true; }
+    void printArgs(int deep, bool isTree = true);
+    ArrNode(Lexeme* t, Node* arr, SymType *type): Node(t), name(arr), type(type), index(0){};
+    void addIndex(Node* arg);
+    void print(int deep = 0, bool isTree = true);
+    bool isModifiableLvalue();
+    bool isLvalue(){ return true; }
+    virtual SymType *getType();
 };
 
 class PostfixUnaryOpNode : public UnaryOpNode
 {
 public:
     PostfixUnaryOpNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper) {}
-    void print(int deep = 0, bool isTree = true) const;
+    bool isLvalue() const { return false; }
+    bool isModifiableLvalue() const { return false; }
+    void print(int deep = 0, bool isTree = true);
 };
 
 class TypecastNode : public UnaryOpNode
@@ -155,7 +166,7 @@ private:
     
 public:
     TypecastNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper){}
-    void print(int deep = 0, bool isTree = true) const;
+    void print(int deep = 0, bool isTree = true);
 };
 
 //------------------------- Symbols -------------------------
@@ -169,7 +180,7 @@ private:
 public:
     Symbol(const string &name = ""): name(name){};
     string getName(){return name;};
-    bool isAnonymousSym(){return name[1] == '#';};
+    bool isAnonymousSym(){return (name[1] == '#' || name[0] == '#');};
     virtual void print(int deep = 0, bool printType = true){};
     virtual bool isType(){return false;};
     virtual bool isVar(){return false;};
@@ -203,6 +214,8 @@ public:
     void printTypes(int deep = 0, bool printType = true);
     void printVariables(int deep = 0, bool printType = true);
     void printFunctions(int deep = 0, bool printType = true);
+    void printParam(int deep = 0, bool printType = true);
+    bool hasAnonymousSym();
     int getSize(){return size;};
     Symbol *top();
     Symbol *find(const string &name);
@@ -240,51 +253,51 @@ public:
     virtual bool isType(){return true;};
     virtual bool isTypedef(){return false;};
     virtual bool isEmpty(){return false;}
+    virtual bool isLvalue(){ return false; }
+    virtual bool isModifiableLvalue(){ return false; }
     virtual SymType *getType(){return NULL;};
+    virtual bool canConvertTo(SymType* newType) { return false; }
     virtual void setTable(SymTable *t){};
+    virtual bool operator == (SymType* t) { return this == t; }
     void print(int deep = 0, bool printType = true);
 };
 
-class SymTypeInt : public SymType
+class SymTypeScalar : public SymType
 {
 private:
 public:
-    SymTypeInt(const string &name = "int"): SymType(name){};
+    bool isModifiableLvalue(){ return true; }
+    bool isLvalue() { return true; }
+    bool canConvertTo(SymType* newType);
+    SymTypeScalar(const string &name = ""): SymType(name){}
 };
 
-class SymTypeVoid : public SymType
+class SymTypeInt : public SymTypeScalar
 {
 private:
 public:
-    SymTypeVoid(const string &name = "void"): SymType(name){};
+    SymTypeInt(const string &name = "int"): SymTypeScalar(name){};
 };
 
-class SymTypeFloat : public SymType
+class SymTypeVoid : public SymTypeScalar
 {
 private:
 public:
-    SymTypeFloat(const string &name = "float"): SymType(name){};
+    SymTypeVoid(const string &name = "void"): SymTypeScalar(name){};
 };
 
-class SymTypeChar : public SymType
+class SymTypeFloat : public SymTypeScalar
 {
 private:
 public:
-    SymTypeChar(const string &name = "char"): SymType(name){};
+    SymTypeFloat(const string &name = "float"): SymTypeScalar(name){};
 };
 
-class SymTypeArray: public SymType
+class SymTypeChar : public SymTypeScalar
 {
 private:
-    Node *size;
-    SymType *type;
 public:
-    SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
-    void print(int deep = 0, bool printType = true);
-    void setSize(Node *newSize){size = newSize;};
-    virtual SymType *getType(){return type;};
-    virtual bool isArray(){return true;};
-    //size_t getSize(){return size;};
+    SymTypeChar(const string &name = "char"): SymTypeScalar(name){};
 };
 
 class SymTypeStruct : public SymType
@@ -322,7 +335,32 @@ public:
     void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
     virtual SymType *getType(){return (SymType*)type;};
+    virtual void setType(SymType *newType){type = newType;};
     virtual bool isConst(){return cnst;};
+    bool operator == (SymType* t);
+    bool isModifiableLvalue() { return true; }
+    bool isLvalue() { return true; }
+    bool canConvertTo(SymType* newType);
+    
+};
+
+class SymTypeArray: public SymType
+{
+private:
+    Node *size;
+    SymType *type;
+public:
+    SymTypeArray(Node *size , SymType *type, const string &name = "array"): SymType(name), type(type), size(size){};
+    void print(int deep = 0, bool printType = true);
+    void setSize(Node *newSize){size = newSize;};
+    Node *getSize(){return size;};
+    void setSymType(SymType *newType){type = newType;};
+    virtual SymType *getType(){return type;};
+    virtual bool isArray(){return true;};
+    bool operator == (SymType* t);
+    bool isLvalue(){return true;};
+    bool canConvertTo(SymType *newType);
+    SymTypePointer* convertToPointer() { return new SymTypePointer(type);};
 };
 
 class SymVar : public Symbol
@@ -331,10 +369,11 @@ private:
     SymType* type;
     Node* exp;
     bool localVar;
+    bool param;
     bool cnst;
 public:
-    SymVar(const string &name, SymType* type, Node* exp, bool constVar = false, bool localVar = true)
-    : Symbol(name), type(type), exp(exp), cnst(constVar), localVar(localVar){}
+    SymVar(const string &name, SymType* type, Node* exp, bool constVar = false, bool param = false, bool localVar = true)
+    : Symbol(name), type(type), exp(exp), cnst(constVar), param(param), localVar(localVar){}
     virtual bool isConst(){return cnst;};
     bool isLocal(){return localVar;};
     virtual bool isVar(){return true;};
@@ -342,16 +381,17 @@ public:
     virtual SymType *getType(){return type;};
     virtual void setType(SymType *t){ type = t;};
     void setVal(Node *val){exp = val;};
+    bool isParam(){return param;};
 };
 
-class SymFunc : public Symbol
+class SymFunc : public SymType
 {
 private:
     SymType *retType;
     SymTable *args;
     StmtBlock *body;
 public:
-    SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):Symbol(name), retType(retType), args(args), body(body){};
+    SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):SymType(name), retType(retType), args(args), body(body){};
     virtual bool isFunc(){return true;};
     void print(int deep = 0, bool printType = true);
     int getArgCount(){return args->getSize();};

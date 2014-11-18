@@ -4,7 +4,7 @@ int main()
 		int bb;
 		int ii;
 	};
-	a bb;
+	struct a bb;
 
 	int y = bb.bb;
 }

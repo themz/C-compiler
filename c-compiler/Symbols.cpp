@@ -35,7 +35,7 @@ Symbol *SymTable::top()
 void SymTable::printTypes(int deep, bool printType)
 {
     for (Symbol* s : table) {
-        if (s->isType()) {
+        if (s->isType() && !s->isFunc()) {
             s->print(deep);
             cout << endl;
         }
@@ -71,6 +71,16 @@ void SymTable::printParam(int deep, bool printType)
             }
         }
     }
+}
+
+bool SymTable::hasAnonymousSym()
+{
+    for (Symbol* s : table) {
+        if(s->isAnonymousSym()){
+            return true;
+        }
+    }
+    return false;
 }
 
 void SymTable::print(int deep, bool printType)
@@ -198,6 +208,14 @@ void SymVar::print(int deep, bool printType)
     cout << endl;
 }
 
+bool SymTypeScalar::canConvertTo(SymType *newType)
+{
+//    if (dynamic_cast<SymTypePointer*>(newType) || dynamic_cast<SymFunc*>(to))
+//        return false;
+//    return typePriority[this] <= typePriority[to];
+    return false;
+}
+
 void SymTypeArray::print(int deep, bool printType)
 {
     cout << "array [" ;
@@ -209,10 +227,60 @@ void SymTypeArray::print(int deep, bool printType)
     }
 }
 
+bool SymTypeArray::canConvertTo(SymType *newType)
+{
+    if (dynamic_cast<SymTypeInt *>(newType))
+        return true;
+    SymTypePointer* p = dynamic_cast<SymTypePointer*>(newType);
+    if (p && *p->getType() == type)
+        return true;
+    return false;
+}
+
+bool SymTypeArray::operator==(SymType* t)
+{
+    SymTypeArray* a = dynamic_cast<SymTypeArray*>(t);
+    if (!a)
+        return false;
+    return size == a->getSize() && *type == a->type;
+}
+
+
 void SymTypePointer::print(int deep, bool printType)
 {
     cout << (isConst() ? "const " : "" ) <<"pointer to ";
     type->print(deep, !type->isStruct() && printType);
+}
+
+bool SymTypePointer::canConvertTo(SymType *newType)
+{
+    return false;
+}
+
+bool SymTypePointer::operator==(SymType* t)
+{
+//    SymTypePointer* p = dynamic_cast<SymTypePointer*>(t);
+//    if (!t)
+//        return false;
+//    SymType* type1 = getType();
+//    SymType* type2 = p->getType();
+//    while (true)
+//    {
+//        if (*type1 != type2)
+//            return false;
+//        SymType* tmp1 = type1->getType();
+//        SymType* tmp2 = type2->getType();
+//        if (tmp1 == NULL || tmp2 == NULL)
+//        {
+//            if (tmp1 != NULL || tmp2 != NULL)
+//                return false;
+//            return true;
+//        } else {
+//            type1 = tmp1;
+//            type2 = tmp2;
+//        }
+//    }
+    return false;
 }
 
 void SymTypeStruct::print(int deep, bool printType)

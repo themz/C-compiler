@@ -11,7 +11,8 @@ typedef enum {
     PARSE_TYPEDEF,
     PARSE_CYCLE,
     PARSE_FUNC,
-    PARSE_IF
+    PARSE_IF,
+    PARSE_DOT,
 } parserState;
 
 typedef enum {
@@ -37,7 +38,7 @@ private:
     bool defStruct = false;
     parserState pState = PARSE;
     void parseTypedef();
-    StmtBlock *parseBlock();
+    StmtBlock *parseBlock(SymTable* table = NULL);
     Stmt *parseStmt();
     Stmt *parseIf();
     Stmt *parseFor();

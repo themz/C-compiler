@@ -99,6 +99,8 @@ public:
 	virtual bool operator != (ReservedWordType t) const{return true;}
 	Lexeme(Lexeme &l) : line(l.line), col(l.col), stringValue(l.stringValue), type(l.type){};
 	Lexeme(int line, int col, const string& strVal, LexemType type) : line(line), col(col), stringValue(strVal),type(type){};
+    int getCol(){return col;};
+    int getLine(){return line;};
 };
 
 class ReservedWordLexeme : public Lexeme

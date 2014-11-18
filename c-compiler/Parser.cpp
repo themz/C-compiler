@@ -123,42 +123,27 @@ Node* Parser::parseExp(int priority){
             case(DOT):
             {
                 NL();
-                exception("Left expression must be identificator", *root->lexeme_ != IDENTIFICATOR);
-                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
-                exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'", strct == NULL);
-                if (!strct->getType()->isStruct()){
-                    exception("Member '"+ strct->getName() +"'  reference base type '"
-                              + strct->getType()->getName() + "' is not a structure ");
-                }
-                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
-                exception("Expected identificator", r->lexeme_->getLexType() != IDENTIFICATOR);
-                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
-                exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'", member == NULL);
-                root = new BinaryOpNode(opLex, root, r);
+                SymType *type = root->getType();
+                exception("Left operand of '.' must be a struct ", !dynamic_cast<SymTypeStruct*>(type));
+                exception("Expected identificator", *GL() != IDENTIFICATOR);
+                Symbol *member = dynamic_cast<SymTypeStruct*>(type)->find(GL()->getValue());
+                exception("No member named '" + GL()->getValue() + "' in struct '" + type->getName() + "'", member == NULL);
+                root = new BinaryOpNode(opLex, root, new IdentifierNode(GL(), (SymVar*)member));
+                NL();
                 break;
             }
             case(ARROW):
             {
                 NL();
-                //                if (*root->lexeme_ != IDENTIFICATOR) {
-                //                    exception("Left expression must be identificator");
-                //                }
-                //                SymVar *strct = (SymVar*)symStack.find(root->lexeme_->getValue());
-                //                if(strct == NULL) {
-                //                    exception("Use of undeclared identifier '" + root->lexeme_->getValue() + "'");
-                //                } else if (!strct->getType()->isStruct()){
-                //                    exception("Member '"+ strct->getName() +"'  reference base type '"
-                //                              + strct->getType()->getName() + "' is not a structure ");
-                //                }
-                //                Node* r = parseExp(priority + (int)!rightAssocOps[op]);
-                //                if(r->lexeme_->getLexType() != IDENTIFICATOR){
-                //                    exception("Expected identificator");
-                //                }
-                //                Symbol *member = ((SymTypeStruct*)strct->getType())->find(r->lexeme_->getValue());
-                //                if(member == NULL) {
-                //                    exception("No member named '" + r->lexeme_->getValue() + "' in struct '$" + strct->getName() + "'");
-                //                }
-                //                root = new BinaryOpNode(opLex, root, r);
+                SymType *type = root->getType();
+                exception("Left operand of '.' must be a pointer to struct ", !dynamic_cast<SymTypePointer*>(type));
+                SymType *StructType = dynamic_cast<SymTypePointer*>(type)->getType();
+                exception("Left operand of '.' must be a pointer to struct ", !dynamic_cast<SymTypeStruct*>(StructType));
+                exception("Expected identificator", *GL() != IDENTIFICATOR);
+                Symbol *member = dynamic_cast<SymTypeStruct*>(StructType)->find(GL()->getValue());
+                exception("No member named '" + GL()->getValue() + "' in struct '" + StructType->getName() + "'", member == NULL);
+                root = new BinaryOpNode(opLex, root, new IdentifierNode(GL(), (SymVar*)member));
+                NL();
                 break;
             }
             default:
@@ -252,6 +237,10 @@ Node* Parser::parseFactor(int priority)
                 root = parseExp();
                 needNext = false;
             }
+            else if (*opLex == COMMA)
+            {
+               
+            }
             break;
         }
         case (SEPARATOR):
@@ -297,6 +286,9 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
     }
     var = new SymVar(GL()->getValue(), type, NULL, isConst);
     NL();
+    if (*GL() == PARENTHESIS_BACK) {
+        NL();
+    }
     if (*GL() == PARENTHESIS_FRONT) {
         parseFunctionDeclaration(type, var->getName());
         if (*GL() == COMMA) {
@@ -306,9 +298,15 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
     }else if(*GL() == BRACKET_FRONT) {
         var->setType(parseArrayDeclaration(var->getType()));
     }
+    if (var->getType()->isStruct() && var->getType()->isEmpty()) {
+        exception("Variable has incomplete type 'struct " + var->getType()->getName() +"'");
+    }
     if(*GL() == ASSIGN)
     {
         parseInitializer(var);
+    }
+    if (*GL() != COMMA && *GL() != SEMICOLON && *GL() != ENDOF && PARENTHESIS_BACK) {
+        exception("Expected ',' or ';'");
     }
     if (*GL() == COMMA) {
         NL();
@@ -318,7 +316,9 @@ SymVar* Parser::parseDirectDeclarator(SymType *type, bool isConst, const parserS
 
 SymVar* Parser::parseDeclarator(SymType *type, bool isConst, const parserState state)
 {
-    return parseDirectDeclarator(parsePointerDeclaration(type), isConst, state);
+    SymVar* v = parseDirectDeclarator(parsePointerDeclaration(type), isConst, state);
+    //exception("Expected ';' after declaration or function_definition", *GL() != SEMICOLON);
+    return v;
 }
 
 void Parser::parseTypeSpec(const parserState state)
@@ -368,7 +368,8 @@ void Parser::parseFunctionDeclaration(SymType *type, string name)
     StmtBlock *body = NULL;
     SymTable *params = parseFunctionsParams();
     if(*GL() == BRACE_FRONT){
-        body = parseBlock();
+        exception("Parameters name omitted", params->hasAnonymousSym());
+        body = parseBlock(params);
     } else if(*GL() == SEMICOLON || *GL() == COMMA){
         //parseSemicolon();
     } else {
@@ -407,7 +408,8 @@ SymTable* Parser::parseFunctionsParams()
             type = parseArrayDeclaration(type);
         }
         exception("C does not support default arguments", *GL() == ASSIGN);
-        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst)));
+        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst, true)));
+        exception("Expected ',' or identificator", *GL() != COMMA && *GL() != PARENTHESIS_BACK);
         if (*GL() == COMMA) {
             NL();
         }
@@ -520,10 +522,7 @@ Node *Parser::parseInitList()
         exception("Expected expression", exp == NULL);
         op = new BinaryOpNode(new OperationLexeme(scanner_.getLine(),scanner_.getCol(), "," ,SEPARATOR, COMMA), op, exp);
     }
-    if (*GL() == COMMA) {
-        NL();
-    }
-    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON && *GL() != IDENTIFICATOR);
+    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON && *GL() != COMMA);
     exception("Imbalance brace ",deep != 0);
     return op;
 }
@@ -593,25 +592,24 @@ Node* Parser::parseFuncCall(Node* root)
 Node* Parser::parseArrIndex(Node* root)
 {
     Node* r = NULL;
-    if (*GL() == BRACKET_FRONT)
-    {
-        r = (root == NULL) ? new ArrNode(NULL, root) : new ArrNode(root->lexeme_, root);
-        NL();
-        dynamic_cast<ArrNode*>(r)->addArg(parseExp());
-        exception("Expected bracket close after array index", *GL() != BRACKET_BACK);
-    }
+    r = new ArrNode(root->lexeme_, root,root->getType());
+    NL();
+    Node *idx = parseExp();
+    exception("Array subscript is not an integer", !dynamic_cast<SymTypeInt*>(idx->getType()));
+    dynamic_cast<ArrNode*>(r)->addIndex(idx);
+    exception("Expected bracket close after array index", *GL() != BRACKET_BACK);
     return r;
 }
 
 
 //----------Stmt
 
-StmtBlock *Parser::parseBlock()
+StmtBlock *Parser::parseBlock(SymTable* table)
 {
     NL();
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
-    symStack.push(new SymTable());
+    symStack.push(table != NULL ? table : new SymTable());
     while (*GL() != BRACE_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF || *GL() == T_STRUCT) {
@@ -702,7 +700,15 @@ Stmt *Parser::parseFor()
     NL();
     if(*GL() == SEMICOLON) {
         NL();
-    } else if (*GL() == BRACE_FRONT) {
+    } else if (*GL() == BRACE_FRONT
+               || *GL() == T_DO
+               || *GL() == T_WHILE
+               || *GL() == T_FOR
+               || *GL() == T_IF
+               || *GL() == T_BREAK
+               || *GL() == T_CONTINUE
+               || *GL() == T_BREAK
+               || *GL() == T_RETURN) {
         body = parseBlock();
     } else {
         exception("Unexpected lexeme '" + GL()->getValue() + "'");

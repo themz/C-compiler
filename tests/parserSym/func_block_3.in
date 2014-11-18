@@ -1,4 +1,4 @@
-void*** c(float)
+void*** c(float s)
 {
 	int a = 6, v = 8, g = 'w';
 	void* b;

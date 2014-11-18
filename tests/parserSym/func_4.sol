@@ -1,10 +1,2 @@
-+----Types----+
-   int
-   char
-   float
-   void
-+----Functions----+
-   int main(
-       #unname#0 int
-       #unname#1 float
-   )
+Error: Expected ',' or identificator
+row:1 col:19

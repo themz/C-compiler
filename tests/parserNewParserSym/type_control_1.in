@@ -1,4 +1,4 @@
-int a()
+int main()
 {
 	struct a{
 		int a;
@@ -6,5 +6,5 @@ int a()
 	};
 	struct a d;
 	int u;
-	int k = d.p;
+	int k = d[1].b;
 }

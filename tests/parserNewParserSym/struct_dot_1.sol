@@ -14,7 +14,6 @@
                 ii int
 
    +----Variables----+
-       a struct $a
        bb struct $a
        y int = { ,bb.bb }
 
