@@ -1,0 +1,4 @@
+typedef struct point sp;
+typedef struct point* spp;
+sp foo(sp, sp, spp);
+sp bar(struct point, struct point*, sp, spp, struct point a, spp, struct point* b);

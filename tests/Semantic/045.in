@@ -1,0 +1,6 @@
+typedef int i;
+typedef char c;
+typedef void* vp;
+i a, b, d;
+c c1, c2, c3;
+vp _a;

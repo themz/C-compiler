@@ -1,0 +1,3 @@
+struct point* point_ptr;
+struct point point_arr[10];
+struct point *pointers[10];

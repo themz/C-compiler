@@ -1,0 +1,2 @@
+typedef struct point sp;
+typedef struct point* psp;

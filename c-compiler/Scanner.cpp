@@ -296,6 +296,11 @@ bool Scanner::identityNext()
 		readNext_ = false;
 		return true;
 	}
+    else if (s_ == '\'')
+    {
+        curState_ = IN_CHAR_ONE;
+        return true;
+    }
 	else
 	{
 		string msg = "";

@@ -1,0 +1,6 @@
+void* c(int)
+{
+	int c;
+	void* b;
+	void foo(), bar(int);
+}

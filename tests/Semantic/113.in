@@ -1,0 +1,6 @@
+int main()
+{
+	void f(int*);
+	float a[10];
+	f(a);
+}

@@ -1,0 +1,6 @@
+int main()
+{
+	int f(int, int);
+	f(3, 3);
+	f(3, 3, 3);
+}

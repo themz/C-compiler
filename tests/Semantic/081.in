@@ -1,0 +1,4 @@
+int foo()
+{
+	int a = int('c'), b = 3 * a + 1, c;
+}

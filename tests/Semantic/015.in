@@ -1,0 +1,1 @@
+int a(int b, float d, char c, int s);

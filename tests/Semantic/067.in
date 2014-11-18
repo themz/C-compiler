@@ -1,0 +1,11 @@
+int main()
+{
+	int i;
+	for (;;)
+		for (;;)
+			for (;;)
+				for (;;)
+					i++;
+	for (;;)
+		i--;
+}

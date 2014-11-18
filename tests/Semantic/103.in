@@ -1,0 +1,12 @@
+int main()
+{
+	int f1(int*), f2(char*), f3(float*), f4(void*);
+	int *a;
+	char *b;
+	float *c;
+	void *d;
+	f1(a);
+	f2(b);
+	f3(c);
+	f4(d);
+}

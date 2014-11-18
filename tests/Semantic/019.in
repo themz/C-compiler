@@ -1,0 +1,1 @@
+int foo(int[], int[][10], int[10][20][30], int[][10][20][30], int*, int**, int*);

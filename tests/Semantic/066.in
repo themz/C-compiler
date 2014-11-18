@@ -1,0 +1,18 @@
+int main()
+{
+	int i;
+	for (;;)
+		i++;
+	for (;;)
+		if (1)
+			i++;
+		else
+			i--;
+	for (;;)
+		if (0)
+			i++;
+		else if (--i)
+			i--;
+		else 
+			i += 5;
+}

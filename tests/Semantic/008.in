@@ -1,0 +1,4 @@
+int *a;
+void *b;
+float **d;
+char ****c;

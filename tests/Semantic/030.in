@@ -1,0 +1,4 @@
+struct point {
+	int x, y, z;
+};
+struct point a, b, c;

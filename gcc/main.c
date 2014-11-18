@@ -30,8 +30,8 @@ int main()
     //                 1;
     //     while (9000);
 
-	char (*(*x[3])*())[5];
 
 }
- //тест 0
-	
+
+typedef struct point sp;
+typedef struct point* psp;

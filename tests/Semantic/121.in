@@ -1,0 +1,6 @@
+int main()
+{
+	struct point { int x, y; } *x;
+	x->x;
+	x->y;
+}

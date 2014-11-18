@@ -1,0 +1,4 @@
+int a, b, c;
+char d, e;
+void aa, bb, cc;
+float ddd, ddddd;

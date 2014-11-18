@@ -1,0 +1,15 @@
+int main()
+{
+	struct point {
+		int x, y;
+		struct {
+			float ro, fi;
+		} z;
+	} a;
+	&a;
+	&a.x;
+	&a.y;
+	&a.z;
+	&a.z.ro;
+	&a.z.fi;
+}

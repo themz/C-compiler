@@ -1,0 +1,1 @@
+struct point foo(struct point a, struct point b);

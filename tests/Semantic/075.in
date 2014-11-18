@@ -1,0 +1,9 @@
+int main()
+{
+	do {
+		1;
+		int a, b, c;
+		a = b + c;
+	}
+	while (1);
+}

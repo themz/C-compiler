@@ -35,7 +35,7 @@ Symbol *SymTable::top()
 void SymTable::printTypes(int deep, bool printType)
 {
     for (Symbol* s : table) {
-        if (s->isType() && !s->isFunc()) {
+        if (s->isType()) {
             s->print(deep);
             cout << endl;
         }

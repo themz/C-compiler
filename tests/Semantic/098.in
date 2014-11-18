@@ -1,0 +1,12 @@
+int main()
+{
+	struct point { 
+		int x, y;
+	} a;
+	struct point b;
+	a.x;
+	a.y;
+	b.x;
+	b.y;
+	a.z;
+}

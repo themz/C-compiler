@@ -1,0 +1,3 @@
+struct point {int x, y, z; float d; void *ptr;} a;
+struct point {int a, b;} b;
+struct point x, y;

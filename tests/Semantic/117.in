@@ -1,0 +1,11 @@
+int main()
+{
+	void f1(int (*x)[]), f2(void* (*y)());
+	int (*x)[];
+	void* (*y)();
+	f1(x);
+	f2(y);
+	void f3(int** (*(*x())[][3])[]);
+	int** (*(*z())[][3])[];
+	f3(z);
+}

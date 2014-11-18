@@ -1,0 +1,6 @@
+struct point {
+	int x, y, z;
+	struct inner_struct {
+		float x, y, z;
+	} fields;
+};

@@ -1,0 +1,8 @@
+int main()
+{
+	while (1)
+	{
+		int a, b, c;
+		a = b = c = 1;	
+	}
+}

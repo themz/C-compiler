@@ -1,0 +1,12 @@
+int main()
+{
+	int i;
+	while (1)
+		if (0)
+			while (i)
+				i--;
+		else 
+			for (;;)
+				while (0)
+					1;
+}

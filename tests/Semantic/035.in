@@ -1,0 +1,4 @@
+struct a {
+	const int a;
+	int b, c;
+};

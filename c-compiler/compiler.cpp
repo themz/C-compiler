@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
                     "\t/ex\tExpression parser & print expression tree \n"
                     "\t/p\tParse file and print symbols table\n"
                     "\tfile.in\tSource filename witn .in\n";
-    string copyRight = "C-compiler v.0.8 developed by Zinov Mikhail 2014";
+    string copyRight = "C-compiler v.0.81 developed by Zinov Mikhail 2014";
     bool debug = true;
     if (argc == 4) {
         debug = string(argv[3]) != string("ok");

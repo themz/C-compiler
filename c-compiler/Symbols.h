@@ -393,6 +393,7 @@ private:
 public:
     SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):SymType(name), retType(retType), args(args), body(body){};
     virtual bool isFunc(){return true;};
+    virtual bool isType(){return false;};
     void print(int deep = 0, bool printType = true);
     int getArgCount(){return args->getSize();};
 };

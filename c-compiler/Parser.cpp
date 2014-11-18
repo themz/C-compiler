@@ -668,7 +668,9 @@ Node* Parser::parseArrIndex(Node* root)
 
 StmtBlock *Parser::parseBlock(SymTable* table)
 {
-    NL();
+    if (*GL() == BRACE_FRONT) {
+        NL();
+    }
     vector<Stmt*> statements;
     StmtBlock *block = new StmtBlock();
     symStack.push(table != NULL ? table : new SymTable());
@@ -682,9 +684,24 @@ StmtBlock *Parser::parseBlock(SymTable* table)
             if (s != NULL) {
                 block->addStmt(s);
             }
+//            if( *GL() == BRACE_FRONT
+//               || *GL() == T_DO
+//               || *GL() == T_WHILE
+//               || *GL() == T_FOR
+//               || *GL() == T_IF
+//               || *GL() == T_BREAK
+//               || *GL() == T_CONTINUE
+//               || *GL() == T_BREAK
+//               || *GL() == T_RETURN
+//               || *GL() == SEMICOLON)
+//            {
+//                break;
+//            }
         }
     }
-    NL();
+    if (*GL() == BRACE_BACK) {
+        NL();
+    }
     block->setSymTable(symStack.top());
     symStack.pop();
     return block;
@@ -762,18 +779,21 @@ Stmt *Parser::parseFor()
     NL();
     if(*GL() == SEMICOLON) {
         NL();
-    } else if (*GL() == BRACE_FRONT
-               || *GL() == T_DO
-               || *GL() == T_WHILE
-               || *GL() == T_FOR
-               || *GL() == T_IF
-               || *GL() == T_BREAK
-               || *GL() == T_CONTINUE
-               || *GL() == T_BREAK
-               || *GL() == T_RETURN) {
-        body = parseBlock();
+        
+//    } else if (*GL() == BRACE_FRONT
+//               || *GL() == T_DO
+//               || *GL() == T_WHILE
+//               || *GL() == T_FOR
+//               || *GL() == T_IF
+//               || *GL() == T_BREAK
+//               || *GL() == T_CONTINUE
+//               || *GL() == T_BREAK
+//               || *GL() == T_RETURN) {
+//        body = parseBlock();
     } else {
-        exception("Unexpected lexeme '" + GL()->getValue() + "'");
+
+        body = parseBlock();
+        //exception("Unexpected lexeme '" + GL()->getValue() + "'");
     }
     pState = p;
     return new StmtFor(ini, con, inc, body);
@@ -784,8 +804,10 @@ Stmt *Parser::parseWhile()
     parserState p = pState;
     pState = PARSE_CYCLE;
     NL();
+    Node *cond = parseCondition();
+    NL();
     pState = p;
-    return new StmtWhile(parseCondition(), parseBlock());
+    return new StmtWhile(cond, parseBlock());
     
 }
 
