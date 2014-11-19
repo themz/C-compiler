@@ -13,10 +13,10 @@
       {
          if (a) {
          +----Variables----+
-             b int = { ,9 }
+             b int = 9
          } else {
          +----Variables----+
-             b int = { ,9 }
+             b int = 9
          }
       }
 

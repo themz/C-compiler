@@ -127,7 +127,7 @@ class FuncCallNode : public Node
 {
 private:
     Node* name;
-    mutable vector<Node*> args;
+    vector<Node*> args;
 public:
     FuncCallNode(Lexeme* t, Node* f): Node(t), name(f), args(0) {}
     void print(int deep = 0, bool isTree = true);
@@ -135,11 +135,25 @@ public:
     void addArg(Node* arg);
 };
 
+class ListNode :public Node
+{
+private:
+    vector<Node*> args;
+    SymType* type;
+public:
+    ListNode(Lexeme* t, SymType *type): Node(t), type(type){};
+    void print(int deep = 0, bool isTree = true);
+    void addArg(Node* newNode);
+    int size(){return (int)args.size();};
+    void setType(SymType *newType){type = newType;};
+    virtual SymType *getType();
+};
+
 class ArrNode : public Node
 {
 private:
     Node* name;
-    mutable vector<Node*> index;
+    vector<Node*> index;
     SymType* type;
 public:
     void printArgs(int deep, bool isTree = true);

@@ -201,9 +201,8 @@ void SymVar::print(int deep, bool printType)
     cout << " ";
     type->print(0, !type->isStruct());
     if (exp != NULL) {
-        cout << " = { ";
+        cout << " = ";
         exp->print(deep, false);
-        cout << " }";
     }
     cout << endl;
 }
@@ -221,7 +220,7 @@ void SymTypeArray::print(int deep, bool printType)
     cout << "array [" ;
     if(size != NULL)
         size->print(0,false);
-    cout << "] of ";    
+    cout << "] of ";
     if (type->isFunc()) {
         dynamic_cast<SymFunc *>(type)->printAsType(deep, printType);
     } else if (type != NULL) {

@@ -13,7 +13,7 @@
       {
          for (i=0;i<10;i++){
          +----Variables----+
-             a int = { ,9 }
+             a int = 9
 
          }
       }

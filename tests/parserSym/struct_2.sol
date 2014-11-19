@@ -7,5 +7,5 @@
          +----Variables----+
              num1 int
              num2 int
-             num3 float = { ,2+1 }
+             num3 float = 2+1
 

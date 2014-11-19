@@ -335,6 +335,33 @@ bool ArrNode::isModifiableLvalue()
 #warning isLV
 }
 
+void ListNode::print(int deep, bool isTree)
+{
+    cout << string(isTree ? deep * N : 0, ' ') << "{" ;
+    for (int i = 0 ; i < args.size(); i++) {
+        args[i]->print(deep, isTree);
+        if (i != args.size() - 1) {
+            cout << string(isTree ? deep * N : 0, ' ') << "," << (isTree ? "\n" :"");
+        }
+    }
+    cout << string(isTree ? deep * N : 0, ' ') << "}" << (isTree ? "\n" :"");
+}
+void ListNode::addArg(Node* newNode)
+{
+    if(newNode != NULL)
+        args.push_back(newNode);
+    else
+    {
+        throw parser_exception("Args in list node == NULL", false);
+    }
+}
+
+SymType *ListNode::getType()
+{
+    return type;
+}
+
+
 void TypecastNode::print(int offset, bool isTree)
 {
 	string typeName = "";

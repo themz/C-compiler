@@ -15,6 +15,6 @@
 
    +----Variables----+
        bb struct $a
-       y int = { ,bb.bb }
+       y int = bb.bb
 
    }

@@ -4,6 +4,6 @@
    float
    void
 +----Variables----+
-    a int = { ,5 }
+    a int = 5
     n int
-    b int = { ,6 }
+    b int = 6

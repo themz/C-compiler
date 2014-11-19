@@ -576,44 +576,34 @@ void Parser::parseTypedef()
 
 Node *Parser::parseInitList()
 {
-    int deep = 0;
-    BinaryOpNode *op = NULL;
-    Node *exp = NULL;
+    NL();
     exception("Expected expression", *GL() == SEMICOLON);
-    while (*GL() != SEMICOLON && *GL() !=ENDOF && !(deep == 0 && *GL() == COMMA)) {
-        if ( *GL() == BRACE_FRONT) {
-            deep++;
-            NL();
-            continue;
-        } else if ( *GL() == BRACE_BACK) {
-            deep--;
-            NL();
-            if (deep == 0) {
-                break;
+    ListNode *list = new ListNode(NULL, NULL);
+    while (*GL() != BRACE_BACK) {
+        if (*GL() == BRACE_FRONT) {
+            list->addArg(parseInitList());
+            if (*GL() == COMMA) {
+                NL();
             }
             continue;
-        } else if(*GL() == COMMA)
-        {
-            NL();
-            continue;
         }
-        exp = parseExp(priorityTable[COMMA] + 1);
-        exception("Expected expression", exp == NULL);
-        op = new BinaryOpNode(new OperationLexeme(scanner_.getLine(),scanner_.getCol(), "," ,SEPARATOR, COMMA), op, exp);
+        list->addArg(parseExp(priorityTable[COMMA] + 1));
+        exception("Expected ',' or } or {", *GL() != COMMA && *GL() != BRACE_FRONT && *GL() != BRACE_BACK);
+        if (*GL() == COMMA) {
+            NL();
+        }
     }
-    exception("Expected ';' at end of declaration ", *GL() != SEMICOLON && *GL() != COMMA);
-    exception("Imbalance brace ",deep != 0);
-    return op;
+    NL();
+    return list;
 }
 
 void Parser::parseInitializer(SymVar *var)
 {
     NL();
-    Node *val = parseInitList();
+    Node *val =  *GL() == BRACE_FRONT ? parseInitList() : parseExp(priorityTable[COMMA] + 1);
     SymType *type = var->getType();
     exception("scalar initializer cannot be empty", val == NULL && !type->isStruct() && !type->isArray());
     var->setVal(val);
-    
 }
 
 SymType *Parser::parsePointerDeclaration(SymType *type)

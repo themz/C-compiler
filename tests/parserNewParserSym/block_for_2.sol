@@ -8,7 +8,7 @@
    )
    {
    +----Variables----+
-       i int = { ,0 }
+       i int = 0
 
       {
          for (;;){
