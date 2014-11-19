@@ -49,7 +49,13 @@ int main()
     //             while (777)
     //                 1;
     //     while (9000);
-    int *a(int, int);
+    int u = {1,2,{3},4,{5,6,7,8},{9, 10}, 11}, s = 9;
+    struct a
+    {
+        int d;
+    } tt;
+    int ttt = 0;
+    int i = (int*****)ttt;
    	return 0;
 }
 

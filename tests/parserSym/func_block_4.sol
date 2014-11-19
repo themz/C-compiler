@@ -6,7 +6,7 @@
 +----Functions----+
    int main(
        argc int
-       argv array [] of pointer to char
+       argv array [<empty>] of pointer to char
    )
    {
    +----Variables----+

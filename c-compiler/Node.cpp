@@ -37,12 +37,11 @@ bool BinaryOpNode::haveBranch()
 
 bool BinaryOpNode::isLvalue()
 {
-    
     switch (dynamic_cast<OperationLexeme *>(lexeme_)->getOpType())
     {
         case DOT:
         case ARROW:
-            return right->isLvalue(); //Проверить что тип второго выражения не массив
+            return right->isLvalue() && !right->getType()->isArray();
         default:
             return isModifiableLvalue();
     }
@@ -191,8 +190,8 @@ SymType *UnaryOpNode::getType()
                 throw parser_exception("Expression must have modifiable lvalue", lexeme_->getLine(), lexeme_->getCol());
             break;
         case MINUS:
-            //if (!type->canConvertTo(floatType))
-                //throw CompilerException("Expression must have arithmetic type", lexeme_->getLine(), lexeme_->getCol());
+            if (!type->canConvertTo(new SymTypeFloat()))
+                throw parser_exception("Expression must have arithmetic type", lexeme_->getLine(), lexeme_->getCol());
             break;
         default:
             break;
@@ -315,10 +314,10 @@ SymType *ArrNode::getType()
 
 void ArrNode::printArgs(int offset, bool isTree)
 {
-    for (int i = 0; i < (int)index.size(); i++)
+    for (int i = 0; i < (int)size.size(); i++)
     {
-        index[i]->print(offset + 1, isTree);
-        if (i < (int)index.size() - 1)
+        size[i]->print(offset + 1, isTree);
+        if (i < (int)size.size() - 1)
             cout << string(isTree ? offset * N : 0, ' ') << ',' << (isTree ? "\n" :"");
     }
 }
@@ -326,13 +325,15 @@ void ArrNode::printArgs(int offset, bool isTree)
 void ArrNode::addIndex(Node *idx)
 {
     if(idx != NULL)
-        index.push_back(idx);
+        size.push_back(idx);
 }
 
 bool ArrNode::isModifiableLvalue()
 {
-    return NULL;
-#warning isLV
+    SymType* type = name->getType();
+    for (int i = 0; i < size.size(); i++)
+        type = type->getType();
+    return type->isModifiableLvalue();
 }
 
 void ListNode::print(int deep, bool isTree)

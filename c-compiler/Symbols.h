@@ -153,11 +153,11 @@ class ArrNode : public Node
 {
 private:
     Node* name;
-    vector<Node*> index;
+    vector<Node*> size;
     SymType* type;
 public:
     void printArgs(int deep, bool isTree = true);
-    ArrNode(Lexeme* t, Node* arr, SymType *type): Node(t), name(arr), type(type), index(0){};
+    ArrNode(Lexeme* t, Node* arr, SymType *type): Node(t), name(arr), type(type), size(0){};
     void addIndex(Node* arg);
     void print(int deep = 0, bool isTree = true);
     bool isModifiableLvalue();

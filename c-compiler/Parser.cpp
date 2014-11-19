@@ -376,7 +376,7 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
             exception("Unexpected lex in declarate '"+ GL()->getValue() +"'");
         }
     }
-    //ok = revers(ok);
+    ok = revers(ok);
     type = hitch(ok, type);
     if (*GL() == PARENTHESIS_BACK) {
         NL();
@@ -497,23 +497,19 @@ SymTable* Parser::parseFunctionsParams()
 SymType *Parser::parseArrayDeclaration(SymType *type)
 {
     vector<Node *> sizes;
-    SymType *arrType = new SymTypeArray(NULL, type);
+    SymType *arrType = type;
+    new SymTypeArray(NULL, type);
     while (*GL() == BRACKET_FRONT) {
         NL();
         if (*GL() == BRACKET_BACK) {
+            arrType = new SymTypeArray(new EmptyNode(), arrType);
             NL();
             break;
         }
-        sizes.push_back(parseExp());
+        arrType = new SymTypeArray(parseExp(), arrType);
         exception("Expected bracket back after array count", *GL() != BRACKET_BACK);
         NL();
     }
-    for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
-        if (i == (int)sizes.size() - 1) {
-            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
-        } else
-            arrType = new SymTypeArray(sizes[i], arrType);
-    };
     return arrType;
 }
 
