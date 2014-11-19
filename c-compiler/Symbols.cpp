@@ -249,7 +249,11 @@ bool SymTypeArray::operator==(SymType* t)
 void SymTypePointer::print(int deep, bool printType)
 {
     cout << (isConst() ? "const " : "" ) <<"pointer to ";
-    type->print(deep, !type->isStruct() && printType);
+    if (type->isFunc()) {
+        dynamic_cast<SymFunc *>(type)->printAsType(deep, printType);
+    } else {
+        type->print(deep, !type->isStruct() && printType);
+    }
 }
 
 bool SymTypePointer::canConvertTo(SymType *newType)
@@ -321,6 +325,20 @@ void SymFunc::print(int deep, bool printType)
         cout << endl;
     }
     
+}
+
+void SymFunc::printAsType(int deep, bool printType)
+{
+    cout << "function (";
+    if (args->getSize() > 0) {
+        cout << endl;
+        args->printParam(deep + N);
+        cout << string(deep, ' ');
+    }
+    cout << ")";
+
+    cout << " returning ";
+    retType->print(deep, printType);
 }
 
 void SymTypeDef::print(int deep, bool printType)

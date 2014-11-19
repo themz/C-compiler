@@ -13,6 +13,7 @@ typedef enum {
     PARSE_FUNC,
     PARSE_IF,
     PARSE_DOT,
+    PARSE_START
 } parserState;
 
 typedef enum {
@@ -23,7 +24,8 @@ typedef enum {
     COD_GEN,
 } comState;
 
-class lexBuffer;
+class nameStack;
+class stateStack;
 
 class Parser
 {
@@ -38,7 +40,6 @@ private:
     SymTableStack symStack;
     int unnameCount = 0;
     bool defStruct = false;
-    parserState pState = PARSE;
     void parseTypedef();
     StmtBlock *parseBlock(SymTable* table = NULL);
     Stmt *parseStmt();
@@ -47,34 +48,42 @@ private:
     Stmt *parseWhile();
     Stmt *parseDoWhile();
     Stmt *parseJumpStatement();
-    SymVar* parseDeclarator(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
-    void parseTypeSpec(const parserState state = PARSE_DEFENITION);
-    SymVar* parseDirectDeclarator(SymType *type, bool isConst, const parserState state = PARSE_DEFENITION);
-    void parseFunction(const bool withBlock);
+
+    
+    SymType *parseDeclarator();
+    SymType *parseDirectDeclarator(SymType *type);
     SymType *parseArrayDeclaration(SymType *type);
-    void parseFunctionDeclaration(SymType *type, string name);
+    SymType *parsePointerDeclaration(SymType *type);
+    SymType *parseFunctionDeclaration(SymType *type, bool parseParam = false);
+    SymType *hitch(SymType* start, SymType* type);
+    
+    void parseTypeSpec();
+    void parseFunction(const bool withBlock);
+
+
     SymTable *parseFunctionsParams();
     void parseInitializer(SymVar *var);
     Node *parseInitList();
-    SymType *parsePointerDeclaration(SymType *type);
-    string parseStruct(const parserState state = PARSE_DEFENITION);
-    string parseName(const parserState state = PARSE_DEFENITION);
+
+    string parseStruct();
+    string parseName();
     
     string parseDec(SymType *type);
     
-    SymType* parseDecComArray(SymType *type);
-    SymType* parseDecComPointer(SymType *type);
-    SymType* parseDecComFunc(SymType *type);
-    SymType* parseDecComplexType();
+    //SymType* parseDecComArray(SymType *type);
+    //SymType* parseDecComPointer(SymType *type);
+    //SymType* parseDecComFunc(SymType *type);
+    //SymType* parseDecComplexType();
     
     
     SymTable *parseFuncArg(const bool dec = true);
-    SymType *parseType(const parserState state = PARSE_DEFENITION, bool isConst = false);
+    SymType *parseType(bool isConst = false);
     void addSym(Symbol *symbol);
     void exception(string msg, bool cond = true);
     void parseSemicolon();
     Node *parseCondition();
-    lexBuffer* lb;
+    nameStack *names;
+    stateStack *state;
 public:
     comState cState = NONE;
 	Node *parseExp(int priority = 0);
@@ -83,31 +92,18 @@ public:
     void printTable(int deep = 0);
 };
 
-class lexBuffer {
-    int curIndex;
-    vector<Lexeme *> lexemes;
-    vector<int> deeps;
-    int curDeep = 0;
-    int maxDeep = 0;
-    bool hasId = false;
-    int idIndex = 0;
+class nameStack {
+    vector<string> names;
 public:
-    void push(Lexeme *l);
-    void delCurLex();
-    void delLex(int indx);
-    void setToOpenParenthisOrStart();
-    int getCurDeep(){return curDeep;};
-    Lexeme *curLex();
-    Lexeme *prevLex();
-    Lexeme *nextLex();
-    int getCurIndex(){return curIndex;};
-    bool empty(){return lexemes.empty();};
-    void setCurIndex(int idx){curIndex = idx;};
-    int size(){return (int)lexemes.size();};
-    void next(){curIndex++;};
-    void prev(){curIndex--;};
-    void setIndexToId();
-    Lexeme *getLex(){return lexemes[curIndex];};
-    lexBuffer():lexemes(0){};
-    string getName();
+    void push(string name);
+    string pop();
+};
+
+class stateStack {
+    vector<parserState> states;
+public:
+    void push(parserState state);
+    parserState pop();
+    parserState top();
+    bool find(parserState state);
 };

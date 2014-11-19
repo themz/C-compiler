@@ -16,11 +16,31 @@
  //tstrct qux(tstrct);
  // tstrct qux(struct strct ***x[3]);
 
+/*
+int a1;
+int *a2;
+int (*a)[];
+int ***a3[1][1][1];
+int *a4[2];
+int *a5[2][2];
+int **a6[2][6];
 
+//int *(*a7[1])[1];
+//int *(*a7[1])[1];
+//int **(*(*x)[3])[5][5];
+//int a()[];
+/*
+
+int main()
+{
+	char (*(*x[3])())[5];
+	char * const (*(* const const (*(* const bar)[5])(int ))[5])(int );
+
+}
+*/
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 int main()
 {
-    // for (1; 2; 3)
     // return 1;
     //     do
     //         if (42)
@@ -30,8 +50,14 @@ int main()
     //                 1;
     //     while (9000);
 
-
+   	return 0;
 }
 
+int a, b, foo(int *a(int, int){}, int b)
+{
+
+	return 0;
+};
+ 
 typedef struct point sp;
 typedef struct point* psp;

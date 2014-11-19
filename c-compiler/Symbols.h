@@ -175,7 +175,7 @@ public:
 
 class Symbol
 {
-private:
+protected:
     string name;
 public:
     Symbol(const string &name = ""): name(name){};
@@ -191,7 +191,7 @@ public:
     virtual bool isEmpty(){return false;};
     virtual bool isConst(){return false;};
     virtual SymType *getType(){return NULL;};
-    virtual void setType(){};
+    virtual void setType(SymType* type){};
 };
 
 //-------------SymTable--------------//
@@ -255,7 +255,8 @@ public:
     virtual bool isEmpty(){return false;}
     virtual bool isLvalue(){ return false; }
     virtual bool isModifiableLvalue(){ return false; }
-    virtual SymType *getType(){return NULL;};
+    virtual SymType *getType(){return this;};
+    virtual void setType(SymType* type) {}
     virtual bool canConvertTo(SymType* newType) { return false; }
     virtual void setTable(SymTable *t){};
     virtual bool operator == (SymType* t) { return this == t; }
@@ -335,7 +336,7 @@ public:
     void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
     virtual SymType *getType(){return (SymType*)type;};
-    virtual void setType(SymType *newType){type = newType;};
+    void setType(SymType* t) { type = t; }
     virtual bool isConst(){return cnst;};
     bool operator == (SymType* t);
     bool isModifiableLvalue() { return true; }
@@ -354,7 +355,7 @@ public:
     void print(int deep = 0, bool printType = true);
     void setSize(Node *newSize){size = newSize;};
     Node *getSize(){return size;};
-    void setSymType(SymType *newType){type = newType;};
+    void setType(SymType* t) { type = t; }
     virtual SymType *getType(){return type;};
     virtual bool isArray(){return true;};
     bool operator == (SymType* t);
@@ -394,7 +395,12 @@ public:
     SymFunc(string &name, SymType *retType, SymTable *args, StmtBlock *body):SymType(name), retType(retType), args(args), body(body){};
     virtual bool isFunc(){return true;};
     virtual bool isType(){return false;};
+    SymTable *getTable(){return args;};
+    SymType *getType(){return retType;};
+    void setType(SymType *type){ retType = type;};
+    void setName(string newName){name = newName;};
     void print(int deep = 0, bool printType = true);
+    void printAsType(int deep = 0, bool printType = true);
     int getArgCount(){return args->getSize();};
 };
 
