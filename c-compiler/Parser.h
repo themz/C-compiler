@@ -34,13 +34,17 @@ private:
 	map<OperationType, bool> unaryOps;
 	map<OperationType, bool> rightAssocOps;
 	Scanner scanner_;
+    nameStack *names;
+    stateStack *state;
+    SymTableStack symStack;
+    int unnameCount = 0;
+    
 	Node *parseFactor(int priority = 0);
 	Node *parseArrIndex(Node*);
 	Node *parseFuncCall(Node*);
-    SymTableStack symStack;
-    int unnameCount = 0;
-    bool defStruct = false;
+   
     void parseTypedef();
+    
     StmtBlock *parseBlock(SymTable* table = NULL);
     Stmt *parseStmt();
     Stmt *parseIf();
@@ -49,32 +53,22 @@ private:
     Stmt *parseDoWhile();
     Stmt *parseJumpStatement();
 
-    
     SymType *parseDeclarator();
     SymType *parseDirectDeclarator(SymType *type);
     SymType *parseArrayDeclaration(SymType *type);
     SymType *parsePointerDeclaration(SymType *type);
     SymType *parseFunctionDeclaration(SymType *type, bool parseParam = false);
     SymType *hitch(SymType* start, SymType* type);
-    
-    void parseTypeSpec();
-    void parseFunction(const bool withBlock);
-
-
     SymTable *parseFunctionsParams();
+    
+    void parseExternalDecl();
+
+
     void parseInitializer(SymVar *var);
     Node *parseInitList();
 
     string parseStruct();
     string parseName();
-    
-    string parseDec(SymType *type);
-    
-    //SymType* parseDecComArray(SymType *type);
-    //SymType* parseDecComPointer(SymType *type);
-    //SymType* parseDecComFunc(SymType *type);
-    //SymType* parseDecComplexType();
-    
     
     SymTable *parseFuncArg(const bool dec = true);
     SymType *parseType(bool isConst = false);
@@ -82,8 +76,7 @@ private:
     void exception(string msg, bool cond = true);
     void parseSemicolon();
     Node *parseCondition();
-    nameStack *names;
-    stateStack *state;
+
 public:
     comState cState = NONE;
 	Node *parseExp(int priority = 0);
@@ -91,6 +84,9 @@ public:
 	Parser(Scanner &scanner);
     void printTable(int deep = 0);
 };
+
+
+//Helper
 
 class nameStack {
     vector<string> names;

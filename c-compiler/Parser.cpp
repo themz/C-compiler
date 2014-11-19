@@ -73,17 +73,32 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     rightAssocOps[MULT] = true;
     rightAssocOps[BITWISE_AND] = true;
     rightAssocOps[QUESTION] = true;
-    NL();
+
     SymTable *st = new SymTable();
     st->add(new SymTypeInt());
     st->add(new SymTypeChar());
     st->add(new SymTypeFloat());
     st->add(new SymTypeVoid());
     symStack.push(st);
+    
     names = new nameStack();
     state = new stateStack();
     state->push(PARSE_START);
+    
+    NL();
 }
+
+
+void Parser::parse()
+{
+    while (*GL() != ENDOF) {
+        parseExternalDecl();
+        NL();
+    }
+}
+
+
+//======================= Expression
 
 Node* Parser::parseExp(int priority){
     if (priority > 15)
@@ -260,134 +275,10 @@ Node* Parser::parseFactor(int priority)
 }
 
 
-SymType* Parser::parseType(bool isConst)
-{
-    string typeName = GL()->getValue();
-    exception("Expected type", *GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR);
-    if (*GL() == T_STRUCT) {
-        typeName = parseStruct();
-    }
-    SymType* type = (SymType*)symStack.find(typeName);
-    exception("Undefine type", type == NULL || type->isFunc());
-    if (!type->isStruct()){
-        NL();
-    }
-    return type;
-}
+//======================= Declarator
 
 
-//============================================================      complex
-
-//SymType* Parser::parseDecComArray(SymType *type)
-//{
-//    vector<Node *> sizes;
-//    SymType *arrType = new SymTypeArray(NULL, type);
-//    while (*lb->getLex() == BRACKET_FRONT) {
-//        lb->next();
-//        if (*lb->getLex() == BRACKET_BACK) {
-//            lb->next();
-//            break;
-//        }
-//        
-//        sizes.push_back(parseExp());
-//        exception("Expected bracket back after array count", *GL() != BRACKET_BACK);
-//        NL();
-//    }
-//    for (int i = (int)sizes.size() - 1; i >= 0  ; i--) {
-//        if (i == (int)sizes.size() - 1) {
-//            dynamic_cast<SymTypeArray *>(arrType)->setSize(sizes[i]);
-//        } else
-//            arrType = new SymTypeArray(sizes[i], arrType);
-//    };
-//    return arrType;
-//}
-
-
-//SymType* Parser::parseDecComplexType()
-//{
-//    SymType *type = NULL;
-//    if (*lb->nextLex() == BRACKET_FRONT) {
-//        type = parseDecComArray(type);
-//    }
-//
-//    return type;
-//}
-
-//string Parser::parseDec(SymType *globType)
-//{
-//    
-//    while(*GL() != SEMICOLON && *GL() != COMMA)
-//    {
-//        lb->push(GL());
-//        NL();
-//    }
-//    lb->setIndexToId();
-//    SymType* curType = parseDecComplexType();
-//    return lb->getName();
-//}
-
-SymType* Parser::parseDirectDeclarator(SymType *type)
-{
-    SymType *getFromRecType = NULL;
-    type = parsePointerDeclaration(type);
-    if(*GL() == PARENTHESIS_FRONT)
-    {
-        NL();
-        getFromRecType = parseDirectDeclarator(NULL);
-    } else {
-        exception("Expected identificator", *GL() != IDENTIFICATOR);
-        exception("Redefinition variable '" + GL()->getValue() + "'",
-                  symStack.top()->find(GL()->getValue()) != NULL);
-        names->push(GL()->getValue());
-        NL();
-    }
-    while (*GL() == BRACKET_FRONT || *GL() == PARENTHESIS_FRONT) {
-        if(*GL() == BRACKET_FRONT) {
-            type = parseArrayDeclaration(type);
-        }else if(*GL() == PARENTHESIS_FRONT) {
-            type = parseFunctionDeclaration(type);
-        } else if(*GL() == PARENTHESIS_BACK) {
-            NL();
-        } else{
-            exception("Unexpected lex in declarate '"+ GL()->getValue() +"'");
-        }
-    }
-    if (*GL() == PARENTHESIS_BACK) {
-        NL();
-    }
-    return hitch(getFromRecType, type);
-}
-
-
-
-//============================================================      complex
-
-
-SymType* Parser::parseDeclarator()
-{
-    SymType* newType = parseDirectDeclarator(NULL);
-    exception("Expected ';' or ',' or '=' or EOF  not '" + GL()->getValue() + "'",
-              *GL() != SEMICOLON && *GL() != COMMA && *GL() != BRACE_BACK && *GL() != ASSIGN && *GL() != ENDOF)  ;
-    if (*GL() == COMMA) {
-        NL();
-    }
-    return newType;
-}
-
-SymType* Parser::hitch(SymType* start, SymType* type)
-{
-    if (start == NULL) {
-        return type;
-    }
-    SymType* last = start;
-    while (last->getType() != NULL) {
-        last = last->getType();
-    }
-    last->setType(type);
-    return start;
-}
-
-void Parser::parseTypeSpec()
+void Parser::parseExternalDecl()
 {
     parseSemicolon();
     if (*GL() == ENDOF) {
@@ -430,17 +321,80 @@ void Parser::parseTypeSpec()
     }
 }
 
+SymType* Parser::parseDeclarator()
+{
+    SymType* newType = parseDirectDeclarator(NULL);
+    exception("Expected ';' or ',' or '=' or EOF  not '" + GL()->getValue() + "'",
+              *GL() != SEMICOLON && *GL() != COMMA && *GL() != BRACE_BACK && *GL() != ASSIGN && *GL() != ENDOF)  ;
+    if (*GL() == COMMA) {
+        NL();
+    }
+    return newType;
+}
+
+SymType* Parser::parseType(bool isConst)
+{
+    string typeName = GL()->getValue();
+    exception("Expected type", *GL()!= RESERVEDWORD && *GL() != IDENTIFICATOR);
+    if (*GL() == T_STRUCT) {
+        typeName = parseStruct();
+    }
+    SymType* type = (SymType*)symStack.find(typeName);
+    exception("Undefine type", type == NULL || type->isFunc());
+    if (!type->isStruct()){
+        NL();
+    }
+    return type;
+}
+
+SymType* Parser::parseDirectDeclarator(SymType *type)
+{
+    SymType *getFromRecType = NULL;
+    type = parsePointerDeclaration(type);
+    if(*GL() == PARENTHESIS_FRONT)
+    {
+        NL();
+        getFromRecType = parseDirectDeclarator(NULL);
+    } else {
+        exception("Expected identificator", *GL() != IDENTIFICATOR);
+        exception("Redefinition variable '" + GL()->getValue() + "'",
+                  symStack.top()->find(GL()->getValue()) != NULL);
+        names->push(GL()->getValue());
+        NL();
+    }
+    while (*GL() == BRACKET_FRONT || *GL() == PARENTHESIS_FRONT) {
+        if(*GL() == BRACKET_FRONT) {
+            type = parseArrayDeclaration(type);
+        }else if(*GL() == PARENTHESIS_FRONT) {
+            type = parseFunctionDeclaration(type);
+        } else if(*GL() == PARENTHESIS_BACK) {
+            NL();
+        } else{
+            exception("Unexpected lex in declarate '"+ GL()->getValue() +"'");
+        }
+    }
+    if (*GL() == PARENTHESIS_BACK) {
+        NL();
+    }
+    return hitch(getFromRecType, type);
+}
+
+SymType* Parser::hitch(SymType* start, SymType* type)
+{
+    if (start == NULL) {
+        return type;
+    }
+    SymType* last = start;
+    while (last->getType() != NULL) {
+        last = last->getType();
+    }
+    last->setType(type);
+    return start;
+}
+
 void Parser::addSym(Symbol *symbol){
     if (!symStack.top()->add(symbol)) {
         exception("Redefinition variable \"" + symbol->getName() + "\"");
-    }
-}
-
-void Parser::parse()
-{
-    while (*GL() != ENDOF) {
-        parseTypeSpec();
-        NL();
     }
 }
 
@@ -454,7 +408,7 @@ SymType *Parser::parseFunctionDeclaration(SymType *type, bool parseParam)
         exception("Parameters name omitted", params->hasAnonymousSym());
         body = parseBlock(params);
     } else if(*GL() == SEMICOLON || *GL() == COMMA || *GL() == BRACKET_FRONT || *GL() == PARENTHESIS_BACK || *GL() == PARENTHESIS_FRONT){
-        //parseSemicolon();
+        
     }
     else {
         exception("Expected function body, complexDeclaration or ';' but not '" + GL()->getValue() + "'");
@@ -525,7 +479,6 @@ SymType *Parser::parseArrayDeclaration(SymType *type)
     return arrType;
 }
 
-
 string Parser::parseStruct()
 {
     NL();
@@ -539,7 +492,7 @@ string Parser::parseStruct()
         NL();
         symStack.push(new SymTable());
         while (*GL() != BRACE_BACK) {
-            parseTypeSpec();
+            parseExternalDecl();
             NL();
         }
         SymTable* table = symStack.top();
@@ -570,7 +523,7 @@ void Parser::parseTypedef()
     SymTable *table = new SymTable();
     symStack.push(table);
     state->push(PARSE_TYPEDEF);
-    parseTypeSpec();
+    parseExternalDecl();
     state->pop();
     symStack.pop();
     for (Symbol* s : table->table) {
@@ -703,7 +656,7 @@ StmtBlock *Parser::parseBlock(SymTable* table)
     while (*GL() != BRACE_BACK && *GL() != ENDOF) {
         Symbol *s = symStack.find(GL()->getValue());
         if ((s != NULL && s->isType()) || *GL() == T_TYPEDEF || *GL() == T_STRUCT) {
-            parseTypeSpec();
+            parseExternalDecl();
             NL();
         } else {
             Stmt *s = parseStmt();
