@@ -29,7 +29,7 @@ int **a6[2][6];
 //int *(*a7[1])[1];
 //int **(*(*x)[3])[5][5];
 //int a()[];
-/*
+
 
 int main()
 {
@@ -49,15 +49,7 @@ int main()
     //             while (777)
     //                 1;
     //     while (9000);
-
+    int *a(int, int);
    	return 0;
 }
 
-int a, b, foo(int *a(int, int){}, int b)
-{
-
-	return 0;
-};
- 
-typedef struct point sp;
-typedef struct point* psp;

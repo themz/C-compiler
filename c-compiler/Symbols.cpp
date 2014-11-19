@@ -221,9 +221,11 @@ void SymTypeArray::print(int deep, bool printType)
     cout << "array [" ;
     if(size != NULL)
         size->print(0,false);
-    cout << "] of ";
-    if (type != NULL) {
-        type->print();
+    cout << "] of ";    
+    if (type->isFunc()) {
+        dynamic_cast<SymFunc *>(type)->printAsType(deep, printType);
+    } else if (type != NULL) {
+        type->print(deep, !type->isStruct() && printType);
     }
 }
 
@@ -307,9 +309,10 @@ void SymFunc::print(int deep, bool printType)
     cout <<  string(deep, ' ');
     if (retType->isStruct()) {
         cout << retType->getName();
-    } else {
+    } else if(retType->isFunc()){
+        dynamic_cast<SymFunc*>(retType)->printAsType();
+    } else
         retType->print();
-    }
     cout << " " << getName()<< "(";
     if (args->getSize() > 0 && printType) {
         cout << endl;
@@ -325,6 +328,14 @@ void SymFunc::print(int deep, bool printType)
         cout << endl;
     }
     
+}
+
+void SymFunc::setType(SymType *type)
+{
+    if (type != NULL && type->getType() != NULL && type->getType()->isArray()) {
+        throw parser_exception("Function cannot return array type ");
+    }
+    retType = type;
 }
 
 void SymFunc::printAsType(int deep, bool printType)

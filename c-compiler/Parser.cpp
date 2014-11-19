@@ -304,6 +304,7 @@ void Parser::parseExternalDecl()
         SymType* complexType = parseDeclarator();
         type = hitch(complexType, lastType);
         string name = names->pop();
+        exception("Variable has incomplete type 'struct " + type->getName() + "'", type->isStruct() && type->isEmpty() && state->top() != PARSE_TYPEDEF);
         if (type->isFunc()) {
             dynamic_cast<SymFunc*>(type)->setName(name);
             symStack.add(type);
@@ -362,22 +363,59 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
         names->push(GL()->getValue());
         NL();
     }
+    SymType* ok = NULL;
     while (*GL() == BRACKET_FRONT || *GL() == PARENTHESIS_FRONT) {
         if(*GL() == BRACKET_FRONT) {
-            type = parseArrayDeclaration(type);
-        }else if(*GL() == PARENTHESIS_FRONT) {
-            type = parseFunctionDeclaration(type);
+            ok = parseArrayDeclaration(ok);
+        }else if(*GL() ==  PARENTHESIS_FRONT) {
+            ok = parseFunctionDeclaration(ok);
         } else if(*GL() == PARENTHESIS_BACK) {
             NL();
+            //break;
         } else{
             exception("Unexpected lex in declarate '"+ GL()->getValue() +"'");
         }
     }
+    //ok = revers(ok);
+    type = hitch(ok, type);
     if (*GL() == PARENTHESIS_BACK) {
         NL();
     }
     return hitch(getFromRecType, type);
 }
+
+SymType* Parser::revers(SymType *head)
+{
+    SymType *reversed = NULL;
+    while (head != NULL) {
+        SymType *standalone = head;
+        head = head->getType();
+        standalone->setType(reversed);
+        reversed = standalone;
+    }
+    return reversed;
+}
+
+//**
+//* @param head - голова списка [a_1, ..., a_n]
+//* @return голова списка [a_n, ..., a_1]
+//*/
+//public static Element reverse(Element head){
+//    Element reversed = null;
+//    // инвариант цикла:
+//    // reversed - перевёрнутый список - [a_(k-1), ..., a_1]
+//    // head - ещё нет - [a_k, ..., a_n]
+//    while(head != null){
+//        // отцепляем элемент от головы
+//        Element standalone = head;
+//        head = head.next;
+//        // и прицепляем в голову перевёрнутого списка
+//        standalone.next = reversed;
+//        reversed = standalone;
+//    }
+//    return reversed;
+//}
+
 
 SymType* Parser::hitch(SymType* start, SymType* type)
 {

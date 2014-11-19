@@ -312,7 +312,7 @@ public:
     virtual bool isType(){return true;};
     void print(int deep = 0, bool printType = true);
     virtual void setTable(SymTable *t){ table = t;}
-    virtual bool isEmpty(){return table == NULL;}
+    bool isEmpty(){return table == NULL;}
 };
 
 class SymTypeDef : public SymType
@@ -397,7 +397,7 @@ public:
     virtual bool isType(){return false;};
     SymTable *getTable(){return args;};
     SymType *getType(){return retType;};
-    void setType(SymType *type){ retType = type;};
+    void setType(SymType *type);
     void setName(string newName){name = newName;};
     void print(int deep = 0, bool printType = true);
     void printAsType(int deep = 0, bool printType = true);

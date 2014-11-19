@@ -59,6 +59,7 @@ private:
     SymType *parsePointerDeclaration(SymType *type);
     SymType *parseFunctionDeclaration(SymType *type, bool parseParam = false);
     SymType *hitch(SymType* start, SymType* type);
+    SymType *revers(SymType* type);
     SymTable *parseFunctionsParams();
     
     void parseExternalDecl();
