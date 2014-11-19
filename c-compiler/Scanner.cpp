@@ -470,10 +470,10 @@ bool Scanner::next()
 			}
 			continue;
         case (IN_POINT):
-                if (curLexem_ == NULL) {
+                if (curLexem_ == NULL || curLexem_) {
                     curState_ = IN_DECIMAL_POINT;
                 }
-                else if(curLexem_->getLexType() == IDENTIFICATOR || dynamic_cast<OperationLexeme*>(curLexem_)->getOpType() == BRACKET_BACK || dynamic_cast<OperationLexeme*>(curLexem_)->getOpType() == PARENTHESIS_BACK){
+                else if(*curLexem_ == IDENTIFICATOR || *curLexem_ == BRACKET_BACK || *curLexem_ == PARENTHESIS_BACK){
                     readNext_ = false;
                     curState_ = IN_OPERATION;
                     continue;
