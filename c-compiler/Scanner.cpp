@@ -470,7 +470,7 @@ bool Scanner::next()
 			}
 			continue;
         case (IN_POINT):
-                if (curLexem_ == NULL || curLexem_) {
+                if (curLexem_ == NULL) {
                     curState_ = IN_DECIMAL_POINT;
                 }
                 else if(*curLexem_ == IDENTIFICATOR || *curLexem_ == BRACKET_BACK || *curLexem_ == PARENTHESIS_BACK){
