@@ -5,5 +5,5 @@
    void
 +----Functions----+
    int foo(
-       bar array [] of int
+       bar array [<empty>] of int
    )

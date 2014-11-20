@@ -73,6 +73,8 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     rightAssocOps[MULT] = true;
     rightAssocOps[BITWISE_AND] = true;
     rightAssocOps[QUESTION] = true;
+    
+
 
     SymTable *st = new SymTable();
     st->add(new SymTypeInt());
@@ -319,6 +321,9 @@ void Parser::parseExternalDecl()
             symStack.add(var);
             
         }
+        if (*GL() == COMMA && state->top() == PARSE_FUNC_ARG_DEF) {
+            break;
+        }
     }
 }
 
@@ -326,8 +331,8 @@ SymType* Parser::parseDeclarator()
 {
     SymType* newType = parseDirectDeclarator(NULL);
     exception("Expected ';' or ',' or '=' or EOF  not '" + GL()->getValue() + "'",
-              *GL() != SEMICOLON && *GL() != COMMA && *GL() != BRACE_BACK && *GL() != ASSIGN && *GL() != ENDOF)  ;
-    if (*GL() == COMMA) {
+              *GL() != SEMICOLON && *GL() != COMMA && *GL() != BRACE_BACK && *GL() != ASSIGN && *GL() != ENDOF && (*GL() != PARENTHESIS_BACK && state->top() == PARSE_FUNC_ARG_DEF));
+    if (*GL() == COMMA && state->top() != PARSE_FUNC_ARG_DEF) {
         NL();
     }
     return newType;
@@ -352,16 +357,24 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
 {
     SymType *getFromRecType = NULL;
     type = parsePointerDeclaration(type);
+    
     if(*GL() == PARENTHESIS_FRONT)
     {
         NL();
         getFromRecType = parseDirectDeclarator(NULL);
     } else {
-        exception("Expected identificator", *GL() != IDENTIFICATOR);
-        exception("Redefinition variable '" + GL()->getValue() + "'",
-                  symStack.top()->find(GL()->getValue()) != NULL);
-        names->push(GL()->getValue());
-        NL();
+        if (state->top() == PARSE_FUNC_ARG_DEF && *GL() != IDENTIFICATOR) {
+            names->push("#unname#" + to_string(unnameCount++));
+        }else{
+            exception("Expected identificator", *GL() != IDENTIFICATOR);
+            exception("Redefinition variable '" + GL()->getValue() + "'",
+                          symStack.top()->find(GL()->getValue()) != NULL);
+            //if (*GL() != IDENTIFICATOR) {
+            //    names->push("#unname#" + to_string(unnameCount++));
+            ///} else{
+            names->push(GL()->getValue());
+            NL();
+        }
     }
     SymType* ok = NULL;
     while (*GL() == BRACKET_FRONT || *GL() == PARENTHESIS_FRONT) {
@@ -378,7 +391,7 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
     }
     ok = revers(ok);
     type = hitch(ok, type);
-    if (*GL() == PARENTHESIS_BACK) {
+    if (*GL() == PARENTHESIS_BACK && state->top() != PARSE_FUNC_ARG_DEF) {
         NL();
     }
     return hitch(getFromRecType, type);
@@ -386,36 +399,15 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
 
 SymType* Parser::revers(SymType *head)
 {
-    SymType *reversed = NULL;
+    SymType *r = NULL;
     while (head != NULL) {
-        SymType *standalone = head;
+        SymType *s = head;
         head = head->getType();
-        standalone->setType(reversed);
-        reversed = standalone;
+        s->setType(r);
+        r = s;
     }
-    return reversed;
+    return r;
 }
-
-//**
-//* @param head - голова списка [a_1, ..., a_n]
-//* @return голова списка [a_n, ..., a_1]
-//*/
-//public static Element reverse(Element head){
-//    Element reversed = null;
-//    // инвариант цикла:
-//    // reversed - перевёрнутый список - [a_(k-1), ..., a_1]
-//    // head - ещё нет - [a_k, ..., a_n]
-//    while(head != null){
-//        // отцепляем элемент от головы
-//        Element standalone = head;
-//        head = head.next;
-//        // и прицепляем в голову перевёрнутого списка
-//        standalone.next = reversed;
-//        reversed = standalone;
-//    }
-//    return reversed;
-//}
-
 
 SymType* Parser::hitch(SymType* start, SymType* type)
 {
@@ -465,34 +457,62 @@ void Parser::parseSemicolon()
 SymTable* Parser::parseFunctionsParams()
 {
     SymTable *table = new SymTable();
-    SymType *type = NULL;
-    string name = "";
-    Node *exp = NULL;
+    symStack.push(table);
     while (*GL() != PARENTHESIS_BACK) {
         bool isConst = false;
-        exp = NULL;
-        name = "";
         if (*GL() == T_CONST) {
             NL();
             isConst = true;
         }
-        type = parsePointerDeclaration(parseType());
         state->push(PARSE_FUNC_ARG_DEF);
-        name = parseName();
+        SymType *type = parseType();
+        SymType* complpexType = parseDeclarator();
+        type = hitch(complpexType, type) ;
         state->pop();
-        if (*GL() == BRACKET_FRONT) {
-            type = parseArrayDeclaration(type);
-        }
+        string name = names->pop();
         exception("C does not support default arguments", *GL() == ASSIGN);
-        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst, true)));
+        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, NULL, isConst, true)));
         exception("Expected ',' or identificator", *GL() != COMMA && *GL() != PARENTHESIS_BACK);
         if (*GL() == COMMA) {
             NL();
         }
     }
     NL();
+    symStack.pop();
     return table;
 }
+
+//SymTable* Parser::parseFunctionsParams()
+//{
+//    SymTable *table = new SymTable();
+//    SymType *type = NULL;
+//    string name = "";
+//    Node *exp = NULL;
+//    while (*GL() != PARENTHESIS_BACK) {
+//        bool isConst = false;
+//        exp = NULL;
+//        name = "";
+//        if (*GL() == T_CONST) {
+//            NL();
+//            isConst = true;
+//        }
+//        type = parsePointerDeclaration(parseType());
+//        state->push(PARSE_FUNC_ARG_DEF);
+//        name = parseName();
+//        state->pop();
+//        if (*GL() == BRACKET_FRONT) {
+//            type = parseArrayDeclaration(type);
+//        }
+//        exception("C does not support default arguments", *GL() == ASSIGN);
+//        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst, true)));
+//        exception("Expected ',' or identificator", *GL() != COMMA && *GL() != PARENTHESIS_BACK);
+//        if (*GL() == COMMA) {
+//            NL();
+//        }
+//    }
+//    NL();
+//    return table;
+//}
 
 SymType *Parser::parseArrayDeclaration(SymType *type)
 {

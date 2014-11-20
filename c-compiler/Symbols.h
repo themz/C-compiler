@@ -279,11 +279,14 @@ public:
 
 class SymTypeScalar : public SymType
 {
-private:
+protected:
+    int priority;
 public:
     bool isModifiableLvalue(){ return true; }
     bool isLvalue() { return true; }
     bool canConvertTo(SymType* newType);
+    virtual int getPriority(){ return 0;};
+    
     SymTypeScalar(const string &name = ""): SymType(name){}
 };
 
@@ -291,28 +294,28 @@ class SymTypeInt : public SymTypeScalar
 {
 private:
 public:
-    SymTypeInt(const string &name = "int"): SymTypeScalar(name){};
+    SymTypeInt(const string &name = "int"): SymTypeScalar(name){ priority = 2;};
 };
 
 class SymTypeVoid : public SymTypeScalar
 {
 private:
 public:
-    SymTypeVoid(const string &name = "void"): SymTypeScalar(name){};
+    SymTypeVoid(const string &name = "void"): SymTypeScalar(name){priority = 5;};
 };
 
 class SymTypeFloat : public SymTypeScalar
 {
 private:
 public:
-    SymTypeFloat(const string &name = "float"): SymTypeScalar(name){};
+    SymTypeFloat(const string &name = "float"): SymTypeScalar(name){priority = 3;};
 };
 
 class SymTypeChar : public SymTypeScalar
 {
 private:
 public:
-    SymTypeChar(const string &name = "char"): SymTypeScalar(name){};
+    SymTypeChar(const string &name = "char"): SymTypeScalar(name){priority = 4;};
 };
 
 class SymTypeStruct : public SymType

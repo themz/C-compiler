@@ -9,7 +9,7 @@
    {
    +----Variables----+
        a array [10] of int
-       i int = { ,0 }
+       i int = 0
    +----Functions----+
       void f(
           #unname#0 int

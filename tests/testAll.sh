@@ -8,3 +8,5 @@ echo ''
 bash parserSymTest.sh
 echo ''
 bash parserNewSymTest.sh
+echo ''
+bash ParserTypes.sh

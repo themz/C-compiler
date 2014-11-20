@@ -8,6 +8,6 @@
    )
    {
    +----Variables----+
-       a int = { ,1 }
+       a int = 1
 
    }

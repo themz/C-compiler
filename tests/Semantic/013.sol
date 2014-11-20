@@ -5,5 +5,5 @@
    void
 +----Functions----+
    int a(
-       #unname#0 int
+       a int
    )

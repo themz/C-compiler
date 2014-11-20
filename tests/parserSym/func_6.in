@@ -1,5 +1,5 @@
-int func1(int, float);
+int func1(int a, float a1);
 int func2(int a, float b);
 int func3(const int a, float b);
-int func4(const float);
-int func5(const float, const float b);
+int func4(const float a);
+int func5(const float a, const float b);

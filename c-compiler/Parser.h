@@ -52,7 +52,7 @@ private:
     Stmt *parseWhile();
     Stmt *parseDoWhile();
     Stmt *parseJumpStatement();
-
+    
     SymType *parseDeclarator();
     SymType *parseDirectDeclarator(SymType *type);
     SymType *parseArrayDeclaration(SymType *type);
@@ -60,6 +60,7 @@ private:
     SymType *parseFunctionDeclaration(SymType *type, bool parseParam = false);
     SymType *hitch(SymType* start, SymType* type);
     SymType *revers(SymType* type);
+    SymType *selectFuncOrRec(SymType* type);
     SymTable *parseFunctionsParams();
     
     void parseExternalDecl();

@@ -1,1 +1,2 @@
-int foo(int[10], int[10][10], int[10][20][30], int[10][10][20][30], int*, int**, int*);
+//int foo(int[10], int[10][10], int[10][20][30], int[10][10][20][30], int*, int**, int*);
+int foo(int a[10], int b[10][10], int c[10][20][30], int b1[10][10][20][30], int *t, int ** u, int* i);

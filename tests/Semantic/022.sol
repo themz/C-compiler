@@ -8,11 +8,11 @@
 +----Functions----+
    int b()
    int c(
-       #unname#0 int
+       c int
    )
    int d(
-       #unname#1 pointer to int
-       #unname#2 array [] of int
+       d1 pointer to int
+       d2 array [<empty>] of int
    )
    int f(
        intptr pointer to int

@@ -5,6 +5,7 @@ using namespace std;
 
 static const int N = 3;
 
+
 UnaryOpNode::UnaryOpNode(Lexeme* op, Node* oper): OpNode(op), operand(oper) 
 {
 
@@ -75,20 +76,17 @@ bool BinaryOpNode::isModifiableLvalue()
 SymType *BinaryOpNode::getType()
 {
     SymType* rootType = NULL;
-    SymType* lType = left->getType();
-    SymType* rType = right->getType();
+    SymType* leftType = left->getType();
+    SymType* rightType = right->getType();
     
     OperationType opType = dynamic_cast<OperationLexeme *>(lexeme_)->getOpType();
 
-    if (dynamic_cast<SymTypeDef *>(lType))
-        lType = lType->getType();
-    if (dynamic_cast<SymTypeDef*>(rType))
-        rType = rType->getType();
-//TypeSym* maxTypeOfArgs = NULL;
-//    if (operationTypeOperands.count(op))
-//        maxTypeOfArgs = operationTypeOperands[op];
-//    else
-//        maxTypeOfArgs = typePriority[leftType] > typePriority[rightType] ? leftType : rightType;
+    if (dynamic_cast<SymTypeDef *>(leftType))
+        leftType = leftType->getType();
+    if (dynamic_cast<SymTypeDef*>(rightType))
+        rightType = rightType->getType();
+    
+    SymType* maxTypeOfArgs = priorityType[leftType] > priorityType[rightType] ? leftType : rightType;
 //    PointerSym* lp = dynamic_cast<PointerSym*>(leftType);
 //    PointerSym* rp = dynamic_cast<PointerSym*>(rightType);
 //    ArraySym* la = dynamic_cast<ArraySym*>(leftType);

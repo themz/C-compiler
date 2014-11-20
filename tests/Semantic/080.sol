@@ -8,9 +8,9 @@
    )
    {
    +----Variables----+
-       a int = { ,1 }
+       a int = 1
        b int
-       c int = { ,3 }
-       d int = { ,a*c*1 }
+       c int = 3
+       d int = a*c*1
 
    }

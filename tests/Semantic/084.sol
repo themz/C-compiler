@@ -1,2 +1,16 @@
-Error: Expected ',' or identificator
-row:3 col:19
++----Types----+
+   int
+   char
+   float
+   void
++----Functions----+
+   int main(
+   )
+   {
+   +----Functions----+
+      function () returning pointer to void i(
+          x pointer to int ()
+
+      )
+
+   }

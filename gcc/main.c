@@ -1,4 +1,62 @@
 #include <stdio.h>
+
+
+// SymType *Parser::parseFunctionDeclaration(SymType *type, bool parseParam)
+// {
+//     NL();
+//     StmtBlock *body = NULL;
+//     SymTable *params = parseFunctionsParams();
+//     if(*GL() == BRACE_FRONT){
+//         exception("Expected ')' in function declaration can not have body", parseParam);
+//         exception("Parameters name omitted", params->hasAnonymousSym());
+//         body = parseBlock(params);
+//     } else if(*GL() == SEMICOLON || *GL() == COMMA || *GL() == BRACKET_FRONT || *GL() == PARENTHESIS_BACK || *GL() == PARENTHESIS_FRONT){
+        
+//     }
+//     else {
+//         exception("Expected function body, complexDeclaration or ';' but not '" + GL()->getValue() + "'");
+//     }
+//     string s = "";
+//     return new SymFunc(s, type, params, body);
+// }
+
+// void Parser::parseSemicolon()
+// {
+//     while (*GL() == SEMICOLON) {
+//         NL();
+//     }
+// }
+
+// SymTable* Parser::parseFunctionsParams()
+// {
+//     SymTable *table = new SymTable();
+//     SymType *type = NULL;
+//     while (*GL() != PARENTHESIS_BACK) {
+//         bool isConst = false;
+        
+//         if (*GL() == T_CONST) {
+//             NL();
+//             isConst = true;
+//         }
+//         state->push(PARSE_FUNC_ARG_DEF);
+//             type = hitch(parseType(), parseDeclarator()) ;
+//         state->pop();
+        
+//         string name = names->pop();
+//         exception("C does not support default arguments", *GL() == ASSIGN);
+//         exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, NULL, isConst, true)));
+//         exception("Expected ',' or identificator", *GL() != COMMA && *GL() != PARENTHESIS_BACK);
+//         if (*GL() == COMMA) {
+//             NL();
+//         }
+//     }
+//     NL();
+//     return table;
+// }
+
+//--------------------------------------------------------------------------------------------
+
+
 // int foo();
 // int a, **bar(), baz(int **, float y), b;
 
@@ -41,21 +99,10 @@ int main()
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 int main()
 {
-    // return 1;
-    //     do
-    //         if (42)
-    //             666;
-    //         else
-    //             while (777)
-    //                 1;
-    //     while (9000);
-    int u = {1,2,{3},4,{5,6,7,8},{9, 10}, 11}, s = 9;
-    struct a
-    {
-        int d;
-    } tt;
-    int ttt = 0;
-    int i = (int*****)ttt;
-   	return 0;
+	void f3(int** (*(*x())[][3])());
+	int** (*(*z())[][3])[];
+	f3(z);
+	return 0;
 }
+
 

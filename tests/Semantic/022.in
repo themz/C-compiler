@@ -1,1 +1,2 @@
-int a, b(), c(int), d(int*, int[]), f(int* intptr, void* vptr);
+//int a, b(), c(int), d(int*, int[]), f(int* intptr, void* vptr);
+int a, b(), c(int c), d(int* d1, int d2[]), f(int* intptr, void* vptr);

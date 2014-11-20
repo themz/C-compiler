@@ -4,8 +4,9 @@
    float
    void
 +----Functions----+
-   int foo(
-       a int
-       q float
-       d int
+   int a(
+       t pointer to int (
+    const  a int
+)
+
    )

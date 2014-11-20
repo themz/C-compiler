@@ -1,6 +1,14 @@
 #include "Symbols.h"
+#include <map>
+
 
 #define N 3
+
+SymTypeScalar* intType = new SymTypeInt();
+SymTypeScalar* floatType = new SymTypeFloat();
+SymTypeScalar* charType = new SymTypeChar();
+SymTypeScalar* voidType = new SymTypeVoid();
+
 //--------------------------------SymTable--------------------------------//
 
 bool SymTable::add(Symbol *symbol)

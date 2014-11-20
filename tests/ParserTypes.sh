@@ -1,5 +1,5 @@
 #!/bin/bash
-cd Semantic;
+cd parserTypes;
 all=0;
 ok=0;
 for file in $(ls | grep ".in$" | cut -d '.' -f 1); do
@@ -13,4 +13,4 @@ for file in $(ls | grep ".in$" | cut -d '.' -f 1); do
 	fi
 done
 cd ..
-echo '========== Semantic tests completed' $ok 'of' $all '==========';
+echo '========== Parse Types tests completed' $ok 'of' $all '==========';

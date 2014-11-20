@@ -1,10 +1,2 @@
-+----Types----+
-   int
-   char
-   float
-   void
-   struct $point
-+----Variables----+
-    a struct $point
-    b struct $point
-    c struct $point
+Error: Variable has incomplete type 'struct $point'
+row:2 col:18

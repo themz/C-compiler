@@ -16,7 +16,7 @@
    +----Functions----+
       void foo()
       void bar(
-          #unname#0 int
+          s int
       )
 
    }
