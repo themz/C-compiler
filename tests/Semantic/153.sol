@@ -8,8 +8,8 @@
    )
    {
    +----Variables----+
-       a int = { ,3 }
-       c char = { ,c  }
+       a int = 3
+       c char = c 
 
       {
          c%=a

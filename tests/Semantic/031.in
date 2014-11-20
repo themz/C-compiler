@@ -1,3 +1,0 @@
-struct point {
-	float x, y, z;
-} p1, p2, p3;

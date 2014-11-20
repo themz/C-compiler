@@ -4,11 +4,6 @@
 
 #define N 3
 
-SymTypeScalar* intType = new SymTypeInt();
-SymTypeScalar* floatType = new SymTypeFloat();
-SymTypeScalar* charType = new SymTypeChar();
-SymTypeScalar* voidType = new SymTypeVoid();
-
 //--------------------------------SymTable--------------------------------//
 
 bool SymTable::add(Symbol *symbol)
@@ -217,10 +212,9 @@ void SymVar::print(int deep, bool printType)
 
 bool SymTypeScalar::canConvertTo(SymType *newType)
 {
-//    if (dynamic_cast<SymTypePointer*>(newType) || dynamic_cast<SymFunc*>(to))
-//        return false;
-//    return typePriority[this] <= typePriority[to];
-    return false;
+    if (dynamic_cast<SymTypePointer*>(newType) || dynamic_cast<SymFunc*>(newType))
+        return false;
+    return this->getPriority() <= newType->getPriority();
 }
 
 void SymTypeArray::print(int deep, bool printType)
@@ -267,32 +261,37 @@ void SymTypePointer::print(int deep, bool printType)
 
 bool SymTypePointer::canConvertTo(SymType *newType)
 {
+   	if (newType == intType)
+        return true;
+    SymType* p = dynamic_cast<SymTypePointer*>(newType);
+    if (p)
+        return *this == p;
     return false;
 }
 
 bool SymTypePointer::operator==(SymType* t)
 {
-//    SymTypePointer* p = dynamic_cast<SymTypePointer*>(t);
-//    if (!t)
-//        return false;
-//    SymType* type1 = getType();
-//    SymType* type2 = p->getType();
-//    while (true)
-//    {
-//        if (*type1 != type2)
-//            return false;
-//        SymType* tmp1 = type1->getType();
-//        SymType* tmp2 = type2->getType();
-//        if (tmp1 == NULL || tmp2 == NULL)
-//        {
-//            if (tmp1 != NULL || tmp2 != NULL)
-//                return false;
-//            return true;
-//        } else {
-//            type1 = tmp1;
-//            type2 = tmp2;
-//        }
-//    }
+    SymTypePointer* p = dynamic_cast<SymTypePointer*>(t);
+    if (!p)
+        return false;
+    SymType* t1 = getType();
+    SymType* t2 = p->getType();
+    while (true)
+    {
+        if (!(*t1 == t2))
+            return false;
+        SymType* tmp1 = t1->getType();
+        SymType* tmp2 = t1->getType();
+        if (tmp1 == NULL || tmp2 == NULL)
+        {
+            if (tmp1 != NULL || tmp2 != NULL)
+                return false;
+            return true;
+        } else {
+            t1 = tmp1;
+            t2 = tmp2;
+        }
+    }
     return false;
 }
 
@@ -339,9 +338,9 @@ void SymFunc::print(int deep, bool printType)
 
 void SymFunc::setType(SymType *type)
 {
-    if (type != NULL && type->getType() != NULL && type->getType()->isArray()) {
-        throw parser_exception("Function cannot return array type ");
-    }
+//    if (type != NULL && type->getType() != NULL && type->getType()->isArray()) {
+//        throw parser_exception("Function cannot return array type ");
+//    }
     retType = type;
 }
 

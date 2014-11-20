@@ -2,16 +2,26 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 #include "exception.h"
 #include "Lexeme.h"
 
 using namespace std;
 
+class SymTypeScalar;
 class SymType;
 class Stmt;
 class StmtBlock;
 class SymTable;
 class SymVar;
+
+extern SymTypeScalar* intType;
+extern SymTypeScalar* floatType;
+extern SymTypeScalar* charType;
+extern SymTypeScalar* voidType;
+
+extern map<OperationType, SymType*> operationTypeOperands;
+extern map<OperationType, SymType*> operationReturningType;
 
 //------------------------- Expression node -------------------------
 
@@ -30,6 +40,8 @@ public:
     Node(): lexeme_(0) {}
     Node(Lexeme* lex): lexeme_(lex) {}
     virtual bool isLvalue(){ return false; };
+    int getLine(){return lexeme_->getLine();};
+    int getCol(){return lexeme_->getCol();};
     virtual bool isModifiableLvalue(){ return false; }
     virtual SymType* getType(){ return NULL; }
     virtual void print(int deep = 0, bool isTree = true){};
@@ -59,6 +71,16 @@ public:
     bool isLvalue();
     SymType* getType();
     void print(int deep = 0, bool isTree = true);
+};
+
+class TypecastNode : public UnaryOpNode
+{
+private:
+    SymType* type;
+public:
+    TypecastNode(Lexeme* op, Node* oper, SymType* type): UnaryOpNode(op, oper), type(type) {}
+    void print(int deep = 0, bool isTree = true);
+    virtual SymType* getType();
 };
 
 class BinaryOpNode : public OpNode
@@ -174,15 +196,6 @@ public:
     void print(int deep = 0, bool isTree = true);
 };
 
-class TypecastNode : public UnaryOpNode
-{
-private:
-    
-public:
-    TypecastNode(Lexeme* op, Node* oper): UnaryOpNode(op, oper){}
-    void print(int deep = 0, bool isTree = true);
-};
-
 //------------------------- Symbols -------------------------
 
 
@@ -206,6 +219,10 @@ public:
     virtual bool isConst(){return false;};
     virtual SymType *getType(){return NULL;};
     virtual void setType(SymType* type){};
+    
+    virtual int getPriority(){return 0;};
+    static Node* makeTypecastNode(Node* exp, SymType* from, SymType* to);
+
 };
 
 //-------------SymTable--------------//
@@ -273,6 +290,7 @@ public:
     virtual void setType(SymType* type) {}
     virtual bool canConvertTo(SymType* newType) { return false; }
     virtual void setTable(SymTable *t){};
+    virtual int getPriority(){return 0;};
     virtual bool operator == (SymType* t) { return this == t; }
     void print(int deep = 0, bool printType = true);
 };
@@ -285,8 +303,7 @@ public:
     bool isModifiableLvalue(){ return true; }
     bool isLvalue() { return true; }
     bool canConvertTo(SymType* newType);
-    virtual int getPriority(){ return 0;};
-    
+    virtual int getPriority(){return priority;};
     SymTypeScalar(const string &name = ""): SymType(name){}
 };
 
@@ -301,7 +318,7 @@ class SymTypeVoid : public SymTypeScalar
 {
 private:
 public:
-    SymTypeVoid(const string &name = "void"): SymTypeScalar(name){priority = 5;};
+    SymTypeVoid(const string &name = "void"): SymTypeScalar(name){priority = -10;};
 };
 
 class SymTypeFloat : public SymTypeScalar
@@ -315,7 +332,7 @@ class SymTypeChar : public SymTypeScalar
 {
 private:
 public:
-    SymTypeChar(const string &name = "char"): SymTypeScalar(name){priority = 4;};
+    SymTypeChar(const string &name = "char"): SymTypeScalar(name){priority = 1;};
 };
 
 class SymTypeStruct : public SymType
@@ -524,3 +541,4 @@ public:
     StmtReturn(Node *ret): retArg(ret) {}
     void print(int deep = 0, bool printType = true);
 };
+

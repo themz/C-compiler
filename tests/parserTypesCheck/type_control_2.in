@@ -1,0 +1,10 @@
+int i;
+float f;
+int *p;
+int a[42];
+struct strct {int i; int **appv[100];} s;
+
+int main()
+{
+    i * p;
+}

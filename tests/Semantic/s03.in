@@ -1,0 +1,1 @@
+struct {int a; float *a;} s;

@@ -1,2 +1,0 @@
-typedef int INT;
-typedef INT* intp;

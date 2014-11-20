@@ -28,7 +28,7 @@ class parser_exception : public compiler_exception
 {
 	bool printPos;
 public:
-	parser_exception(string msg, int col, int line, bool prPos = true) : compiler_exception(msg, col, line, prPos){};
+    parser_exception(string msg, int line, int col, bool prPos = true) : compiler_exception(msg, col, line, prPos){};
 	parser_exception(string msg, bool prPos = true ) : compiler_exception(msg, 0, 0,prPos){}
 };
 

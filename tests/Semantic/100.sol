@@ -1,2 +1,2 @@
-Error: No member named 'x' in struct '$#unname#0'
-row:11 col:10
+Error: Left operand of '.' must be a struct 
+row:9 col:11

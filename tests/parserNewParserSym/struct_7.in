@@ -1,4 +1,0 @@
-struct tt{
-	struct tt *next;
-	int val;
-};

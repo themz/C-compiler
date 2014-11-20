@@ -5,10 +5,38 @@ using namespace std;
 
 static const int N = 3;
 
+map<OperationType, SymType*> operationTypeOperands;
+map<OperationType, SymType*> operationReturningType;
 
-UnaryOpNode::UnaryOpNode(Lexeme* op, Node* oper): OpNode(op), operand(oper) 
+SymTypeScalar* intType = new SymTypeInt();
+SymTypeScalar* floatType = new SymTypeFloat();
+SymTypeScalar* charType = new SymTypeChar();
+SymTypeScalar* voidType = new SymTypeVoid();
+
+Node* makeTypecastNode(Node* exp, SymType* from, SymType* to)
+{
+    if (!from->canConvertTo(to))
+        throw parser_exception("Cannot perform conversion", exp->getLine(), exp->getCol());
+    if (from == to || *from == to)
+        return exp;
+    if (!dynamic_cast<SymTypeScalar*>(from) || !dynamic_cast<SymTypeScalar*>(to))
+    {
+        return exp;
+    } else {
+        if (to->getPriority() - from->getPriority() == 1)
+            return new TypecastNode(0, exp, to);
+        return new TypecastNode(0, makeTypecastNode(exp, from, intType), floatType);
+    }
+}
+
+UnaryOpNode::UnaryOpNode(Lexeme* op, Node* oper): OpNode(op), operand(oper)
 {
 
+}
+
+SymType* TypecastNode::getType()
+{
+    return type;
 }
 
 void EmptyNode::print(int offset, bool isTree)
@@ -75,80 +103,101 @@ bool BinaryOpNode::isModifiableLvalue()
 
 SymType *BinaryOpNode::getType()
 {
-    SymType* rootType = NULL;
     SymType* leftType = left->getType();
     SymType* rightType = right->getType();
-    
-    OperationType opType = dynamic_cast<OperationLexeme *>(lexeme_)->getOpType();
-
-    if (dynamic_cast<SymTypeDef *>(leftType))
+    if (dynamic_cast<SymTypeDef*>(leftType))
         leftType = leftType->getType();
     if (dynamic_cast<SymTypeDef*>(rightType))
         rightType = rightType->getType();
-    
-    SymType* maxTypeOfArgs = priorityType[leftType] > priorityType[rightType] ? leftType : rightType;
+    OperationType op = dynamic_cast<OperationLexeme*>(lexeme_)->getOpType();
+    SymType* maxTypeOfArgs = NULL;
+    if (operationTypeOperands.count(op))
+        maxTypeOfArgs = operationTypeOperands[op];
+    else
+        maxTypeOfArgs = leftType->getPriority() > rightType->getPriority() ? leftType : rightType;
+    SymTypePointer* lp = dynamic_cast<SymTypePointer*>(leftType);
+    SymTypePointer* rp = dynamic_cast<SymTypePointer*>(rightType);
+    SymTypeArray* la = dynamic_cast<SymTypeArray*>(leftType);
+    SymTypeArray* ra = dynamic_cast<SymTypeArray*>(rightType);
+
+
+//
+//    if (operationTypeOperands.count(op))
+//        maxTypeOfArgs = operationTypeOperands[op];
+//    else
+//        maxTypeOfArgs = typePriority[leftType] > typePriority[rightType] ? leftType : rightType;
 //    PointerSym* lp = dynamic_cast<PointerSym*>(leftType);
 //    PointerSym* rp = dynamic_cast<PointerSym*>(rightType);
 //    ArraySym* la = dynamic_cast<ArraySym*>(leftType);
 //    ArraySym* ra = dynamic_cast<ArraySym*>(rightType);
-    switch (opType)
+    
+    
+    switch (op)
     {
         case MOD_ASSIGN:
         case AND_ASSIGN:
         case OR_ASSIGN:
         case BITWISE_SHIFT_LEFT_ASSIGN:
         case BITWISE_SHIFT_RIGHT_ASSIGN:
-            //if (!leftType->canConvertTo(intType) || !rightType->canConvertTo(intType))
-            //    throw CompilerException("Invalid operator arguments type (required int in both sides)", token->line, token->col);
-            // fallthrough
+            if (!leftType->canConvertTo(intType) || !rightType->canConvertTo(intType))
+                throw parser_exception("Invalid operator arguments type (required int in both sides)", lexeme_->getLine(), lexeme_->getCol());
         case ASSIGN:
-            //if (leftType->isStruct() && *leftType == rightType)
-            //    return leftType;
-            // fallthrough
+            if (leftType->isStruct() && *leftType == rightType)
+                return leftType;
         case MULT_ASSIGN:
         case PLUS_ASSIGN:
         case MINUS_ASSIGN:
         case DIV_ASSIGN:
-            //if (!left->isModifiableLvalue())
-            //    throw CompilerException("Left argument of assignment must be modifiable lvalue", left->token->line, left->token->col);
-            //right = makeTypeCoerce(right, rightType, leftType);
-            //return leftType;
+            if (!left->isModifiableLvalue())
+                throw parser_exception("Left argument of assignment must be modifiable lvalue", left->getLine(), left->getCol());
+            right = makeTypecastNode(right, rightType, leftType);
+            return leftType;
         case DOT:
-            return rType;
         case ARROW:
-            //if (!lp || (!dynamic_cast<StructSym*>(lp->type) && !dynamic_cast<StructSym*>(dynamic_cast<AliasSym*>(lp->type)->type)))
-            //    throw CompilerException("Left operand of -> must be of pointer-to-structure type", left->token->line, left->token->col);
-            //return rightType;
+            return rightType;
         case MINUS:
-            //if (lp && rp || la && ra)
-            //{
-            //   if (lp && rp && *lp->type != rp->type
-            //        || la && ra && *la->type != ra->type)
-            //    throw CompilerException("Operand types are incompatible", token->line, token->col);
-            //    return intType;
-            //}
+            if ((lp && rp) || (la && ra))
+            {
+                if ((lp && rp && !(*lp->getType() == rp->getType()))
+                    || (la && ra && !(*la->getType() == ra->getType())))
+                    throw parser_exception("Operand types are incompatible", lexeme_->getLine(), lexeme_->getCol());
+                return intType;
+            }
         case PLUS:
-            //if (lp && rp || la && ra)
-            //   throw CompilerException("Cannot add two pointers", token->line, token->col);
-            //if (lp || rp)
-            //    return lp == 0 ? rightType : leftType;
-            //if (la || ra)
-            //    return new PointerSym(la == 0 ? ra->type : la->type);
-        default: ;
-            //if (leftType->isStruct() || rightType->isStruct())
-            //    throw CompilerException("Cannot perform operation over two structures", token->line, token->col);
-            //if (typePriority[maxTypeOfArgs] < max(typePriority[leftType], typePriority[rightType]))
-            //    throw CompilerException("Invalid type of operands", token->line, token->col);
-            //left = makeTypeCoerce(left, leftType, maxTypeOfArgs);
-            //right = makeTypeCoerce(right, rightType, maxTypeOfArgs);
-            //if (operationReturningType.count(op))
-            //    return operationReturningType[op];
-            //else
-            //    return maxTypeOfArgs;
+            if ((lp && rp) || (la && ra))
+                throw parser_exception("Cannot add two pointers", lexeme_->getLine(), lexeme_->getCol());
+            if (lp || rp)
+                return lp == 0 ? rightType : leftType;
+            if (la || ra)
+                return new SymTypePointer(la == 0 ? ra->getType() : la->getType());
+        default:
+            if (leftType->isStruct() || rightType->isStruct())
+                throw parser_exception("Cannot perform operation over two structures", lexeme_->getLine(), lexeme_->getCol());
+            if (maxTypeOfArgs->getPriority() < max(leftType->getPriority(),rightType->getPriority()))
+                throw parser_exception("Invalid type of operands", lexeme_->getLine(), lexeme_->getCol());
+            left = makeTypecastNode(left, leftType, maxTypeOfArgs);
+            right = makeTypecastNode(right, rightType, maxTypeOfArgs);
+            if (operationReturningType.count(op))
+                return operationReturningType[op];
+            else 
+                return maxTypeOfArgs;
     }
-    return rootType;
 }
 
+//bool BinaryOpNode::isAssignment(OperationType op)
+//{
+//    return op == ASSIGN || op == PLUS_ASSIGN || op == MINUS_ASSIGN
+//    || op == MULT_ASSIGN || op == DIV_ASSIGN || op == MOD_ASSIGN
+//    || op == AND_ASSIGN || op == OR_ASSIGN
+//    || op == BITWISE_SHIFT_LEFT_ASSIGN || op == BITWISE_SHIFT_RIGHT_ASSIGN;
+//}
+//
+//bool BinaryOpNode::isComparison(OperationType op)
+//{
+//    return op == EQUAL || op == LESS || op == GREATER
+//    || op == LESS_OR_EQUAL || op == GREATER_OR_EQUAL
+//    || op == NOT_EQUAL;
+//}
 
 bool UnaryOpNode::isLvalue()
 {
@@ -188,7 +237,7 @@ SymType *UnaryOpNode::getType()
                 throw parser_exception("Expression must have modifiable lvalue", lexeme_->getLine(), lexeme_->getCol());
             break;
         case MINUS:
-            if (!type->canConvertTo(new SymTypeFloat()))
+            if (!type->canConvertTo(floatType))
                 throw parser_exception("Expression must have arithmetic type", lexeme_->getLine(), lexeme_->getCol());
             break;
         default:
@@ -221,7 +270,7 @@ void IntNode::print(int offset, bool isTree)
 
 SymType *IntNode::getType()
 {
-    return new SymTypeInt();
+    return intType;
 }
 
 void FloatNode::print(int offset, bool isTree)
@@ -231,7 +280,7 @@ void FloatNode::print(int offset, bool isTree)
 
 SymType *FloatNode::getType()
 {
-    return new SymTypeFloat();
+    return floatType;
 }
 
 void CharNode::print(int offset, bool isTree)
@@ -241,7 +290,7 @@ void CharNode::print(int offset, bool isTree)
 
 SymType *CharNode::getType()
 {
-    return new SymTypeChar();
+    return charType;
 }
 
 void IdentifierNode::print(int offset, bool isTree)
@@ -251,7 +300,8 @@ void IdentifierNode::print(int offset, bool isTree)
 
 bool IdentifierNode::isModifiableLvalue()
 {
-    return NULL;
+    return !(var->isConst() || var->getType()->isFunc() ||
+             var->getType()->isStruct() || var->getType()->isArray());
 }
 
 SymType *IdentifierNode::getType()
@@ -363,22 +413,7 @@ SymType *ListNode::getType()
 
 void TypecastNode::print(int offset, bool isTree)
 {
-	string typeName = "";
-	switch (dynamic_cast<ReservedWordLexeme*>(lexeme_)->getRwType())
-	{
-	case(T_CHAR):
-		typeName = "char";
-		break;
-	case(T_INT):
-		typeName = "int";
-		break;
-	case(T_FLOAT):
-		typeName = "float";
-		break;
-    default:
-        break;
-	}	
-	cout << string(isTree ? offset * N : 0, ' ') << typeName << (isTree ? "\n" :"");
+	cout << string(isTree ? offset * N : 0, ' ') << type->getName() << (isTree ? "\n" :"");
 	cout << string(isTree ? offset * N : 0, ' ') << "(" << (isTree ? "\n" :"");
 	operand->print(offset + 1, isTree);
 	cout << string(isTree ? offset * N : 0, ' ') << ")" << (isTree ? "\n" :"");

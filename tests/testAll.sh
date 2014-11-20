@@ -7,6 +7,7 @@ echo ''
 #echo ''
 bash parserSymTest.sh
 echo ''
-bash parserNewSymTest.sh
+bash parserTypesCheck.sh
 echo ''
-bash ParserTypes.sh
+bash generator.sh
+echo ''

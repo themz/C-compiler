@@ -62,9 +62,8 @@ private:
     SymType *revers(SymType* type);
     SymType *selectFuncOrRec(SymType* type);
     SymTable *parseFunctionsParams();
-    
-    void parseExternalDecl();
 
+    void parseExternalDecl();
 
     void parseInitializer(SymVar *var);
     Node *parseInitList();

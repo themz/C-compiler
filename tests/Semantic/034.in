@@ -1,7 +1,0 @@
-struct a {
-	struct b {
-		struct c {
-			int a;
-		} f;
-	};
-};

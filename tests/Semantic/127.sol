@@ -8,8 +8,8 @@
    )
    {
    +----Variables----+
-       a int = { ,3 }
-       c char = { ,c  }
-       d float = { ,5 }
+       a int = 3
+       c char = c 
+       d float = 5
 
    }

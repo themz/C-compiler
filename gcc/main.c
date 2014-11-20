@@ -99,9 +99,8 @@ int main()
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
 int main()
 {
-	void f3(int** (*(*x())[][3])());
-	int** (*(*z())[][3])[];
-	f3(z);
+	int i = 8;
+	printf("%d\n",i /= 2.72);
 	return 0;
 }
 

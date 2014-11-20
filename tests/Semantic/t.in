@@ -1,0 +1,24 @@
+typedef int ti;
+typedef float ***taappp[100][200];
+
+typedef struct {int i;} ts1;
+
+typedef struct 
+{
+    ti a;
+    ts1 *pb;
+} ts2, *aapts2[123][456];
+
+typedef struct ts3
+{
+    ts3 *pts3;
+    aapts2 b;
+} *pts3;
+
+typedef pts3 apts3[10];
+
+ti a;
+taappp b;
+pts3 c;
+apts3 d;
+

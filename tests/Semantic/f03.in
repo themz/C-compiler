@@ -1,0 +1,2 @@
+typedef int tint;
+int foo(tint tint);

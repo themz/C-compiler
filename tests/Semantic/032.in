@@ -1,2 +1,0 @@
-struct point;
-struct point a, b, c;

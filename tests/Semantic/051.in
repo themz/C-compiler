@@ -1,4 +1,0 @@
-typedef struct point sp;
-typedef struct point* spp;
-sp foo();
-spp foop();

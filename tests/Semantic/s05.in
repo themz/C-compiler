@@ -1,0 +1,2 @@
+int s;
+struct {int i;} **s;

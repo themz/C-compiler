@@ -1,0 +1,4 @@
+struct a{
+	int a(int *t(const int a));
+	int m;
+}

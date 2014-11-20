@@ -1,2 +1,0 @@
-typedef const int intconst;
-intconst a, b, c;

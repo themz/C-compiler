@@ -1,2 +1,2 @@
-Error: Expected ',' or identificator
-row:3 col:20
+Error: Function cannot return array type 
+row:0 col:0

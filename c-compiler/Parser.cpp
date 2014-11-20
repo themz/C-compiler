@@ -73,14 +73,40 @@ Parser::Parser(Scanner &scanner):scanner_(scanner), symStack()
     rightAssocOps[MULT] = true;
     rightAssocOps[BITWISE_AND] = true;
     rightAssocOps[QUESTION] = true;
+
+    operationTypeOperands[MOD] = intType;
+    operationTypeOperands[BITWISE_AND] = intType;
+    operationTypeOperands[BITWISE_OR] = intType;
+    operationTypeOperands[BITWISE_XOR] = intType;
+    operationTypeOperands[BITWISE_NOT] = intType;
+    operationTypeOperands[BITWISE_SHIFT_LEFT] = intType;
+    operationTypeOperands[BITWISE_SHIFT_RIGHT] = intType;
+    
+    operationReturningType[MOD] = intType;
+    operationReturningType[BITWISE_AND] = intType;
+    operationReturningType[BITWISE_OR] = intType;
+    operationReturningType[BITWISE_NOT] = intType;
+    operationReturningType[BITWISE_SHIFT_LEFT] = intType;
+    operationReturningType[BITWISE_SHIFT_RIGHT] = intType;
+    operationReturningType[LOGICAL_AND] = intType;
+    operationReturningType[LOGICAL_OR] = intType;
+    operationReturningType[BITWISE_XOR] = intType;
+    operationReturningType[LOGICAL_NOT] = intType;
+    operationReturningType[BITWISE_XOR] = intType;
+    operationReturningType[EQUAL] = intType;
+    operationReturningType[NOT_EQUAL] = intType;
+    operationReturningType[LESS] = intType;
+    operationReturningType[LESS_OR_EQUAL] = intType;
+    operationReturningType[GREATER] = intType;
+    operationReturningType[GREATER_OR_EQUAL] = intType;
     
 
 
     SymTable *st = new SymTable();
-    st->add(new SymTypeInt());
-    st->add(new SymTypeChar());
-    st->add(new SymTypeFloat());
-    st->add(new SymTypeVoid());
+    st->add(intType);
+    st->add(charType);
+    st->add(floatType);
+    st->add(voidType);
     symStack.push(st);
     
     names = new nameStack();
@@ -99,7 +125,6 @@ void Parser::parse()
     }
 }
 
-
 //======================= Expression
 
 Node* Parser::parseExp(int priority){
@@ -109,6 +134,8 @@ Node* Parser::parseExp(int priority){
     Node* root = l;
     if (GL() == NULL || *GL() == ENDOF || *GL() == PARENTHESIS_BACK ||
         *GL() == BRACKET_BACK || *GL() == COLON || *GL() == SEPARATOR) {
+        if (root != NULL)
+            root->getType();
         return root;
     }
     OperationLexeme* opLex = dynamic_cast<OperationLexeme*>(GL());
@@ -175,6 +202,7 @@ Node* Parser::parseExp(int priority){
         }
         opLex = dynamic_cast<OperationLexeme*>(GL());
     }
+    root->getType();
     return root;
 }
 
@@ -213,12 +241,13 @@ Node* Parser::parseFactor(int priority)
         case RESERVEDWORD:
         {
             
-            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT)
+            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT )
             {
+                string tName = *lex == T_CHAR ? "char" : *lex == T_INT ? "int" : "float";
                 NL();
                 exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
                 NL();
-                root = new TypecastNode(lex, parseExp());
+                root = new TypecastNode(lex, parseExp(), dynamic_cast<SymType*>(symStack.find(tName)));
                 exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
                 NL();
             }
@@ -346,7 +375,7 @@ SymType* Parser::parseType(bool isConst)
         typeName = parseStruct();
     }
     SymType* type = (SymType*)symStack.find(typeName);
-    exception("Undefine type", type == NULL || type->isFunc());
+    exception("Undefine type '" + GL()->getValue() + "'", type == NULL || type->isFunc());
     if (!type->isStruct()){
         NL();
     }
@@ -872,7 +901,7 @@ void Parser::printTable(int deep)
 void Parser::exception(string msg, bool cond)
 {
     if (cond)
-        throw parser_exception(msg, scanner_.getCol(), scanner_.getLine());
+        throw parser_exception(msg, scanner_.getLine(), scanner_.getCol());
 }
 
 //------------------Helper
