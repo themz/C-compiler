@@ -184,7 +184,7 @@ Node* Parser::parseExp(int priority){
                 NL();
                 SymType *type = root->getType();
                 exception("Left operand of '.' must be a pointer to struct ", !dynamic_cast<SymTypePointer*>(type));
-                SymType *StructType = dynamic_cast<SymTypePointer*>(type)->getType();
+                SymType *StructType = dynamic_cast<SymTypePointer*>(type)->getNextType();
                 exception("Left operand of '.' must be a pointer to struct ", !dynamic_cast<SymTypeStruct*>(StructType));
                 exception("Expected identificator", *GL() != IDENTIFICATOR);
                 Symbol *member = dynamic_cast<SymTypeStruct*>(StructType)->find(GL()->getValue());
@@ -431,7 +431,7 @@ SymType* Parser::revers(SymType *head)
     SymType *r = NULL;
     while (head != NULL) {
         SymType *s = head;
-        head = head->getType();
+        head = head->getNextType();
         s->setType(r);
         r = s;
     }
@@ -444,8 +444,8 @@ SymType* Parser::hitch(SymType* start, SymType* type)
         return type;
     }
     SymType* last = start;
-    while (last->getType() != NULL) {
-        last = last->getType();
+    while (last->getNextType() != NULL) {
+        last = last->getNextType();
     }
     last->setType(type);
     return start;

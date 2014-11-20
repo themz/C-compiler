@@ -232,10 +232,10 @@ void SymTypeArray::print(int deep, bool printType)
 
 bool SymTypeArray::canConvertTo(SymType *newType)
 {
-    if (dynamic_cast<SymTypeInt *>(newType))
+    if (  dynamic_cast<SymTypeArray*>(newType) || dynamic_cast<SymTypeInt *>(newType))
         return true;
     SymTypePointer* p = dynamic_cast<SymTypePointer*>(newType);
-    if (p && *p->getType() == type)
+    if (p && *p->getNextType() == type)
         return true;
     return false;
 }
@@ -261,7 +261,7 @@ void SymTypePointer::print(int deep, bool printType)
 
 bool SymTypePointer::canConvertTo(SymType *newType)
 {
-   	if (newType == intType)
+   	if (newType == intType || newType->isArray())
         return true;
     SymType* p = dynamic_cast<SymTypePointer*>(newType);
     if (p)
@@ -274,14 +274,14 @@ bool SymTypePointer::operator==(SymType* t)
     SymTypePointer* p = dynamic_cast<SymTypePointer*>(t);
     if (!p)
         return false;
-    SymType* t1 = getType();
-    SymType* t2 = p->getType();
+    SymType* t1 = getNextType();
+    SymType* t2 = p->getNextType();
     while (true)
     {
         if (!(*t1 == t2))
             return false;
-        SymType* tmp1 = t1->getType();
-        SymType* tmp2 = t1->getType();
+        SymType* tmp1 = t1->getNextType();
+        SymType* tmp2 = t1->getNextType();
         if (tmp1 == NULL || tmp2 == NULL)
         {
             if (tmp1 != NULL || tmp2 != NULL)

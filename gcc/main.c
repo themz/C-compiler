@@ -100,7 +100,9 @@ int main()
 int main()
 {
 	int i = 8;
-	printf("%d\n",i /= 2.72);
+	int *a;
+	i * a;
+	//printf("%d\n",i /= 2.72);
 	return 0;
 }
 

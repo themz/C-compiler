@@ -219,7 +219,7 @@ public:
     virtual bool isConst(){return false;};
     virtual SymType *getType(){return NULL;};
     virtual void setType(SymType* type){};
-    
+    virtual SymType* getNextType(){ return NULL;};
     virtual int getPriority(){return 0;};
     static Node* makeTypecastNode(Node* exp, SymType* from, SymType* to);
 
@@ -356,7 +356,7 @@ private:
 public:
     SymTypeDef(SymType *type, const string &name): SymType (name), type(type){};
     void print(int deep = 0, bool printType = true);
-    virtual SymType *getType(){return type;};
+    SymType* getNextType(){ return type;};
     virtual bool isTypedef(){return true;};
 };
 
@@ -369,7 +369,7 @@ public:
     SymTypePointer(SymType *type, const bool isConst = false, const string &name = ""): SymType(name), type(type), cnst(isConst){};
     void print(int deep = 0, bool printType = true);
     virtual bool isPointer(){return true;};
-    virtual SymType *getType(){return (SymType*)type;};
+    SymType *getNextType(){return (SymType*)type;};
     void setType(SymType* t) { type = t; }
     virtual bool isConst(){return cnst;};
     bool operator == (SymType* t);
@@ -390,7 +390,7 @@ public:
     void setSize(Node *newSize){size = newSize;};
     Node *getSize(){return size;};
     void setType(SymType* t) { type = t; }
-    virtual SymType *getType(){return type;};
+    SymType* getNextType(){ return type;};
     virtual bool isArray(){return true;};
     bool operator == (SymType* t);
     bool isLvalue(){return true;};
@@ -430,7 +430,7 @@ public:
     virtual bool isFunc(){return true;};
     virtual bool isType(){return false;};
     SymTable *getTable(){return args;};
-    SymType *getType(){return retType;};
+    SymType* getNextType(){ return retType;};
     void setType(SymType *type);
     void setName(string newName){name = newName;};
     void print(int deep = 0, bool printType = true);

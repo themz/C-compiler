@@ -119,21 +119,15 @@ SymType *BinaryOpNode::getType()
     SymTypePointer* rp = dynamic_cast<SymTypePointer*>(rightType);
     SymTypeArray* la = dynamic_cast<SymTypeArray*>(leftType);
     SymTypeArray* ra = dynamic_cast<SymTypeArray*>(rightType);
-
-
-//
-//    if (operationTypeOperands.count(op))
-//        maxTypeOfArgs = operationTypeOperands[op];
-//    else
-//        maxTypeOfArgs = typePriority[leftType] > typePriority[rightType] ? leftType : rightType;
-//    PointerSym* lp = dynamic_cast<PointerSym*>(leftType);
-//    PointerSym* rp = dynamic_cast<PointerSym*>(rightType);
-//    ArraySym* la = dynamic_cast<ArraySym*>(leftType);
-//    ArraySym* ra = dynamic_cast<ArraySym*>(rightType);
-    
-    
     switch (op)
     {
+        case LOGICAL_AND:
+        case LOGICAL_OR:
+        case LOGICAL_NOT:
+            if( !(leftType->isArray() || leftType->isPointer() || dynamic_cast<SymTypeScalar*>(leftType)
+               || rightType->isArray() || rightType->isPointer() || dynamic_cast<SymTypeScalar*>(rightType)))
+                throw parser_exception("Invalid operands to binary expression '" + lexeme_->getValue() + "' ", lexeme_->getLine(), lexeme_->getCol());
+            return intType;
         case MOD_ASSIGN:
         case AND_ASSIGN:
         case OR_ASSIGN:
@@ -170,6 +164,11 @@ SymType *BinaryOpNode::getType()
                 return lp == 0 ? rightType : leftType;
             if (la || ra)
                 return new SymTypePointer(la == 0 ? ra->getType() : la->getType());
+        case MULT:
+        case DIV:
+            if (!(dynamic_cast<SymTypeScalar*>(rightType) && dynamic_cast<SymTypeScalar*>(leftType))) {
+                throw parser_exception("Invalid operands to binary expression '" + lexeme_->getValue() + "'", lexeme_->getLine(), lexeme_->getCol());
+            }
         default:
             if (leftType->isStruct() || rightType->isStruct())
                 throw parser_exception("Cannot perform operation over two structures", lexeme_->getLine(), lexeme_->getCol());
@@ -183,21 +182,6 @@ SymType *BinaryOpNode::getType()
                 return maxTypeOfArgs;
     }
 }
-
-//bool BinaryOpNode::isAssignment(OperationType op)
-//{
-//    return op == ASSIGN || op == PLUS_ASSIGN || op == MINUS_ASSIGN
-//    || op == MULT_ASSIGN || op == DIV_ASSIGN || op == MOD_ASSIGN
-//    || op == AND_ASSIGN || op == OR_ASSIGN
-//    || op == BITWISE_SHIFT_LEFT_ASSIGN || op == BITWISE_SHIFT_RIGHT_ASSIGN;
-//}
-//
-//bool BinaryOpNode::isComparison(OperationType op)
-//{
-//    return op == EQUAL || op == LESS || op == GREATER
-//    || op == LESS_OR_EQUAL || op == GREATER_OR_EQUAL
-//    || op == NOT_EQUAL;
-//}
 
 bool UnaryOpNode::isLvalue()
 {
