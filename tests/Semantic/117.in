@@ -1,4 +1,0 @@
-int main()
-{
-	void f1(int (*x)[]), f2(void* (*y)());
-}

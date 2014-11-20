@@ -97,13 +97,28 @@ int main()
 }
 */
 // typedef int (*(*foo2(float (a), float b)))(int a, int b);
+int i;
+float f;
+int *p;
+int a[42];
+struct strct {int i; int **appv[100];} s;
+
+int *pi;
+float af[42];
+
 int main()
 {
-	int i = 8;
-	int *a;
-	i * a;
-	//printf("%d\n",i /= 2.72);
-	return 0;
+   //====== typecast
+    (int)i; 
+    (float)i;
+    (float *)i;
+    (int)f;
+    (float)f;
+    (int)pi;
+    (float *)pi;
+    (int)af;
+    (int *)af;
+    return 0;
 }
 
 

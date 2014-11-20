@@ -397,9 +397,10 @@ SymType *ListNode::getType()
 
 void TypecastNode::print(int offset, bool isTree)
 {
-	cout << string(isTree ? offset * N : 0, ' ') << type->getName() << (isTree ? "\n" :"");
-	cout << string(isTree ? offset * N : 0, ' ') << "(" << (isTree ? "\n" :"");
+	cout << string(isTree ? offset * N : 0, ' ') << "(";
+    type->print(0, false);
+    cout << ")";
 	operand->print(offset + 1, isTree);
-	cout << string(isTree ? offset * N : 0, ' ') << ")" << (isTree ? "\n" :"");
+	cout << (isTree ? "\n" :"");
 }
 

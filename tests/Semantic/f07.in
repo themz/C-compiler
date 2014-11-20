@@ -1,2 +1,0 @@
-int foo(int, float);
-int foo(int, int);

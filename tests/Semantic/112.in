@@ -1,6 +1,0 @@
-int main()
-{
-	void f(int*);
-	int a[10];
-	f(a);
-}

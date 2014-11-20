@@ -71,13 +71,14 @@ int main()
 
     //====== typecast
 
-    int(i); 
-    float(i);
-    float (i);
-    int(f);
-    float(f);
-    int(pi);
-    float (pi);
-    int (af);
+    (int)i;
+    (float)i;
+    (float *)i;
+    (int)f;
+    (float)f;
+    (int)pi;
+    (float *)pi;
+    (int)af;
+    (int *)af;
 
 }

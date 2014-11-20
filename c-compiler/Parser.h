@@ -13,6 +13,8 @@ typedef enum {
     PARSE_FUNC,
     PARSE_IF,
     PARSE_DOT,
+    PARSE_TYPECAST,
+    PARSE_IN_PARENTHIS,
     PARSE_START
 } parserState;
 

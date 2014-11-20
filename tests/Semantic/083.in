@@ -1,7 +1,0 @@
-int main()
-{
-	struct a { int a; };
-	struct a (*x)[15];
-	struct a (*y)(struct a, struct a);
-	struct a (*z)(struct a[], struct a* []);
-}

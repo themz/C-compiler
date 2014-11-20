@@ -240,16 +240,15 @@ Node* Parser::parseFactor(int priority)
             break;
         case RESERVEDWORD:
         {
-            
-            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT )
+            exception("Expected '(' before type cast", state->top() != PARSE_IN_PARENTHIS && *lex != T_SIZEOF);
+            if (*lex == T_CHAR || *lex == T_INT || *lex == T_FLOAT || *lex == T_VOID )
             {
                 string tName = *lex == T_CHAR ? "char" : *lex == T_INT ? "int" : "float";
                 NL();
-                exception("Expected open parenthesis", *GL() != PARENTHESIS_FRONT);
-                NL();
-                root = new TypecastNode(lex, parseExp(), dynamic_cast<SymType*>(symStack.find(tName)));
-                exception("Expected close parenthesis", *GL() != PARENTHESIS_BACK);
-                NL();
+                state->push(PARSE_TYPECAST);
+                SymType *type = parseDirectDeclarator((SymType*)symStack.find(tName));
+                state->pop();
+                root = new TypecastNode(lex, parseExp(), type);
             }
             else if (*lex == T_SIZEOF)
             {
@@ -266,8 +265,11 @@ Node* Parser::parseFactor(int priority)
             if (*opLex == PARENTHESIS_FRONT)
             {
                 NL();
+                state->push(PARSE_IN_PARENTHIS);
                 root = parseExp();
-                exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK);
+                state->pop();
+                needNext = false;
+                //exception("Expected parenthesis close", *GL() != PARENTHESIS_BACK );
             }
             else if (unaryOps[opLex->getOpType()])
             {
@@ -382,6 +384,19 @@ SymType* Parser::parseType(bool isConst)
     return type;
 }
 
+SymType* Parser::selectFuncOrRec(SymType *type)
+{
+    
+    NL();
+    if(symStack.find(GL()->getValue()) || *GL() == PARENTHESIS_BACK)
+    {
+        //парсим функцию
+    } else {
+        return parseDirectDeclarator(type);
+    }
+    return NULL;
+}
+
 SymType* Parser::parseDirectDeclarator(SymType *type)
 {
     SymType *getFromRecType = NULL;
@@ -389,11 +404,12 @@ SymType* Parser::parseDirectDeclarator(SymType *type)
     
     if(*GL() == PARENTHESIS_FRONT)
     {
-        NL();
-        getFromRecType = parseDirectDeclarator(NULL);
+        getFromRecType = selectFuncOrRec(NULL);
     } else {
         if (state->top() == PARSE_FUNC_ARG_DEF && *GL() != IDENTIFICATOR) {
             names->push("#unname#" + to_string(unnameCount++));
+        } else if(state->top() == PARSE_TYPECAST){
+            // не нужно вставлять и вытаскивать имя
         }else{
             exception("Expected identificator", *GL() != IDENTIFICATOR);
             exception("Redefinition variable '" + GL()->getValue() + "'",
@@ -510,38 +526,6 @@ SymTable* Parser::parseFunctionsParams()
     symStack.pop();
     return table;
 }
-
-//SymTable* Parser::parseFunctionsParams()
-//{
-//    SymTable *table = new SymTable();
-//    SymType *type = NULL;
-//    string name = "";
-//    Node *exp = NULL;
-//    while (*GL() != PARENTHESIS_BACK) {
-//        bool isConst = false;
-//        exp = NULL;
-//        name = "";
-//        if (*GL() == T_CONST) {
-//            NL();
-//            isConst = true;
-//        }
-//        type = parsePointerDeclaration(parseType());
-//        state->push(PARSE_FUNC_ARG_DEF);
-//        name = parseName();
-//        state->pop();
-//        if (*GL() == BRACKET_FRONT) {
-//            type = parseArrayDeclaration(type);
-//        }
-//        exception("C does not support default arguments", *GL() == ASSIGN);
-//        exception("Redefinition param name:  \"" + name + "\"", !table->add(new SymVar(name, type, exp, isConst, true)));
-//        exception("Expected ',' or identificator", *GL() != COMMA && *GL() != PARENTHESIS_BACK);
-//        if (*GL() == COMMA) {
-//            NL();
-//        }
-//    }
-//    NL();
-//    return table;
-//}
 
 SymType *Parser::parseArrayDeclaration(SymType *type)
 {
@@ -868,6 +852,7 @@ Stmt *Parser::parseDoWhile()
     exception("Expected while", *GL() != T_WHILE);
     Node *con = parseCondition();
     state->pop();
+    NL();
     return new StmtDoWhile(con, body);
 }
 
